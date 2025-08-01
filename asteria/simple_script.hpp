@@ -73,10 +73,10 @@ class Simple_Script
     // Load a script, which may be either a sequence of statements or a
     // single expression.
     void
-    reload(const cow_string& name, int start_line, tinybuf&& cbuf);
+    reload(const cow_string& name, int start_line, tinyfmt&& cbuf);
 
     void
-    reload_oneline(const cow_string& name, tinybuf&& cbuf);
+    reload_oneline(const cow_string& name, tinyfmt&& cbuf);
 
     void
     reload_string(const cow_string& name, int start_line, const cow_string& code);

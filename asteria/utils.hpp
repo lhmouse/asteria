@@ -35,7 +35,7 @@ cow_string&
 format(cow_string& str, const array<const char*, N>& templs, const xParams&... params)
   {
     ::rocket::tinyfmt_str fmt;
-    fmt.set_string(move(str), ::rocket::tinybuf::open_append);
+    fmt.set_string(move(str), ::rocket::tinyfmt::open_append);
     format(fmt, templs, params...);
     str = fmt.extract_string();
     return str;

@@ -124,7 +124,7 @@ do_format(::rocket::tinyfmt& fmt, const V_object& value)
   }
 
 V_object
-do_ini_parse(tinybuf& buf)
+do_ini_parse(tinyfmt& buf)
   {
     V_object root;
     V_object* sink = &root;
@@ -218,7 +218,7 @@ void
 std_ini_format_to_file(V_string path, V_object value)
   {
     ::rocket::tinyfmt_file fmt;
-    fmt.open(path.safe_c_str(), tinybuf::open_write);
+    fmt.open(path.safe_c_str(), tinyfmt::open_write);
     do_format(fmt, value);
     fmt.flush();
   }
@@ -226,16 +226,16 @@ std_ini_format_to_file(V_string path, V_object value)
 V_object
 std_ini_parse(V_string text)
   {
-    ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(text, tinybuf::open_read);
+    ::rocket::tinyfmt_str cbuf;
+    cbuf.set_string(text, tinyfmt::open_read);
     return do_ini_parse(cbuf);
   }
 
 V_object
 std_ini_parse_file(V_string path)
   {
-    ::rocket::tinybuf_file cbuf;
-    cbuf.open(path.safe_c_str(), tinybuf::open_read);
+    ::rocket::tinyfmt_file cbuf;
+    cbuf.open(path.safe_c_str(), tinyfmt::open_read);
     return do_ini_parse(cbuf);
   }
 

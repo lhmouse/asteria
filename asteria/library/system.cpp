@@ -674,7 +674,7 @@ std_system_load_conf(V_string path)
     opts.keywords_as_identifiers = true;
 
     Token_Stream tstrm(opts);
-    ::rocket::tinybuf_file cbuf(path.safe_c_str(), tinybuf::open_read);
+    ::rocket::tinyfmt_file cbuf(path.safe_c_str(), tinyfmt::open_read);
     tstrm.reload(path, 1, move(cbuf));
 
     Xparse_object ctxo;

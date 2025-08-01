@@ -8,9 +8,9 @@
 #include "xassert.hpp"
 #include "xthrow.hpp"
 #include "xstring.hpp"
-#include "tinybuf.hpp"
 #include "ascii_numput.hpp"
 #include "unique_ptr.hpp"
+#include "tinyfmt_base.hpp"
 #include <chrono>
 #include <cxxabi.h>
 namespace rocket {
@@ -35,12 +35,13 @@ make_default_formatter(const basic_tinyfmt<charT>&, const valueT& value)
 
 template<typename charT>
 class basic_tinyfmt
+  :
+    public tinyfmt_base
   {
   public:
-    using char_type     = charT;
-    using seek_dir      = tinybuf_base::seek_dir;
-    using open_mode     = tinybuf_base::open_mode;
-    using tinybuf_type  = basic_tinybuf<charT>;
+    using char_type   = charT;
+    using seek_dir    = tinyfmt_base::seek_dir;
+    using open_mode   = tinyfmt_base::open_mode;
 
   protected:
     basic_tinyfmt()
@@ -53,87 +54,68 @@ class basic_tinyfmt
     basic_tinyfmt(const basic_tinyfmt&) = default;
     basic_tinyfmt& operator=(const basic_tinyfmt&) & = default;
 
-  protected:
-    // Gets the associated buffer.
-    // This function is provided to unify `const` and non-`const`
-    // implementations. Successive calls to this function on the same
-    // `basic_tinyfmt` object shall return references to the same buffer.
-    ROCKET_PURE virtual
-    tinybuf_type&
-    do_get_tinybuf_nonconst()
-      const = 0;
-
   public:
     virtual ~basic_tinyfmt() = default;
 
-    // These are wrappers for the buffer.
-    const tinybuf_type&
-    buf()
-      const
-      {
-        return this->do_get_tinybuf_nonconst();
-      }
-
-    tinybuf_type&
-    mut_buf()
-      {
-        return this->do_get_tinybuf_nonconst();
-      }
-
-    // These are wrappers for buffer operations.
+    // Flushes a stream, like `fflush()`.
+    virtual
     basic_tinyfmt&
     flush()
-      {
-        this->mut_buf().flush();
-        return *this;
-      }
+      = 0;
 
+    // Gets the current stream pointer.
+    // If the stream is non-seekable, `-1` shall be returned.
+    virtual
     int64_t
     tell()
-      const
-      {
-        int64_t off = this->buf().tell();
-        return off;
-      }
+      const = 0;
 
+    // Adjusts the current stream pointer.
+    // If an exception is thrown, the stream is left in an unspecified state.
+    virtual
     basic_tinyfmt&
     seek(int64_t off, seek_dir dir)
-      {
-        this->mut_buf().seek(off, dir);
-        return *this;
-      }
+      = 0;
 
+    // Reads some characters from the stream.
+    // Upon success, the number of characters that have been read successfully
+    // shall be returned. If the end of stream has been reached, zero shall be
+    // returned. If an exception is thrown, the stream is left in an unspecified
+    // state.
+    virtual
     size_t
     getn(char_type* s, size_t n)
-      {
-        size_t ngot = 0;
-        if(n != 0)
-          ngot = this->mut_buf().getn(s, n);
-        return ngot;
-      }
+      = 0;
 
+    // Reads a single character from the stream.
+    // Upon success, the character that has been read shall be zero-extended to
+    // an integer and returned. If the end of stream has been reached, `-1` shall
+    // be returned. If an exception is thrown, the stream is left in an unspecified
+    // state.
+    virtual
     int
     getc()
-      {
-        int ch = this->mut_buf().getc();
-        return ch;
-      }
+      = 0;
 
+    // Puts some characters into the stream.
+    // This function shall return only after all characters have been written
+    // successfully. If an exception is thrown, the stream is left in an
+    // unspecified state.
+    virtual
     basic_tinyfmt&
     putn(const char_type* s, size_t n)
-      {
-        if(n != 0)
-          this->mut_buf().putn(s, n);
-        return *this;
-      }
+      = 0;
 
+    // Puts a single character into the stream.
+    // This function shall return only after the character has been written
+    // successfully. If an exception is thrown, the stream is left in an
+    // unspecified state.
+    virtual
     basic_tinyfmt&
     putc(char_type c)
-      {
-        this->mut_buf().putc(c);
-        return *this;
-      }
+      = 0;
 
+    // Puts an ASCII string.
     basic_tinyfmt&
     putn_latin1(const char* s, size_t n);
   };
@@ -163,7 +145,7 @@ putn_latin1(const char* s, size_t n)
         continue;
 
       // Flush all pending characters.
-      this->mut_buf().putn(x, nx);
+      this->putn(x, nx);
       nx = 0;
     }
     return *this;

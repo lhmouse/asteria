@@ -4,7 +4,7 @@
 #include "../asteria/xprecompiled.hpp"
 #include "fwd.hpp"
 #include "../asteria/utils.hpp"
-#include "../rocket/tinybuf_file.hpp"
+#include "../rocket/tinyfmt_file.hpp"
 namespace asteria {
 namespace {
 
@@ -246,8 +246,8 @@ struct Handler_source : Handler
 
         auto abs_path = get_real_path(args[0]);
         repl_printf("* loading file '%s'...", abs_path.c_str());
-        ::rocket::tinybuf_file file;
-        file.open(abs_path.c_str(), ::rocket::tinybuf::open_read);
+        ::rocket::tinyfmt_file file;
+        file.open(abs_path.c_str(), ::rocket::tinyfmt::open_read);
         repl_printf("  ---+");
 
         cow_string source, textln;

@@ -5,7 +5,7 @@
 #define ASTERIA_RUNTIME_MODULE_LOADER_
 
 #include "../fwd.hpp"
-#include "../../rocket/tinybuf_file.hpp"
+#include "../../rocket/tinyfmt_file.hpp"
 namespace asteria {
 
 class Module_Loader
@@ -16,8 +16,8 @@ class Module_Loader
     class Unique_Stream;  // RAII wrapper
 
   private:
-    cow_dictionary<::rocket::tinybuf_file> m_strms;
-    using locked_pair = pair<const phcow_string, ::rocket::tinybuf_file>;
+    cow_dictionary<::rocket::tinyfmt_file> m_strms;
+    using locked_pair = pair<const phcow_string, ::rocket::tinyfmt_file>;
 
   public:
     // Creates an empty module loader.
@@ -96,7 +96,7 @@ class Module_Loader::Unique_Stream
         return this->m_strm->first.rdstr();
       }
 
-    ::rocket::tinybuf_file&
+    ::rocket::tinyfmt_file&
     file()
       const noexcept
       {

@@ -49,7 +49,7 @@ do_csv_format(::rocket::tinyfmt& fmt, const V_array& value)
   }
 
 V_array
-do_csv_parse(tinybuf& buf)
+do_csv_parse(tinyfmt& buf)
   {
     V_array root;
     V_string* cell = nullptr;
@@ -159,7 +159,7 @@ void
 std_csv_format_to_file(V_string path, V_array value)
   {
     ::rocket::tinyfmt_file fmt;
-    fmt.open(path.safe_c_str(), tinybuf::open_write);
+    fmt.open(path.safe_c_str(), tinyfmt::open_write);
     do_csv_format(fmt, value);
     fmt.flush();
   }
@@ -167,16 +167,16 @@ std_csv_format_to_file(V_string path, V_array value)
 V_array
 std_csv_parse(V_string text)
   {
-    ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(text, tinybuf::open_read);
+    ::rocket::tinyfmt_str cbuf;
+    cbuf.set_string(text, tinyfmt::open_read);
     return do_csv_parse(cbuf);
   }
 
 V_array
 std_csv_parse_file(V_string path)
   {
-    ::rocket::tinybuf_file cbuf;
-    cbuf.open(path.safe_c_str(), tinybuf::open_read);
+    ::rocket::tinyfmt_file cbuf;
+    cbuf.open(path.safe_c_str(), tinyfmt::open_read);
     return do_csv_parse(cbuf);
   }
 

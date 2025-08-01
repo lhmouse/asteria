@@ -1,13 +1,13 @@
 // This file is part of Asteria.
 // Copyright (C) 2018-2025, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_TINYBUF_BASE_
-#define ROCKET_TINYBUF_BASE_
+#ifndef ROCKET_TINYFMT_BASE_
+#define ROCKET_TINYFMT_BASE_
 
 #include "fwd.hpp"
 namespace rocket {
 
-struct tinybuf_base
+struct tinyfmt_base
   {
     enum seek_dir : uint8_t
       {
@@ -30,7 +30,7 @@ struct tinybuf_base
       };
   };
 
-ROCKET_DEFINE_ENUM_OPERATORS(tinybuf_base::open_mode)
+ROCKET_DEFINE_ENUM_OPERATORS(tinyfmt_base::open_mode)
 
 }  // namespace rocket
 #endif

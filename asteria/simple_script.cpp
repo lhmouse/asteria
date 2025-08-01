@@ -51,7 +51,7 @@ erase_global_variable(const phcow_string& name)
 
 void
 Simple_Script::
-reload(const cow_string& name, int start_line, tinybuf&& cbuf)
+reload(const cow_string& name, int start_line, tinyfmt&& cbuf)
   {
     Token_Stream tstrm(this->m_opts);
     tstrm.reload(name, start_line, move(cbuf));
@@ -69,7 +69,7 @@ reload(const cow_string& name, int start_line, tinybuf&& cbuf)
 
 void
 Simple_Script::
-reload_oneline(const cow_string& name, tinybuf&& cbuf)
+reload_oneline(const cow_string& name, tinyfmt&& cbuf)
   {
     Token_Stream tstrm(this->m_opts);
     tstrm.reload(name, 1, move(cbuf));
@@ -89,8 +89,8 @@ void
 Simple_Script::
 reload_string(const cow_string& name, int start_line, const cow_string& code)
   {
-    ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(code, tinybuf::open_read);
+    ::rocket::tinyfmt_str cbuf;
+    cbuf.set_string(code, tinyfmt::open_read);
     this->reload(name, start_line, move(cbuf));
   }
 
@@ -105,8 +105,8 @@ void
 Simple_Script::
 reload_oneline(const cow_string& name, const cow_string& code)
   {
-    ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(code, tinybuf::open_read);
+    ::rocket::tinyfmt_str cbuf;
+    cbuf.set_string(code, tinyfmt::open_read);
     this->reload_oneline(name, move(cbuf));
   }
 
@@ -114,7 +114,7 @@ void
 Simple_Script::
 reload_stdin(int start_line)
   {
-    ::rocket::tinybuf_file cbuf;
+    ::rocket::tinyfmt_file cbuf;
     cbuf.reset(stdin);
     this->reload(&"[stdin]", start_line, move(cbuf));
   }
@@ -130,9 +130,9 @@ void
 Simple_Script::
 reload_file(const cow_string& path)
   {
-    ::rocket::tinybuf_file cbuf;
+    ::rocket::tinyfmt_file cbuf;
     cow_string abs_path = get_real_path(path);
-    cbuf.open(abs_path.c_str(), tinybuf::open_read);
+    cbuf.open(abs_path.c_str(), tinyfmt::open_read);
     this->reload(abs_path, 1, move(cbuf));
   }
 

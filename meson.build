@@ -39,13 +39,11 @@ rocket_include = [
   'rocket/cow_hashmap.hpp', 'rocket/unique_ptr.hpp', 'rocket/refcnt_ptr.hpp',
   'rocket/prehashed_string.hpp', 'rocket/static_vector.hpp', 'rocket/optional.hpp',
   'rocket/array.hpp', 'rocket/reference_wrapper.hpp', 'rocket/linear_buffer.hpp',
-  'rocket/tinybuf_base.hpp', 'rocket/tinybuf.hpp', 'rocket/tinybuf_str.hpp',
-  'rocket/tinybuf_file.hpp', 'rocket/tinybuf_ln.hpp', 'rocket/ascii_numput.hpp',
-  'rocket/ascii_numget.hpp', 'rocket/tinyfmt.hpp', 'rocket/tinyfmt_str.hpp',
-  'rocket/tinyfmt_file.hpp', 'rocket/tinyfmt_ln.hpp', 'rocket/atomic.hpp',
-  'rocket/mutex.hpp', 'rocket/recursive_mutex.hpp', 'rocket/condition_variable.hpp',
-  'rocket/once_flag.hpp', 'rocket/shared_function.hpp',
-  'rocket/static_char_buffer.hpp' ]
+  'rocket/tinyfmt_base.hpp', 'rocket/ascii_numput.hpp', 'rocket/ascii_numget.hpp',
+  'rocket/tinyfmt.hpp', 'rocket/tinyfmt_str.hpp', 'rocket/tinyfmt_file.hpp',
+  'rocket/tinyfmt_ln.hpp', 'rocket/atomic.hpp', 'rocket/mutex.hpp',
+  'rocket/recursive_mutex.hpp', 'rocket/condition_variable.hpp', 'rocket/once_flag.hpp',
+  'rocket/shared_function.hpp', 'rocket/static_char_buffer.hpp' ]
 
 asteria_include = [
   'asteria/details/value.ipp', 'asteria/details/variable_hashmap.ipp',
@@ -77,11 +75,9 @@ asteria_include = [
 
 rocket_src = [
   'rocket/xassert.cpp', 'rocket/xthrow.cpp', 'rocket/xuchar.cpp', 'rocket/xmemory.cpp',
-  'rocket/cow_string.cpp', 'rocket/linear_buffer.cpp', 'rocket/tinybuf.cpp',
-  'rocket/tinybuf_str.cpp', 'rocket/tinybuf_file.cpp', 'rocket/tinybuf_ln.cpp',
-  'rocket/ascii_numput.cpp', 'rocket/ascii_numget.cpp', 'rocket/tinyfmt.cpp',
-  'rocket/tinyfmt_str.cpp', 'rocket/tinyfmt_file.cpp', 'rocket/tinyfmt_ln.cpp',
-  'rocket/prehashed_string.cpp' ]
+  'rocket/cow_string.cpp', 'rocket/linear_buffer.cpp', 'rocket/ascii_numput.cpp',
+  'rocket/ascii_numget.cpp', 'rocket/tinyfmt.cpp', 'rocket/tinyfmt_str.cpp',
+  'rocket/tinyfmt_file.cpp', 'rocket/tinyfmt_ln.cpp', 'rocket/prehashed_string.cpp' ]
 
 asteria_src = [
   'asteria/fwd.cpp', 'asteria/utils.cpp', 'asteria/recursion_sentry.cpp',

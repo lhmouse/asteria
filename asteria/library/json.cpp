@@ -623,7 +623,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
   }
 
 Value
-do_parse(tinybuf& cbuf)
+do_parse(tinyfmt& cbuf)
   {
     // We reuse the lexer of Asteria here, allowing quite a few extensions e.g. binary numeric
     // literals and comments.
@@ -679,7 +679,7 @@ void
 std_json_format_to_file(V_string path, Value value, optV_string indent, optV_boolean json5)
   {
     ::rocket::tinyfmt_file fmt;
-    fmt.open(path.safe_c_str(), tinybuf::open_write);
+    fmt.open(path.safe_c_str(), tinyfmt::open_write);
     if(indent && (indent->length() != 0))
       do_format_nonrecursive(fmt, value, json5 == true, Indenter_string(*indent));
     else
@@ -691,7 +691,7 @@ void
 std_json_format_to_file(V_string path, Value value, V_integer indent, optV_boolean json5)
   {
     ::rocket::tinyfmt_file fmt;
-    fmt.open(path.safe_c_str(), tinybuf::open_write);
+    fmt.open(path.safe_c_str(), tinyfmt::open_write);
     if(indent > 0)
       do_format_nonrecursive(fmt, value, json5 == true, Indenter_spaces(indent));
     else
@@ -702,16 +702,16 @@ std_json_format_to_file(V_string path, Value value, V_integer indent, optV_boole
 Value
 std_json_parse(V_string text)
   {
-    ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(text, tinybuf::open_read);
+    ::rocket::tinyfmt_str cbuf;
+    cbuf.set_string(text, tinyfmt::open_read);
     return do_parse(cbuf);
   }
 
 Value
 std_json_parse_file(V_string path)
   {
-    ::rocket::tinybuf_file cbuf;
-    cbuf.open(path.safe_c_str(), tinybuf::open_read);
+    ::rocket::tinyfmt_file cbuf;
+    cbuf.open(path.safe_c_str(), tinyfmt::open_read);
     return do_parse(cbuf);
   }
 

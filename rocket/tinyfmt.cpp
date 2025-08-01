@@ -13,11 +13,11 @@ namespace {
 
 template<typename xwcharT, typename xmbrtowcT>
 void
-do_putmbn_common(basic_tinybuf<xwcharT>& buf, xmbrtowcT&& xmbrtowc, const char* s)
+do_putmbn_common(basic_tinyfmt<xwcharT>& fmt, xmbrtowcT&& xmbrtowc, const char* s)
   {
     if(!s) {
       static constexpr xwcharT null[] = { '(','n','u','l','l',')' };
-      buf.putn(null, 6);
+      fmt.putn(null, 6);
       return;
     }
 
@@ -29,7 +29,8 @@ do_putmbn_common(basic_tinybuf<xwcharT>& buf, xmbrtowcT&& xmbrtowc, const char* 
       xwcharT wc;
       int mblen = static_cast<int>(xmbrtowc(&wc, sptr, MB_LEN_MAX, &mbst));
 
-      switch(mblen) {
+      switch(mblen)
+        {
         case -3:
           // trailing surrogate written; no input consumed
           wtemp.push_back(wc);
@@ -54,18 +55,18 @@ do_putmbn_common(basic_tinybuf<xwcharT>& buf, xmbrtowcT&& xmbrtowc, const char* 
           wtemp.push_back(wc);
           sptr += static_cast<unsigned>(mblen);
           break;
-      }
+        }
 
       if(wtemp.size() != wtemp.capacity())
         continue;
 
       // If the buffer is full now, flush pending characters.
-      buf.putn(wtemp.data(), wtemp.size());
+      fmt.putn(wtemp.data(), wtemp.size());
       wtemp.clear();
     }
 
     if(wtemp.size() != 0)
-      buf.putn(wtemp.data(), wtemp.size());
+      fmt.putn(wtemp.data(), wtemp.size());
   }
 
 }  // namespace
@@ -73,7 +74,7 @@ do_putmbn_common(basic_tinybuf<xwcharT>& buf, xmbrtowcT&& xmbrtowc, const char* 
 basic_tinyfmt<wchar_t>&
 operator<<(basic_tinyfmt<wchar_t>& fmt, const char* s)
   {
-    do_putmbn_common(fmt.mut_buf(), ::mbrtowc, s);
+    do_putmbn_common(fmt, ::mbrtowc, s);
     return fmt;
   }
 
@@ -81,7 +82,7 @@ basic_tinyfmt<char16_t>&
 operator<<(basic_tinyfmt<char16_t>& fmt, const char* s)
   {
 #if !defined ASTERIA_NO_UCHAR
-    do_putmbn_common(fmt.mut_buf(), ::mbrtoc16, s);
+    do_putmbn_common(fmt, ::mbrtoc16, s);
     return fmt;
 #else
     sprintf_and_throw<domain_error>("u16tinyfmt: UTF-16 functions not available");
@@ -92,7 +93,7 @@ basic_tinyfmt<char32_t>&
 operator<<(basic_tinyfmt<char32_t>& fmt, const char* s)
   {
 #if !defined ASTERIA_NO_UCHAR
-    do_putmbn_common(fmt.mut_buf(), ::mbrtoc32, s);
+    do_putmbn_common(fmt, ::mbrtoc32, s);
     return fmt;
 #else
     sprintf_and_throw<domain_error>("u32tinyfmt: UTF-32 functions not available");

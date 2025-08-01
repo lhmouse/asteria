@@ -134,7 +134,7 @@ read_execute_print_single()
       }
 
       fmt.set_string(repl_source);
-      repl_script.reload_oneline(real_name, move(fmt.mut_buf()));
+      repl_script.reload_oneline(real_name, move(fmt));
       repl_file = move(real_name);
     }
     catch(Compiler_Error& except) {
@@ -151,7 +151,7 @@ read_execute_print_single()
         }
 
         fmt.set_string(repl_source);
-        repl_script.reload(real_name, 1, move(fmt.mut_buf()));
+        repl_script.reload(real_name, 1, move(fmt));
         repl_file = move(real_name);
       }
       catch(Compiler_Error& again) {

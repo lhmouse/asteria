@@ -14,7 +14,7 @@ using namespace ::asteria;
 
 int main()
   {
-    ::rocket::tinybuf_str cbuf;
+    ::rocket::tinyfmt_str cbuf;
     cbuf.set_string(
       &R"__(
         func third() {
@@ -34,7 +34,7 @@ int main()
           return typeof(e) + ":" + e;
         }
 
-      )__", tinybuf::open_read);
+      )__", tinyfmt::open_read);
 
     Token_Stream tstrm({ });
     tstrm.reload(&"dummy file", 16, move(cbuf));

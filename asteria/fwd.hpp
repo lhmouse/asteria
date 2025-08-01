@@ -70,7 +70,6 @@ using ::rocket::cow_string;
 using ::rocket::cow_u16string;
 using ::rocket::cow_u32string;
 using ::rocket::phcow_string;
-using ::rocket::tinybuf;
 using ::rocket::tinyfmt;
 
 using ::rocket::begin;

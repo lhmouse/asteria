@@ -15,7 +15,7 @@ int main()
   {
     Compiler_Options opts = { };
     Token_Stream tstrm(opts);
-    ::rocket::tinybuf_str cbuf(&R"__(
+    ::rocket::tinyfmt_str cbuf(&R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         var a = 1.5;
@@ -36,7 +36,7 @@ int main()
         }
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__", tinybuf::open_read);
+      )__", tinyfmt::open_read);
     tstrm.reload(&__FILE__, 13, move(cbuf));
     Statement_Sequence sseq(opts);
     sseq.reload(move(tstrm));

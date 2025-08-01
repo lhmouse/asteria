@@ -36,7 +36,7 @@ template<typename charT>
 class basic_tinyfmt;
 
 template<typename charT>
-class basic_tinybuf;
+class basic_tinyfmt;
 
 #include "details/cow_string.ipp"
 
@@ -2502,7 +2502,7 @@ operator<<(basic_tinyfmt<charT>& fmt, const basic_cow_string<charT, allocT>& str
 template<typename charT, typename allocT>
 inline
 bool
-getline(basic_cow_string<charT, allocT>& str, basic_tinybuf<charT>& buf)
+getline(basic_cow_string<charT, allocT>& str, basic_tinyfmt<charT>& buf)
   {
     str.clear();
     int ch;
