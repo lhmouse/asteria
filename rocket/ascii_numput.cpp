@@ -257,14 +257,14 @@ do_get_small_decimal(const char*& str_out, uint32_t& len_out, uint32_t value)
   {
     // Get the string for a non-negative value.
     str_out = s_small_decimals[value] + 1;
-    uint32_t bytes = ROCKET_LOAD_LE32(str_out);
+    uint32_t bytes = load_le<uint32_t>(str_out);
 
     // Now see whether `bytes` contains a zero byte. The condition
     // is that there shall be a byte whose MSB becomes one after the
     // subtraction below, but was zero before it.
     constexpr uint32_t bmask = UINT32_MAX / 0xFFU;
     bytes = (bytes - bmask) & (bytes ^ (bmask << 7)) & (bmask << 7);
-    len_out = ROCKET_TZCNT32(bytes) / 8U;
+    len_out = tzcnt32(bytes) / 8U;
   }
 
 inline
@@ -1060,7 +1060,7 @@ do_frexp2_23(float value)
         return frx;
 
       // Normalize the subnormal value.
-      int sh = (int) ROCKET_LZCNT64(frx.mant) - 40;
+      int sh = (int) lzcnt64(frx.mant) - 40;
       frx.exp -= sh - 1;
       frx.mant <<= sh;
     }
@@ -1095,7 +1095,7 @@ do_frexp2_52(double value)
         return frx;
 
       // Normalize the subnormal value.
-      int sh = (int) ROCKET_LZCNT64(frx.mant) - 11;
+      int sh = (int) lzcnt64(frx.mant) - 11;
       frx.exp -= sh - 1;
       frx.mant <<= sh;
     }
@@ -1130,7 +1130,7 @@ do_frexp10_8(float value)
         return frx;
 
       // Normalize the subnormal value and remove the hidden bit.
-      int sh = (int) ROCKET_LZCNT64(frx.mant) - 40;
+      int sh = (int) lzcnt64(frx.mant) - 40;
       frx.exp -= sh - 1;
       frx.mant <<= sh;
       frx.mant &= 0x7FFFFFULL;
@@ -1215,7 +1215,7 @@ do_frexp10_17(double value)
         return frx;
 
       // Normalize the subnormal value and remove the hidden bit.
-      int sh = (int) ROCKET_LZCNT64(frx.mant) - 11;
+      int sh = (int) lzcnt64(frx.mant) - 11;
       frx.exp -= sh - 1;
       frx.mant <<= sh;
       frx.mant &= 0xFFFFFFFFFFFFFULL;

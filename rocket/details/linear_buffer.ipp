@@ -102,9 +102,9 @@ class basic_storage
         }
         else {
           // If the buffer is not large enough, allocate a new one.
-          size_type cap_new;
-
-          if(ROCKET_ADD_OVERFLOW(nused, nadd, &cap_new))
+          bool ovr = false;
+          size_type cap_new = noadl::addm(nused, nadd, &ovr);
+          if(ovr)
             noadl::sprintf_and_throw<length_error>(
                 "linear_buffer: arithmetic overflow (`%lld` + `%lld`)",
                 static_cast<long long>(nused), static_cast<long long>(nadd));

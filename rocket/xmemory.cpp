@@ -31,7 +31,7 @@ do_get_pool_for_size(size_t& size)
 
     if(size > rsize64) {
       // Round `size` up to the nearest power of two.
-      si = (uint32_t) (64 - ROCKET_LZCNT64(size - 1ULL));
+      si = (uint32_t) (64 - lzcnt64(size - 1ULL));
       rsize64 = 1ULL << si;
     }
 
@@ -56,8 +56,9 @@ do_deallocate_list(free_block* head)
 void
 xmemalloc(xmeminfo& info, xmemopt opt)
   {
-    size_t rsize;
-    if(ROCKET_MUL_OVERFLOW(info.element_size, info.count, &rsize))
+    bool ovr = false;
+    size_t rsize = mulm(info.element_size, info.count, &ovr);
+    if(ovr)
       throw ::std::bad_alloc();
 
     free_block* b = nullptr;

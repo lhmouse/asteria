@@ -49,18 +49,6 @@ do_append_exponent(V_string& text, ::rocket::ascii_numput& nump, char delim, int
     return text;
   }
 
-template<typename objectT, typename sourceT>
-ROCKET_ALWAYS_INLINE
-objectT
-do_bit_cast(const sourceT& src)
-  noexcept
-  {
-    static_assert(sizeof(objectT) == sizeof(sourceT), "size mismatch");
-    objectT dst;
-    ::memcpy(&dst, &src, sizeof(objectT));
-    return dst;
-  }
-
 }  // namespace
 
 V_integer
@@ -568,7 +556,7 @@ V_string
 std_numeric_pack_i16be(V_integer value)
   {
     char piece[2];
-    ROCKET_STORE_BE16(piece, static_cast<uint16_t>(value));
+    ::rocket::store_be(piece, static_cast<uint16_t>(value));
     return V_string(piece, sizeof(piece));
   }
 
@@ -579,7 +567,7 @@ std_numeric_pack_i16be(V_array values)
     text.reserve(values.size() * 2);
     for(const auto& r : values) {
       char piece[2];
-      ROCKET_STORE_BE16(piece, static_cast<uint16_t>(r.as_integer()));
+      ::rocket::store_be(piece, static_cast<uint16_t>(r.as_integer()));
       text.append(piece, sizeof(piece));
     }
     return text;
@@ -594,7 +582,7 @@ std_numeric_unpack_i16be(V_string text)
     V_array values;
     values.reserve(text.size() / 2);
     for(size_t off = 0;  off != text.size();  off += 2) {
-      uint16_t value = ROCKET_LOAD_BE16(text.data() + off);
+      uint16_t value = ::rocket::load_be<uint16_t>(text.data() + off);
       values.emplace_back(static_cast<int16_t>(value));
     }
     return values;
@@ -604,7 +592,7 @@ V_string
 std_numeric_pack_i16le(V_integer value)
   {
     char piece[2];
-    ROCKET_STORE_LE16(piece, static_cast<uint16_t>(value));
+    ::rocket::store_le(piece, static_cast<uint16_t>(value));
     return V_string(piece, sizeof(piece));
   }
 
@@ -615,7 +603,7 @@ std_numeric_pack_i16le(V_array values)
     text.reserve(values.size() * 2);
     for(const auto& r : values) {
       char piece[2];
-      ROCKET_STORE_LE16(piece, static_cast<uint16_t>(r.as_integer()));
+      ::rocket::store_le(piece, static_cast<uint16_t>(r.as_integer()));
       text.append(piece, sizeof(piece));
     }
     return text;
@@ -630,7 +618,7 @@ std_numeric_unpack_i16le(V_string text)
     V_array values;
     values.reserve(text.size() / 2);
     for(size_t off = 0;  off != text.size();  off += 2) {
-      uint16_t value = ROCKET_LOAD_LE16(text.data() + off);
+      uint16_t value = ::rocket::load_le<uint16_t>(text.data() + off);
       values.emplace_back(static_cast<int16_t>(value));
     }
     return values;
@@ -640,7 +628,7 @@ V_string
 std_numeric_pack_i32be(V_integer value)
   {
     char piece[4];
-    ROCKET_STORE_BE32(piece, static_cast<uint32_t>(value));
+    ::rocket::store_be(piece, static_cast<uint32_t>(value));
     return V_string(piece, sizeof(piece));
   }
 
@@ -651,7 +639,7 @@ std_numeric_pack_i32be(V_array values)
     text.reserve(values.size() * 4);
     for(const auto& r : values) {
       char piece[4];
-      ROCKET_STORE_BE32(piece, static_cast<uint32_t>(r.as_integer()));
+      ::rocket::store_be(piece, static_cast<uint32_t>(r.as_integer()));
       text.append(piece, sizeof(piece));
     }
     return text;
@@ -666,7 +654,7 @@ std_numeric_unpack_i32be(V_string text)
     V_array values;
     values.reserve(text.size() / 4);
     for(size_t off = 0;  off != text.size();  off += 4) {
-      uint32_t value = ROCKET_LOAD_BE32(text.data() + off);
+      uint32_t value = ::rocket::load_be<uint32_t>(text.data() + off);
       values.emplace_back(static_cast<int32_t>(value));
     }
     return values;
@@ -676,7 +664,7 @@ V_string
 std_numeric_pack_i32le(V_integer value)
   {
     char piece[4];
-    ROCKET_STORE_LE32(piece, static_cast<uint32_t>(value));
+    ::rocket::store_le(piece, static_cast<uint32_t>(value));
     return V_string(piece, sizeof(piece));
   }
 
@@ -687,7 +675,7 @@ std_numeric_pack_i32le(V_array values)
     text.reserve(values.size() * 4);
     for(const auto& r : values) {
       char piece[4];
-      ROCKET_STORE_LE32(piece, static_cast<uint32_t>(r.as_integer()));
+      ::rocket::store_le(piece, static_cast<uint32_t>(r.as_integer()));
       text.append(piece, sizeof(piece));
     }
     return text;
@@ -702,7 +690,7 @@ std_numeric_unpack_i32le(V_string text)
     V_array values;
     values.reserve(text.size() / 4);
     for(size_t off = 0;  off != text.size();  off += 4) {
-      uint32_t value = ROCKET_LOAD_LE32(text.data() + off);
+      uint32_t value = ::rocket::load_le<uint32_t>(text.data() + off);
       values.emplace_back(static_cast<int32_t>(value));
     }
     return values;
@@ -712,7 +700,7 @@ V_string
 std_numeric_pack_i64be(V_integer value)
   {
     char piece[8];
-    ROCKET_STORE_BE64(piece, static_cast<uint64_t>(value));
+    ::rocket::store_be(piece, static_cast<uint64_t>(value));
     return V_string(piece, sizeof(piece));
   }
 
@@ -723,7 +711,7 @@ std_numeric_pack_i64be(V_array values)
     text.reserve(values.size() * 8);
     for(const auto& r : values) {
       char piece[8];
-      ROCKET_STORE_BE64(piece, static_cast<uint64_t>(r.as_integer()));
+      ::rocket::store_be(piece, static_cast<uint64_t>(r.as_integer()));
       text.append(piece, sizeof(piece));
     }
     return text;
@@ -738,7 +726,7 @@ std_numeric_unpack_i64be(V_string text)
     V_array values;
     values.reserve(text.size() / 8);
     for(size_t off = 0;  off != text.size();  off += 8) {
-      uint64_t value = ROCKET_LOAD_BE64(text.data() + off);
+      uint64_t value = ::rocket::load_be<uint64_t>(text.data() + off);
       values.emplace_back(static_cast<int64_t>(value));
     }
     return values;
@@ -748,7 +736,7 @@ V_string
 std_numeric_pack_i64le(V_integer value)
   {
     char piece[8];
-    ROCKET_STORE_LE64(piece, static_cast<uint64_t>(value));
+    ::rocket::store_le(piece, static_cast<uint64_t>(value));
     return V_string(piece, sizeof(piece));
   }
 
@@ -759,7 +747,7 @@ std_numeric_pack_i64le(V_array values)
     text.reserve(values.size() * 8);
     for(const auto& r : values) {
       char piece[8];
-      ROCKET_STORE_LE64(piece, static_cast<uint64_t>(r.as_integer()));
+      ::rocket::store_le(piece, static_cast<uint64_t>(r.as_integer()));
       text.append(piece, sizeof(piece));
     }
     return text;
@@ -774,7 +762,7 @@ std_numeric_unpack_i64le(V_string text)
     V_array values;
     values.reserve(text.size() / 8);
     for(size_t off = 0;  off != text.size();  off += 8) {
-      uint64_t value = ROCKET_LOAD_LE64(text.data() + off);
+      uint64_t value = ::rocket::load_le<uint64_t>(text.data() + off);
       values.emplace_back(static_cast<int64_t>(value));
     }
     return values;
@@ -784,7 +772,7 @@ V_string
 std_numeric_pack_f32be(V_real value)
   {
     char piece[4];
-    ROCKET_STORE_BE32(piece, do_bit_cast<uint32_t>(static_cast<float>(value)));
+    ::rocket::store_be(piece, static_cast<float>(value));
     return V_string(piece, sizeof(piece));
   }
 
@@ -795,7 +783,7 @@ std_numeric_pack_f32be(V_array values)
     text.reserve(values.size() * 4);
     for(const auto& r : values) {
       char piece[4];
-      ROCKET_STORE_BE32(piece, do_bit_cast<uint32_t>(static_cast<float>(r.as_real())));
+      ::rocket::store_be(piece, static_cast<float>(r.as_real()));
       text.append(piece, sizeof(piece));
     }
     return text;
@@ -810,7 +798,7 @@ std_numeric_unpack_f32be(V_string text)
     V_array values;
     values.reserve(text.size() / 4);
     for(size_t off = 0;  off != text.size();  off += 4) {
-      float value = do_bit_cast<float>(ROCKET_LOAD_BE32(text.data() + off));
+      float value = ::rocket::load_be<float>(text.data() + off);
       values.emplace_back(static_cast<double>(value));
     }
     return values;
@@ -820,7 +808,7 @@ V_string
 std_numeric_pack_f32le(V_real value)
   {
     char piece[4];
-    ROCKET_STORE_LE32(piece, do_bit_cast<uint32_t>(static_cast<float>(value)));
+    ::rocket::store_le(piece, static_cast<float>(value));
     return V_string(piece, sizeof(piece));
   }
 
@@ -831,7 +819,7 @@ std_numeric_pack_f32le(V_array values)
     text.reserve(values.size() * 4);
     for(const auto& r : values) {
       char piece[4];
-      ROCKET_STORE_LE32(piece, do_bit_cast<uint32_t>(static_cast<float>(r.as_real())));
+      ::rocket::store_le(piece, static_cast<float>(r.as_real()));
       text.append(piece, sizeof(piece));
     }
     return text;
@@ -846,7 +834,7 @@ std_numeric_unpack_f32le(V_string text)
     V_array values;
     values.reserve(text.size() / 4);
     for(size_t off = 0;  off != text.size();  off += 4) {
-      float value = do_bit_cast<float>(ROCKET_LOAD_LE32(text.data() + off));
+      float value = ::rocket::load_le<float>(text.data() + off);
       values.emplace_back(static_cast<double>(value));
     }
     return values;
@@ -856,7 +844,7 @@ V_string
 std_numeric_pack_f64be(V_real value)
   {
     char piece[8];
-    ROCKET_STORE_BE64(piece, do_bit_cast<uint64_t>(static_cast<double>(value)));
+    ::rocket::store_be(piece, static_cast<double>(value));
     return V_string(piece, sizeof(piece));
   }
 
@@ -867,7 +855,7 @@ std_numeric_pack_f64be(V_array values)
     text.reserve(values.size() * 8);
     for(const auto& r : values) {
       char piece[8];
-      ROCKET_STORE_BE64(piece, do_bit_cast<uint64_t>(static_cast<double>(r.as_real())));
+      ::rocket::store_be(piece, static_cast<double>(r.as_real()));
       text.append(piece, sizeof(piece));
     }
     return text;
@@ -882,7 +870,7 @@ std_numeric_unpack_f64be(V_string text)
     V_array values;
     values.reserve(text.size() / 8);
     for(size_t off = 0;  off != text.size();  off += 8) {
-      double value = do_bit_cast<double>(ROCKET_LOAD_BE64(text.data() + off));
+      double value = ::rocket::load_be<double>(text.data() + off);
       values.emplace_back(static_cast<double>(value));
     }
     return values;
@@ -892,7 +880,7 @@ V_string
 std_numeric_pack_f64le(V_real value)
   {
     char piece[8];
-    ROCKET_STORE_LE64(piece, do_bit_cast<uint64_t>(static_cast<double>(value)));
+    ::rocket::store_le(piece, static_cast<double>(value));
     return V_string(piece, sizeof(piece));
   }
 
@@ -903,7 +891,7 @@ std_numeric_pack_f64le(V_array values)
     text.reserve(values.size() * 8);
     for(const auto& r : values) {
       char piece[8];
-      ROCKET_STORE_LE64(piece, do_bit_cast<uint64_t>(static_cast<double>(r.as_real())));
+      ::rocket::store_le(piece, static_cast<double>(r.as_real()));
       text.append(piece, sizeof(piece));
     }
     return text;
@@ -918,7 +906,7 @@ std_numeric_unpack_f64le(V_string text)
     V_array values;
     values.reserve(text.size() / 8);
     for(size_t off = 0;  off != text.size();  off += 8) {
-      double value = do_bit_cast<double>(ROCKET_LOAD_LE64(text.data() + off));
+      double value = ::rocket::load_le<double>(text.data() + off);
       values.emplace_back(static_cast<double>(value));
     }
     return values;

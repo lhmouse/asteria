@@ -171,17 +171,17 @@ template<typename xContainer>
 xContainer
 do_duplicate_sequence(const xContainer& src, int64_t count)
   {
-    xContainer dst;
-    int64_t rlen;
-
     if(count < 0)
       throw Runtime_Error(xtc_format,
                "Negative duplication count (value was `$2`)", count);
 
-    if(ROCKET_MUL_OVERFLOW(src.ssize(), count, &rlen) || (rlen > PTRDIFF_MAX))
+    bool ovr = false;
+    int64_t rlen = ::rocket::mulm(src.ssize(), count, &ovr);
+    if(ovr || (rlen > PTRDIFF_MAX))
       throw Runtime_Error(xtc_format,
                "Length overflow (`$1` * `$2` > `$3`)", src.size(), count, PTRDIFF_MAX);
 
+    xContainer dst;
     if(ROCKET_UNEXPECT(rlen == 0))
       return dst;
 
@@ -2112,8 +2112,9 @@ solidify(AVM_Rod& rod)
                     if(rhs.is_integer()) {
                       // ++ integer ; may overflow
                       V_integer& val = rhs.open_integer();
-                      V_integer result;
-                      if(ROCKET_ADD_OVERFLOW(val, 1, &result))
+                      bool ovr = false;
+                      V_integer result = ::rocket::addm(val, 1, &ovr);
+                      if(ovr)
                         throw Runtime_Error(xtc_format,
                            "Integer increment overflow (operand was `$1`)", val);
                       if(postfix)
@@ -2154,8 +2155,9 @@ solidify(AVM_Rod& rod)
                     if(rhs.is_integer()) {
                       // -- integer ; may overflow
                       V_integer& val = rhs.open_integer();
-                      V_integer result;
-                      if(ROCKET_SUB_OVERFLOW(val, 1, &result))
+                      bool ovr = false;
+                      V_integer result = ::rocket::subm(val, 1, &ovr);
+                      if(ovr)
                         throw Runtime_Error(xtc_format,
                            "Integer increment overflow (operand was `$1`)", val);
                       if(postfix)
@@ -2384,8 +2386,9 @@ solidify(AVM_Rod& rod)
                     if(rhs.is_integer()) {
                       // - integer ; may overflow
                       V_integer& val = rhs.open_integer();
-                      V_integer result;
-                      if(ROCKET_SUB_OVERFLOW(0, val, &result))
+                      bool ovr = false;
+                      V_integer result = ::rocket::subm(0, val, &ovr);
+                      if(ovr)
                         throw Runtime_Error(xtc_format,
                            "Integer negation overflow (operand was `$1`)", val);
                       val = result;
@@ -2630,11 +2633,12 @@ solidify(AVM_Rod& rod)
                     if(rhs.is_integer()) {
                       // __abs integer ; may overflow
                       V_integer& val = rhs.open_integer();
-                      V_integer negv;
-                      if(ROCKET_SUB_OVERFLOW(0, val, &negv))
+                      bool ovr = false;
+                      V_integer negv = ::rocket::subm(0, val, &ovr);
+                      if(ovr)
                         throw Runtime_Error(xtc_format,
                            "Integer absolute value overflow (operand was `$1`)", val);
-                      val = ::std::max(val, negv);
+                      val = ((val ^ negv) & (val >> 63)) ^ val;
                     }
                     else if(rhs.is_real()) {
                       // __abs real
@@ -2946,7 +2950,7 @@ solidify(AVM_Rod& rod)
                     if(rhs.is_integer()) {
                       // __lzcnt integer
                       V_integer& val = rhs.open_integer();
-                      val = ROCKET_LZCNT64(static_cast<uint64_t>(val));
+                      val = static_cast<V_integer>(::rocket::lzcnt64(static_cast<uint64_t>(val)));
                     }
                     else throw Runtime_Error(xtc_format,
                             "`__lzcnt` not applicable (operand was `$1`)", rhs);
@@ -2974,7 +2978,7 @@ solidify(AVM_Rod& rod)
                     if(rhs.is_integer()) {
                       // __tzcnt integer
                       V_integer& val = rhs.open_integer();
-                      val = ROCKET_TZCNT64(static_cast<uint64_t>(val));
+                      val = static_cast<V_integer>(::rocket::tzcnt64(static_cast<uint64_t>(val)));
                     }
                     else throw Runtime_Error(xtc_format,
                              "`__tzcnt` not applicable (operand was `$1`)", rhs);
@@ -3002,7 +3006,7 @@ solidify(AVM_Rod& rod)
                     if(rhs.is_integer()) {
                       // __popcnt integer
                       V_integer& val = rhs.open_integer();
-                      val = static_cast<V_integer>(ROCKET_POPCNT64(static_cast<uint64_t>(val)));
+                      val = static_cast<V_integer>(::rocket::popcnt64(static_cast<uint64_t>(val)));
                     }
                     else throw Runtime_Error(xtc_format,
                              "`__popcnt` not applicable (operand was `$1`)", rhs);
@@ -3250,8 +3254,9 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // integer + integer ; may overflow
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      if(ROCKET_ADD_OVERFLOW(val, rhs.as_integer(), &result))
+                      bool ovr = false;
+                      V_integer result = ::rocket::addm(val, rhs.as_integer(), &ovr);
+                      if(ovr)
                         throw Runtime_Error(xtc_format,
                            "Integer addition overflow (operands were `$1` and `$2`)", val, rhs.as_integer());
                       val = result;
@@ -3300,8 +3305,9 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // integer - integer ; may overflow
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      if(ROCKET_SUB_OVERFLOW(val, rhs.as_integer(), &result))
+                      bool ovr = false;
+                      V_integer result = ::rocket::subm(val, rhs.as_integer(), &ovr);
+                      if(ovr)
                         throw Runtime_Error(xtc_format,
                            "Integer subtraction overflow (operands were `$1` and `$2`)", val, rhs.as_integer());
                       val = result;
@@ -3345,8 +3351,9 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // integer * integer ; may overflow
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      if(ROCKET_MUL_OVERFLOW(val, rhs.as_integer(), &result))
+                      bool ovr = false;
+                      V_integer result = ::rocket::mulm(val, rhs.as_integer(), &ovr);
+                      if(ovr)
                         throw Runtime_Error(xtc_format,
                            "Integer multiplication overflow (operands were `$1` and `$2`)", val, rhs.as_integer());
                       val = result;
@@ -3638,8 +3645,7 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // __addm integer
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      ROCKET_ADD_OVERFLOW(val, rhs.as_integer(), &result);
+                      V_integer result = ::rocket::addm(val, rhs.as_integer());
                       val = result;
                     }
                     else throw Runtime_Error(xtc_format,
@@ -3671,8 +3677,7 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // __subm integer
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      ROCKET_SUB_OVERFLOW(val, rhs.as_integer(), &result);
+                      V_integer result = ::rocket::subm(val, rhs.as_integer());
                       val = result;
                     }
                     else throw Runtime_Error(xtc_format,
@@ -3704,8 +3709,7 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // __mulm integer
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      ROCKET_MUL_OVERFLOW(val, rhs.as_integer(), &result);
+                      V_integer result = ::rocket::mulm(val, rhs.as_integer());
                       val = result;
                     }
                     else throw Runtime_Error(xtc_format,
@@ -3737,8 +3741,9 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // __adds integer
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      if(ROCKET_ADD_OVERFLOW(val, rhs.as_integer(), &result))
+                      bool ovr = false;
+                      V_integer result = ::rocket::addm(val, rhs.as_integer(), &ovr);
+                      if(ovr)
                         result = (val >> 63) ^ INT64_MAX;
                       val = result;
                     }
@@ -3771,8 +3776,9 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // __subs integer
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      if(ROCKET_SUB_OVERFLOW(val, rhs.as_integer(), &result))
+                      bool ovr = false;
+                      V_integer result = ::rocket::subm(val, rhs.as_integer(), &ovr);
+                      if(ovr)
                         result = (val >> 63) ^ INT64_MAX;
                       val = result;
                     }
@@ -3805,8 +3811,9 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // __muls integer
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      if(ROCKET_MUL_OVERFLOW(val, rhs.as_integer(), &result))
+                      bool ovr = false;
+                      V_integer result = ::rocket::mulm(val, rhs.as_integer(), &ovr);
+                      if(ovr)
                         result = (val >> 63) ^ (rhs.as_integer() >> 63) ^ INT64_MAX;
                       val = result;
                     }
@@ -5165,8 +5172,9 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer()) {
                       // integer + integer ; may overflow
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      if(ROCKET_ADD_OVERFLOW(val, irhs, &result))
+                      bool ovr = false;
+                      V_integer result = ::rocket::addm(val, irhs, &ovr);
+                      if(ovr)
                         throw Runtime_Error(xtc_format,
                            "Integer addition overflow (operands were `$1` and `$2`)", val, irhs);
                       val = result;
@@ -5203,8 +5211,9 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer()) {
                       // integer - integer ; may overflow
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      if(ROCKET_SUB_OVERFLOW(val, irhs, &result))
+                      bool ovr = false;
+                      V_integer result = ::rocket::subm(val, irhs, &ovr);
+                      if(ovr)
                         throw Runtime_Error(xtc_format,
                            "Integer subtraction overflow (operands were `$1` and `$2`)", val, irhs);
                       val = result;
@@ -5241,8 +5250,9 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer()) {
                       // integer * integer ; may overflow
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      if(ROCKET_MUL_OVERFLOW(val, irhs, &result))
+                      bool ovr = false;
+                      V_integer result = ::rocket::mulm(val, irhs, &ovr);
+                      if(ovr)
                         throw Runtime_Error(xtc_format,
                            "Integer multiplication overflow (operands were `$1` and `$2`)", val, irhs);
                       val = result;
@@ -5456,8 +5466,7 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer()) {
                       // __addm integer
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      ROCKET_ADD_OVERFLOW(val, irhs, &result);
+                      V_integer result = ::rocket::addm(val, irhs);
                       val = result;
                     }
                     else throw Runtime_Error(xtc_format,
@@ -5487,8 +5496,7 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer()) {
                       // __subm integer
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      ROCKET_SUB_OVERFLOW(val, irhs, &result);
+                      V_integer result = ::rocket::subm(val, irhs);
                       val = result;
                     }
                     else throw Runtime_Error(xtc_format,
@@ -5518,8 +5526,7 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer()) {
                       // __mulm integer
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      ROCKET_MUL_OVERFLOW(val, irhs, &result);
+                      V_integer result = ::rocket::mulm(val, irhs);
                       val = result;
                     }
                     else throw Runtime_Error(xtc_format,
@@ -5549,8 +5556,9 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer()) {
                       // __adds integer
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      if(ROCKET_ADD_OVERFLOW(val, irhs, &result))
+                      bool ovr = false;
+                      V_integer result = ::rocket::addm(val, irhs, &ovr);
+                      if(ovr)
                         result = (val >> 63) ^ INT64_MAX;
                       val = result;
                     }
@@ -5581,8 +5589,9 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer()) {
                       // __subs integer
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      if(ROCKET_SUB_OVERFLOW(val, irhs, &result))
+                      bool ovr = false;
+                      V_integer result = ::rocket::subm(val, irhs, &ovr);
+                      if(ovr)
                         result = (val >> 63) ^ INT64_MAX;
                       val = result;
                     }
@@ -5613,8 +5622,9 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer()) {
                       // __muls integer
                       V_integer& val = lhs.open_integer();
-                      V_integer result;
-                      if(ROCKET_MUL_OVERFLOW(val, irhs, &result))
+                      bool ovr = false;
+                      V_integer result = ::rocket::mulm(val, irhs, &ovr);
+                      if(ovr)
                         result = (val >> 63) ^ (irhs >> 63) ^ INT64_MAX;
                       val = result;
                     }

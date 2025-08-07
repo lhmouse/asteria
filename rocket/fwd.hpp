@@ -198,51 +198,6 @@ using namespace ::std::literals;
 #define ROCKET_CONSTANT_P(...)     __builtin_constant_p(__VA_ARGS__)
 #define ROCKET_FUNCSIG             __PRETTY_FUNCTION__
 
-#define ROCKET_ADD_OVERFLOW(x,y,r)         __builtin_add_overflow(x,y,r)
-#define ROCKET_SUB_OVERFLOW(x,y,r)         __builtin_sub_overflow(x,y,r)
-#define ROCKET_MUL_OVERFLOW(x,y,r)         __builtin_mul_overflow(x,y,r)
-#define ROCKET_MUL_ADD_OVERFLOW(x,y,z,r)   (ROCKET_MUL_OVERFLOW(x,y,r) | ROCKET_ADD_OVERFLOW(*(r),z,r))
-#define ROCKET_ADD_MUL_OVERFLOW(x,y,z,r)   (ROCKET_ADD_OVERFLOW(x,y,r) | ROCKET_MUL_OVERFLOW(*(r),z,r))
-#define ROCKET_MUL_SUB_OVERFLOW(x,y,z,r)   (ROCKET_MUL_OVERFLOW(x,y,r) | ROCKET_SUB_OVERFLOW(*(r),z,r))
-#define ROCKET_SUB_MUL_OVERFLOW(x,y,z,r)   (ROCKET_SUB_OVERFLOW(x,y,r) | ROCKET_MUL_OVERFLOW(*(r),z,r))
-
-#define ROCKET_LZCNT32(x)        ((x) ? (unsigned) __builtin_clz(x) & 31U : 32U)
-#define ROCKET_LZCNT64(x)        ((x) ? (unsigned long long) __builtin_clzll(x) & 63ULL : 64ULL)
-#define ROCKET_TZCNT32(x)        ((x) ? (unsigned) __builtin_ctz(x) & 31U : 32U)
-#define ROCKET_TZCNT64(x)        ((x) ? (unsigned long long) __builtin_ctzll(x) & 63ULL : 64ULL)
-#define ROCKET_POPCNT32(x)       ((unsigned) __builtin_popcount(x))
-#define ROCKET_POPCNT64(x)       ((unsigned long long) __builtin_popcountll(x))
-
-#if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
-#  define ROCKET_LOAD_BE16(p)        (*(const uint16_t*)(const void*) (p))
-#  define ROCKET_LOAD_BE32(p)        (*(const uint32_t*)(const void*) (p))
-#  define ROCKET_LOAD_BE64(p)        (*(const uint64_t*)(const void*) (p))
-#  define ROCKET_STORE_BE16(p,x)     ((void) (*(uint16_t*)(void*) (p) = (x)))
-#  define ROCKET_STORE_BE32(p,x)     ((void) (*(uint32_t*)(void*) (p) = (x)))
-#  define ROCKET_STORE_BE64(p,x)     ((void) (*(uint64_t*)(void*) (p) = (x)))
-#  define ROCKET_LOAD_LE16(p)        (__builtin_bswap16(*(const uint16_t*)(const void*) (p)))
-#  define ROCKET_LOAD_LE32(p)        (__builtin_bswap32(*(const uint32_t*)(const void*) (p)))
-#  define ROCKET_LOAD_LE64(p)        (__builtin_bswap64(*(const uint64_t*)(const void*) (p)))
-#  define ROCKET_STORE_LE16(p,x)     ((void) (*(uint16_t*)(void*) (p) = __builtin_bswap16(x)))
-#  define ROCKET_STORE_LE32(p,x)     ((void) (*(uint32_t*)(void*) (p) = __builtin_bswap32(x)))
-#  define ROCKET_STORE_LE64(p,x)     ((void) (*(uint64_t*)(void*) (p) = __builtin_bswap64(x)))
-#elif __BYTE_ORDER__ != __ORDER_BIG_ENDIAN__
-#  define ROCKET_LOAD_BE16(p)        (__builtin_bswap16(*(const uint16_t*)(const void*) (p)))
-#  define ROCKET_LOAD_BE32(p)        (__builtin_bswap32(*(const uint32_t*)(const void*) (p)))
-#  define ROCKET_LOAD_BE64(p)        (__builtin_bswap64(*(const uint64_t*)(const void*) (p)))
-#  define ROCKET_STORE_BE16(p,x)     ((void) (*(uint16_t*)(void*) (p) = __builtin_bswap16(x)))
-#  define ROCKET_STORE_BE32(p,x)     ((void) (*(uint32_t*)(void*) (p) = __builtin_bswap32(x)))
-#  define ROCKET_STORE_BE64(p,x)     ((void) (*(uint64_t*)(void*) (p) = __builtin_bswap64(x)))
-#  define ROCKET_LOAD_LE16(p)        (*(const uint16_t*)(const void*) (p))
-#  define ROCKET_LOAD_LE32(p)        (*(const uint32_t*)(const void*) (p))
-#  define ROCKET_LOAD_LE64(p)        (*(const uint64_t*)(const void*) (p))
-#  define ROCKET_STORE_LE16(p,x)     ((void) (*(uint16_t*)(void*) (p) = (x)))
-#  define ROCKET_STORE_LE32(p,x)     ((void) (*(uint32_t*)(void*) (p) = (x)))
-#  define ROCKET_STORE_LE64(p,x)     ((void) (*(uint64_t*)(void*) (p) = (x)))
-#else
-#  error Byte order could not be determined.
-#endif
-
 #define ROCKET_UNDEDUCED(...)    typename ::std::enable_if<true, __VA_ARGS__>::type
 #define ROCKET_VOID_T(...)       typename ::std::conditional<true, void, __VA_ARGS__>::type
 #define ROCKET_ENABLE_IF(...)    typename ::std::enable_if<+bool(__VA_ARGS__)>::type* = nullptr
@@ -433,6 +388,22 @@ template<typename firstT, typename secondT>
 struct select_type<firstT, secondT>
   : common_type<firstT, secondT>  { };
 
+template<typename iteratorT>
+struct is_input_iterator
+  : details_fwd::is_input_iterator_aux<iteratorT, void>  { };
+
+template<typename targetT, typename... candidatesT>
+struct is_any_type_of
+  : false_type  { };
+
+template<typename targetT, typename... restT>
+struct is_any_type_of<targetT, targetT, restT...>
+  : true_type  { };
+
+template<typename targetT, typename firstT, typename... restT>
+struct is_any_type_of<targetT, firstT, restT...>
+  : is_any_type_of<targetT, restT...>  { };
+
 template<typename lhsT, typename rhsT>
 constexpr
 typename select_type<lhsT&&, rhsT&&>::type
@@ -485,21 +456,275 @@ clamp_cast(xvT&& xv, loT&& lo, upT&& up)
                                 : forward<xvT>(xv));
   }
 
-template<typename iteratorT>
-struct is_input_iterator
-  : details_fwd::is_input_iterator_aux<iteratorT, void>  { };
+template<typename xvT, typename yvT,
+ROCKET_ENABLE_IF(is_integral<xvT>::value && is_integral<yvT>::value)>
+constexpr
+typename common_type<xvT, yvT>::type
+addm(xvT x, yvT y, bool* ovr = nullptr)
+  noexcept
+  {
+    typename common_type<xvT, yvT>::type r = 0;
+    bool of = __builtin_add_overflow(x, y, ::std::addressof(r));
+    if(ovr)
+      *ovr |= of;
+    return r;
+  }
 
-template<typename targetT, typename... candidatesT>
-struct is_any_type_of
-  : false_type  { };
+template<typename xvT, typename yvT,
+ROCKET_ENABLE_IF(is_integral<xvT>::value && is_integral<yvT>::value)>
+constexpr
+typename common_type<xvT, yvT>::type
+subm(xvT x, yvT y, bool* ovr = nullptr)
+  noexcept
+  {
+    typename common_type<xvT, yvT>::type r = 0;
+    bool of = __builtin_sub_overflow(x, y, ::std::addressof(r));
+    if(ovr)
+      *ovr |= of;
+    return r;
+  }
 
-template<typename targetT, typename... restT>
-struct is_any_type_of<targetT, targetT, restT...>
-  : true_type  { };
+template<typename xvT, typename yvT,
+ROCKET_ENABLE_IF(is_integral<xvT>::value && is_integral<yvT>::value)>
+constexpr
+typename common_type<xvT, yvT>::type
+mulm(xvT x, yvT y, bool* ovr = nullptr)
+  noexcept
+  {
+    typename common_type<xvT, yvT>::type r = 0;
+    bool of = __builtin_mul_overflow(x, y, ::std::addressof(r));
+    if(ovr)
+      *ovr |= of;
+    return r;
+  }
 
-template<typename targetT, typename firstT, typename... restT>
-struct is_any_type_of<targetT, firstT, restT...>
-  : is_any_type_of<targetT, restT...>  { };
+template<typename valueT,
+ROCKET_ENABLE_IF(is_trivially_copyable<valueT>::value && (sizeof(valueT) == 2))>
+ROCKET_ALWAYS_INLINE
+valueT
+load_be(const void* ptr)
+  noexcept
+  {
+    uint16_t temp;
+    ::memcpy(&temp, ptr, 2);
+#if __BYTE_ORDER__ != __ORDER_BIG_ENDIAN__
+    temp = __builtin_bswap16(temp);
+#endif
+    valueT value;
+    ::memcpy(::std::addressof(value), &temp, 2);
+    return value;
+  }
+
+template<typename valueT,
+ROCKET_ENABLE_IF(is_trivially_copyable<valueT>::value && (sizeof(valueT) == 2))>
+ROCKET_ALWAYS_INLINE
+valueT
+load_le(const void* ptr)
+  noexcept
+  {
+    uint16_t temp;
+    ::memcpy(&temp, ptr, 2);
+#if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
+    temp = __builtin_bswap16(temp);
+#endif
+    valueT value;
+    ::memcpy(::std::addressof(value), &temp, 2);
+    return value;
+  }
+
+template<typename valueT,
+ROCKET_ENABLE_IF(is_trivially_copyable<valueT>::value && (sizeof(valueT) == 4))>
+ROCKET_ALWAYS_INLINE
+valueT
+load_be(const void* ptr)
+  noexcept
+  {
+    uint32_t temp;
+    ::memcpy(&temp, ptr, 4);
+#if __BYTE_ORDER__ != __ORDER_BIG_ENDIAN__
+    temp = __builtin_bswap32(temp);
+#endif
+    valueT value;
+    ::memcpy(::std::addressof(value), &temp, 4);
+    return value;
+  }
+
+template<typename valueT,
+ROCKET_ENABLE_IF(is_trivially_copyable<valueT>::value && (sizeof(valueT) == 4))>
+ROCKET_ALWAYS_INLINE
+valueT
+load_le(const void* ptr)
+  noexcept
+  {
+    uint32_t temp;
+    ::memcpy(&temp, ptr, 4);
+#if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
+    temp = __builtin_bswap32(temp);
+#endif
+    valueT value;
+    ::memcpy(::std::addressof(value), &temp, 4);
+    return value;
+  }
+
+template<typename valueT,
+ROCKET_ENABLE_IF(is_trivially_copyable<valueT>::value && (sizeof(valueT) == 8))>
+ROCKET_ALWAYS_INLINE
+valueT
+load_be(const void* ptr)
+  noexcept
+  {
+    uint64_t temp;
+    ::memcpy(&temp, ptr, 8);
+#if __BYTE_ORDER__ != __ORDER_BIG_ENDIAN__
+    temp = __builtin_bswap64(temp);
+#endif
+    valueT value;
+    ::memcpy(::std::addressof(value), &temp, 8);
+    return value;
+  }
+
+template<typename valueT,
+ROCKET_ENABLE_IF(is_trivially_copyable<valueT>::value && (sizeof(valueT) == 8))>
+ROCKET_ALWAYS_INLINE
+valueT
+load_le(const void* ptr)
+  noexcept
+  {
+    uint64_t temp;
+    ::memcpy(&temp, ptr, 8);
+#if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
+    temp = __builtin_bswap64(temp);
+#endif
+    valueT value;
+    ::memcpy(::std::addressof(value), &temp, 8);
+    return value;
+  }
+
+template<typename valueT,
+ROCKET_ENABLE_IF(is_trivially_copyable<valueT>::value && (sizeof(valueT) == 2))>
+ROCKET_ALWAYS_INLINE
+void
+store_be(void* ptr, valueT value)
+  noexcept
+  {
+    uint16_t temp;
+    ::memcpy(&temp, ::std::addressof(value), 2);
+#if __BYTE_ORDER__ != __ORDER_BIG_ENDIAN__
+    temp = __builtin_bswap16(temp);
+#endif
+    ::memcpy(ptr, &temp, 2);
+  }
+
+template<typename valueT,
+ROCKET_ENABLE_IF(is_trivially_copyable<valueT>::value && (sizeof(valueT) == 2))>
+ROCKET_ALWAYS_INLINE
+void
+store_le(void* ptr, valueT value)
+  noexcept
+  {
+    uint16_t temp;
+    ::memcpy(&temp, ::std::addressof(value), 2);
+#if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
+    temp = __builtin_bswap16(temp);
+#endif
+    ::memcpy(ptr, &temp, 2);
+  }
+
+template<typename valueT,
+ROCKET_ENABLE_IF(is_trivially_copyable<valueT>::value && (sizeof(valueT) == 4))>
+ROCKET_ALWAYS_INLINE
+void
+store_be(void* ptr, valueT value)
+  noexcept
+  {
+    uint32_t temp;
+    ::memcpy(&temp, ::std::addressof(value), 4);
+#if __BYTE_ORDER__ != __ORDER_BIG_ENDIAN__
+    temp = __builtin_bswap32(temp);
+#endif
+    ::memcpy(ptr, &temp, 4);
+  }
+
+template<typename valueT,
+ROCKET_ENABLE_IF(is_trivially_copyable<valueT>::value && (sizeof(valueT) == 4))>
+ROCKET_ALWAYS_INLINE
+void
+store_le(void* ptr, valueT value)
+  noexcept
+  {
+    uint32_t temp;
+    ::memcpy(&temp, ::std::addressof(value), 4);
+#if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
+    temp = __builtin_bswap32(temp);
+#endif
+    ::memcpy(ptr, &temp, 4);
+  }
+
+template<typename valueT,
+ROCKET_ENABLE_IF(is_trivially_copyable<valueT>::value && (sizeof(valueT) == 8))>
+ROCKET_ALWAYS_INLINE
+void
+store_be(void* ptr, valueT value)
+  noexcept
+  {
+    uint64_t temp;
+    ::memcpy(&temp, ::std::addressof(value), 8);
+#if __BYTE_ORDER__ != __ORDER_BIG_ENDIAN__
+    temp = __builtin_bswap64(temp);
+#endif
+    ::memcpy(ptr, &temp, 8);
+  }
+
+template<typename valueT,
+ROCKET_ENABLE_IF(is_trivially_copyable<valueT>::value && (sizeof(valueT) == 8))>
+ROCKET_ALWAYS_INLINE
+void
+store_le(void* ptr, valueT value)
+  noexcept
+  {
+    uint64_t temp;
+    ::memcpy(&temp, ::std::addressof(value), 8);
+#if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
+    temp = __builtin_bswap64(temp);
+#endif
+    ::memcpy(ptr, &temp, 8);
+  }
+
+constexpr
+uint32_t
+lzcnt32(uint32_t x)
+  noexcept
+  { return (x != 0) ? static_cast<uint32_t>(__builtin_clz(x) & 31) : 32;  }
+
+constexpr
+uint32_t
+tzcnt32(uint32_t x)
+  noexcept
+  { return (x != 0) ? static_cast<uint32_t>(__builtin_ctz(x) & 31) : 32;  }
+
+constexpr
+uint32_t
+popcnt32(uint32_t x)
+  noexcept
+  { return static_cast<uint32_t>(__builtin_popcount(x));  }
+
+constexpr
+uint64_t
+lzcnt64(uint64_t x)
+  noexcept
+  { return (x != 0) ? static_cast<uint64_t>(__builtin_clzll(x) & 63) : 64;  }
+
+constexpr
+uint64_t
+tzcnt64(uint64_t x)
+  noexcept
+  { return (x != 0) ? static_cast<uint64_t>(__builtin_ctzll(x) & 63) : 64;  }
+
+constexpr
+uint64_t
+popcnt64(uint64_t x)
+  noexcept
+  { return static_cast<uint64_t>(__builtin_popcountll(x));  }
 
 template<typename firstT, typename lastT, typename funcT, typename... paramsT>
 void

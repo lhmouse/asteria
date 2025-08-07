@@ -126,18 +126,17 @@ do_collect_digits(const char*& rptr, const char* eptr, uint32_t base, int rdxp)
         break;
 
       // Accumulate this digit.
-      rptr ++;
       xu.valid = true;
+      rptr ++;
 
+      next_mant = mulm(xu.mant, base, &mant_ovfl);
+      next_mant = addm(next_mant, digit, &mant_ovfl);
       if(!mant_ovfl)
-        mant_ovfl = ROCKET_MUL_ADD_OVERFLOW(xu.mant, base, digit, &next_mant);
-
-      if(mant_ovfl) {
+        xu.mant = next_mant;
+      else {
         xu.exp ++;
         xu.more |= digit != 0;
       }
-      else
-        xu.mant = next_mant;
 
       if(xu.has_point)
         xu.exp --;
@@ -176,10 +175,8 @@ do_collect_digits(const char*& rptr, const char* eptr, uint32_t base, int rdxp)
       // Accumulate this digit.
       rptr ++;
 
-      if(!exp_ovfl)
-        exp_ovfl = ROCKET_MUL_ADD_OVERFLOW(xu.exp - exp_orig, 10,
-                       ((int64_t) digit ^ exp_sign) - exp_sign + exp_orig,
-                       &(xu.exp));
+      xu.exp = mulm(xu.exp - exp_orig, 10, &exp_ovfl);
+      xu.exp = addm(xu.exp, (digit ^ exp_sign) - exp_sign + exp_orig, &exp_ovfl);
     }
 
     if(exp_ovfl)
@@ -1299,7 +1296,8 @@ ascii_numget::
 cast_U(uint64_t& value, uint64_t min, uint64_t max)
   noexcept
   {
-    switch(this->m_cls) {
+    switch(this->m_cls)
+      {
       case value_class_empty:
         // Zero is implied for convenience, but this operation fails.
         this->m_ovfl = true;
@@ -1365,13 +1363,15 @@ cast_U(uint64_t& value, uint64_t min, uint64_t max)
 
         if(exp > 0) {
           // Raise the mantissa.
+          bool ovfl = false;
           do {
             exp --;
-            this->m_ovfl |= ROCKET_MUL_OVERFLOW(value, this->m_base, &value);
+            value = mulm(value, this->m_base, &ovfl);
+            this->m_ovfl |= ovfl;
           }
-          while((exp != 0) && (this->m_ovfl == false));
+          while((exp != 0) && !ovfl);
 
-          if(this->m_ovfl) {
+          if(ovfl) {
             value = UINT64_MAX;
             break;
           }
@@ -1393,7 +1393,7 @@ cast_U(uint64_t& value, uint64_t min, uint64_t max)
 
         ROCKET_ASSERT(value != 0);
         break;
-    }
+      }
 
     this->m_ovfl |= do_is_value_out_of_range(value, min, max);
   }
@@ -1403,7 +1403,8 @@ ascii_numget::
 cast_I(int64_t& value, int64_t min, int64_t max)
   noexcept
   {
-    switch(this->m_cls) {
+    switch(this->m_cls)
+      {
       case value_class_empty:
         // Zero is implied for convenience, but this operation fails.
         this->m_ovfl = true;
@@ -1464,13 +1465,15 @@ cast_I(int64_t& value, int64_t min, int64_t max)
 
         if(exp > 0) {
           // Raise the mantissa.
+          bool ovfl = false;
           do {
             exp --;
-            this->m_ovfl |= ROCKET_MUL_OVERFLOW(bits, this->m_base, &bits);
+            bits = mulm(bits, this->m_base, &ovfl);
+            this->m_ovfl |= ovfl;
           }
-          while((exp != 0) && (this->m_ovfl == false));
+          while((exp != 0) && !ovfl);
 
-          if(this->m_ovfl) {
+          if(ovfl) {
             value = (int64_t) umax;
             break;
           }
@@ -1500,7 +1503,7 @@ cast_I(int64_t& value, int64_t min, int64_t max)
         value = (int64_t) ((bits - umax + INT64_MAX) ^ INT64_MAX ^ umax);
         ROCKET_ASSERT(value != 0);
         break;
-    }
+      }
 
     this->m_ovfl |= do_is_value_out_of_range(value, min, max);
   }
@@ -1510,7 +1513,8 @@ ascii_numget::
 cast_F(float& value, float min, float max)
   noexcept
   {
-    switch(this->m_cls) {
+    switch(this->m_cls)
+      {
       case value_class_empty:
         // Zero is implied for convenience, but this operation fails.
         this->m_ovfl = true;
@@ -1567,7 +1571,7 @@ cast_F(float& value, float min, float max)
 
         // Align the mantissa to the left, so its MSB is non-zero.
         int exp = (int) this->m_exp;
-        int sh = ROCKET_LZCNT64(this->m_mant);
+        int sh = (int) lzcnt64(this->m_mant);
         uint32_t bits = (uint32_t) (this->m_mant << sh);  // lower
         this->m_inxct |= bits != 0;
         bits = (uint32_t) ((this->m_mant << sh) >> 32) | (bits >> 31);  // upper
@@ -1593,7 +1597,7 @@ cast_F(float& value, float min, float max)
           ROCKET_ASSERT(bits != 0);
 
           // Re-align the mantissa, so its MSB is non-zero.
-          int rsh = ROCKET_LZCNT32(bits);
+          int rsh = (int) lzcnt32(bits);
           bits <<= rsh;
           sh += rsh;
         }
@@ -1682,7 +1686,7 @@ cast_F(float& value, float min, float max)
         ::memcpy(&value, &bits, sizeof(float));
         ROCKET_ASSERT(value != 0);
         break;
-    }
+      }
 
     this->m_ovfl |= do_is_value_out_of_range(value, min, max);
   }
@@ -1692,7 +1696,8 @@ ascii_numget::
 cast_D(double& value, double min, double max)
   noexcept
   {
-    switch(this->m_cls) {
+    switch(this->m_cls)
+      {
       case value_class_empty:
         // Zero is implied for convenience, but this operation fails.
         this->m_ovfl = true;
@@ -1749,7 +1754,7 @@ cast_D(double& value, double min, double max)
 
         // Align the mantissa to the left, so its MSB is non-zero.
         int exp = (int) this->m_exp;
-        int sh = ROCKET_LZCNT64(this->m_mant);
+        int sh = (int) lzcnt64(this->m_mant);
         uint64_t bits = this->m_mant << sh;
 
         if(this->m_base == 10) {
@@ -1773,7 +1778,7 @@ cast_D(double& value, double min, double max)
           ROCKET_ASSERT(bits != 0);
 
           // Re-align the mantissa, so its MSB is non-zero.
-          int rsh = ROCKET_LZCNT64(bits);
+          int rsh = (int) lzcnt64(bits);
           bits <<= rsh;
           sh += rsh;
         }
@@ -1862,7 +1867,7 @@ cast_D(double& value, double min, double max)
         ::memcpy(&value, &bits, sizeof(double));
         ROCKET_ASSERT(value != 0);
         break;
-    }
+      }
 
     this->m_ovfl |= do_is_value_out_of_range(value, min, max);
   }

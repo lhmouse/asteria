@@ -329,19 +329,13 @@ class storage_handle
     check_size_add(size_type base, size_type add)
       const
       {
-        size_type res;
-
-        if(ROCKET_ADD_OVERFLOW(base, add, &res))
-          noadl::sprintf_and_throw<length_error>(
-              "cow_vector: arithmetic overflow (`%lld` + `%lld`)",
-              static_cast<long long>(base), static_cast<long long>(add));
-
-        if(res > this->max_size())
+        bool ovr = false;
+        size_type res = noadl::addm(base, add, &ovr);
+        if(ovr || (res > this->max_size()))
           noadl::sprintf_and_throw<length_error>(
               "cow_vector: max size exceeded (`%lld` + `%lld` > `%lld`)",
               static_cast<long long>(base), static_cast<long long>(add),
               static_cast<long long>(this->max_size()));
-
         return res;
       }
 

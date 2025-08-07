@@ -225,10 +225,9 @@ class basic_tinyfmt_str
     seek(int64_t off, seek_dir dir)
       override
       {
-        int64_t orig, targ;
-
-        // Get the origin offset.
-        switch(dir) {
+        int64_t orig;
+        switch(dir)
+          {
           case tinyfmt_base::seek_set:
             orig = 0;
             break;
@@ -245,10 +244,11 @@ class basic_tinyfmt_str
             noadl::sprintf_and_throw<invalid_argument>(
                 "tinyfmt_str: seek direction `%d` not valid",
                 static_cast<int>(dir));
-        }
+          }
 
-        // Calculate the target offset.
-        if(ROCKET_ADD_OVERFLOW(orig, off, ::std::addressof(targ)))
+        bool ovr = false;
+        int64_t targ = noadl::addm(orig, off, &ovr);
+        if(ovr)
           noadl::sprintf_and_throw<out_of_range>(
               "tinyfmt_str: stream offset overflow (operands were `%lld` and `%lld`)",
               static_cast<long long>(orig), static_cast<long long>(off));
