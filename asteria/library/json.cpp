@@ -12,16 +12,9 @@ namespace {
 
 struct Parser_Context
   {
-    // stream offset of the last token
-    int64_t offset;
-
-    // if no error, a null pointer; otherwise, a static string about the error
-    const char* error;
-
-    // !! internal fields !!
     int32_t c;
-    uint32_t eof : 1;
-    uint32_t reserved_1 : 31;
+    bool eof;
+    int64_t offset;
     int64_t saved_offset;
   };
 
@@ -44,18 +37,14 @@ ROCKET_ALWAYS_INLINE
 void
 do_err(Parser_Context& ctx, const char* error)
   {
-    if(ctx.error)
-      return;
-
     ctx.c = -1;
     ctx.offset = ctx.saved_offset;
-    ctx.error = error;
 
-    if(ctx.error)
+    if(error)
       ASTERIA_THROW((
           "Could not parse JSON string: $1",
           "[at offset `$2`]"),
-          ctx.error, ctx.saved_offset);
+          error, ctx.saved_offset);
   }
 
 struct Memory_Source
@@ -353,7 +342,6 @@ do_token(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
   {
     // Clear the current token and skip whitespace.
     ctx.saved_offset = usrc.tell();
-    ctx.error = nullptr;
     token.clear();
 
     if(ctx.c < 0) {
@@ -434,7 +422,6 @@ do_token(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
         // If the end of input has been reached, `ctx.error` may be set. We will
         // not return an error, so clear it.
         ROCKET_ASSERT(token.size() != 0);
-        ctx.error = nullptr;
         ctx.eof = false;
         break;
 
@@ -452,7 +439,6 @@ do_token(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
         // If the end of input has been reached, `ctx.error` may be set. We will
         // not return an error, so clear it.
         ROCKET_ASSERT(token.size() != 0);
-        ctx.error = nullptr;
         ctx.eof = false;
         break;
 
@@ -571,7 +557,6 @@ do_token(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
         // get the next character, as the stream may be blocking but we can't
         // really know whether there are more data.
         ROCKET_ASSERT(token.size() != 0);
-        ctx.error = nullptr;
         ctx.c = -1;
         break;
 
@@ -602,8 +587,6 @@ do_parse_with(Value& root, Parser_Context& ctx, const Unified_Source& usrc)
     Value* pstor = &root;
 
     do_token(token, ctx, usrc);
-    if(ctx.error)
-      return;
 
   do_pack_value_loop_:
     if(stack.size() > 32)
@@ -618,8 +601,6 @@ do_parse_with(Value& root, Parser_Context& ctx, const Unified_Source& usrc)
       do_token(token, ctx, usrc);
       if(ctx.eof)
         return do_err(ctx, "Array not terminated properly");
-      else if(ctx.error)
-        return;
 
       if(token[0] != ']') {
         // open
@@ -640,8 +621,6 @@ do_parse_with(Value& root, Parser_Context& ctx, const Unified_Source& usrc)
       do_token(token, ctx, usrc);
       if(ctx.eof)
         return do_err(ctx, "Object not terminated properly");
-      else if(ctx.error)
-        return;
 
       if(token[0] != '}') {
         // open
@@ -664,8 +643,6 @@ do_parse_with(Value& root, Parser_Context& ctx, const Unified_Source& usrc)
         do_token(token, ctx, usrc);
         if(ctx.eof)
           return do_err(ctx, "Missing value");
-        else if(ctx.error)
-          return;
 
         // first
         pstor = &(emr.first->second);
@@ -698,8 +675,6 @@ do_parse_with(Value& root, Parser_Context& ctx, const Unified_Source& usrc)
         do_token(token, ctx, usrc);
         if(ctx.eof)
           return do_err(ctx, "Array not terminated properly");
-        else if(ctx.error)
-          return;
 
         if(token[0] != ']') {
           if(token[0] != ',')
@@ -708,8 +683,6 @@ do_parse_with(Value& root, Parser_Context& ctx, const Unified_Source& usrc)
           do_token(token, ctx, usrc);
           if(ctx.eof)
             return do_err(ctx, "Missing value");
-          else if(ctx.error)
-            return;
 
           if(token[0] != ']') {
             // next
@@ -723,8 +696,6 @@ do_parse_with(Value& root, Parser_Context& ctx, const Unified_Source& usrc)
         do_token(token, ctx, usrc);
         if(ctx.eof)
           return do_err(ctx, "Object not terminated properly");
-        else if(ctx.error)
-          return;
 
         if(token[0] != '}') {
           if(token[0] != ',')
@@ -733,8 +704,6 @@ do_parse_with(Value& root, Parser_Context& ctx, const Unified_Source& usrc)
           do_token(token, ctx, usrc);
           if(ctx.eof)
             return do_err(ctx, "Missing key string");
-          else if(ctx.error)
-            return;
 
           if(token[0] != '}') {
             // We are inside an object, so this token must be a key string,
@@ -753,8 +722,6 @@ do_parse_with(Value& root, Parser_Context& ctx, const Unified_Source& usrc)
             do_token(token, ctx, usrc);
             if(ctx.eof)
               return do_err(ctx, "Missing value");
-            else if(ctx.error)
-              return;
 
             // next
             pstor = &(emr.first->second);
