@@ -129,6 +129,11 @@ class Value
       const noexcept
       { return this->m_stor.index() == type_null;  }
 
+    void
+    clear()
+      noexcept
+      { this->m_stor.emplace<V_null>();  }
+
     bool
     is_boolean()
       const noexcept
