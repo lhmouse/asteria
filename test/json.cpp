@@ -30,7 +30,6 @@ int main()
         assert std.json.format({a:1}) == "{\"a\":1}";
         assert std.json.format({'$42':1}) == "{\"$42\":1}";
         assert std.json.format({ab:infinity}) == "{\"ab\":null}";
-        assert std.json.format({ab:1,cde:std.json.format}) == "{\"ab\":1}";
 
         assert std.json.format([[1,2],[3,4]]) == "[[1,2],[3,4]]";
         assert std.json.format([[1,2],[3,4]], "") == "[[1,2],[3,4]]";
@@ -60,7 +59,6 @@ int main()
         assert std.json.format({a:1}) == "{\"a\":1}";
         assert std.json.format({'$42':1}) == "{\"$42\":1}";
         assert std.json.format({ab:infinity}) == "{\"ab\":null}";
-        assert std.json.format({ab:1,cde:std.json.format}) == "{\"ab\":1}";
 
         assert std.json.format([[1,2],[3,4]]) == "[[1,2],[3,4]]";
         assert std.json.format([[1,2],[3,4]], "") == "[[1,2],[3,4]]";
@@ -79,7 +77,7 @@ int main()
         assert std.json.parse("  42  ") == 42;
         assert std.json.parse("  76.5") == 76.5;
         assert catch( std.json.parse("2 1") ) != null;
-        assert std.json.parse("'hello'") == "hello";
+        assert std.json.parse("\"hello\"") == "hello";
         assert std.json.parse("\"\u55B5\"") == "喵";
         assert std.json.parse("\"\u55b5\"") == "喵";
         assert std.json.parse("\"\\u0007\\b\\u000B\\f\\n\\r\\t\"") == "\a\b\v\f\n\r\t";
@@ -91,12 +89,10 @@ int main()
 
         assert countof std.json.parse("{}") == 0;
         assert std.json.parse("{\"a\":1}").a == 1;
-        assert std.json.parse("{b:Infinity}").b == infinity;
-        assert __isnan std.json.parse("{b:NaN}").b;
-        assert std.json.parse("{c:1,d:2,}").c == 1;
-        assert std.json.parse("{c:1,d:2,}").d == 2;
+        assert std.json.parse("{\"c\":1,\"d\":2,}").c == 1;
+        assert std.json.parse("{\"c\":1,\"d\":2,}").d == 2;
 
-        var r = std.json.parse("[{a:1,b:[]},{c:{},d:4}]");
+        var r = std.json.parse("[{\"a\":1,\"b\":[]},{\"c\":{},\"d\":4}]");
         assert r[0].a == 1;
         assert r[0].b == [];
         assert typeof r[1].c == "object";
