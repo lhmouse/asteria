@@ -65,6 +65,71 @@ do_accept_object_key(Xparse_object& ctxo, Token_Stream& tstrm)
       ctxo.key = qtok->as_identifier();
     else if(qtok->is_string_literal())
       ctxo.key = qtok->as_string_literal();
+    else if(qtok->is_keyword()) {
+      switch(qtok->as_keyword())
+        {
+        case keyword_var:         ctxo.key = &"var"; break;
+        case keyword_const:       ctxo.key = &"const"; break;
+        case keyword_func:        ctxo.key = &"func"; break;
+        case keyword_if:          ctxo.key = &"if"; break;
+        case keyword_else:        ctxo.key = &"else"; break;
+        case keyword_switch:      ctxo.key = &"switch"; break;
+        case keyword_case:        ctxo.key = &"case"; break;
+        case keyword_default:     ctxo.key = &"default"; break;
+        case keyword_do:          ctxo.key = &"do"; break;
+        case keyword_while:       ctxo.key = &"while"; break;
+        case keyword_for:         ctxo.key = &"for"; break;
+        case keyword_each:        ctxo.key = &"each"; break;
+        case keyword_try:         ctxo.key = &"try"; break;
+        case keyword_catch:       ctxo.key = &"catch"; break;
+        case keyword_defer:       ctxo.key = &"defer"; break;
+        case keyword_break:       ctxo.key = &"break"; break;
+        case keyword_continue:    ctxo.key = &"continue"; break;
+        case keyword_throw:       ctxo.key = &"throw"; break;
+        case keyword_return:      ctxo.key = &"return"; break;
+        case keyword_null:        ctxo.key = &"null"; break;
+        case keyword_true:        ctxo.key = &"true"; break;
+        case keyword_false:       ctxo.key = &"false"; break;
+        case keyword_import:      ctxo.key = &"import"; break;
+        case keyword_ref:         ctxo.key = &"ref"; break;
+        case keyword_this:        ctxo.key = &"this"; break;
+        case keyword_unset:       ctxo.key = &"unset"; break;
+        case keyword_countof:     ctxo.key = &"countof"; break;
+        case keyword_typeof:      ctxo.key = &"typeof"; break;
+        case keyword_and:         ctxo.key = &"and"; break;
+        case keyword_or:          ctxo.key = &"or"; break;
+        case keyword_not:         ctxo.key = &"not"; break;
+        case keyword_assert:      ctxo.key = &"assert"; break;
+        case keyword_sqrt:        ctxo.key = &"__sqrt"; break;
+        case keyword_isnan:       ctxo.key = &"__isnan"; break;
+        case keyword_isinf:       ctxo.key = &"__isinf"; break;
+        case keyword_abs:         ctxo.key = &"__abs"; break;
+        case keyword_sign:        ctxo.key = &"__sign"; break;
+        case keyword_round:       ctxo.key = &"__round"; break;
+        case keyword_floor:       ctxo.key = &"__floor"; break;
+        case keyword_ceil:        ctxo.key = &"__ceil"; break;
+        case keyword_trunc:       ctxo.key = &"__trunc"; break;
+        case keyword_iround:      ctxo.key = &"__iround"; break;
+        case keyword_ifloor:      ctxo.key = &"__ifloor"; break;
+        case keyword_iceil:       ctxo.key = &"__iceil"; break;
+        case keyword_itrunc:      ctxo.key = &"__itrunc"; break;
+        case keyword_fma:         ctxo.key = &"__fma"; break;
+        case keyword_extern:      ctxo.key = &"extern"; break;
+        case keyword_vcall:       ctxo.key = &"__vcall"; break;
+        case keyword_lzcnt:       ctxo.key = &"__lzcnt"; break;
+        case keyword_tzcnt:       ctxo.key = &"__tzcnt"; break;
+        case keyword_popcnt:      ctxo.key = &"__popcnt"; break;
+        case keyword_addm:        ctxo.key = &"__addm"; break;
+        case keyword_subm:        ctxo.key = &"__subm"; break;
+        case keyword_mulm:        ctxo.key = &"__mulm"; break;
+        case keyword_adds:        ctxo.key = &"__adds"; break;
+        case keyword_subs:        ctxo.key = &"__subs"; break;
+        case keyword_muls:        ctxo.key = &"__muls"; break;
+        case keyword_isvoid:      ctxo.key = &"__isvoid"; break;
+        case keyword_ifcomplete:  ctxo.key = &"__ifcomplete"; break;
+        default:   ASTERIA_THROW(("identifier or string expected at '$1'"), tstrm.next_sloc());
+        };
+    }
     else
       ASTERIA_THROW(("identifier or string expected at '$1'"), tstrm.next_sloc());
 
@@ -118,27 +183,19 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
       else
         ASTERIA_THROW(("Value expected at '$1'"), tstrm.next_sloc());
     }
-    else if(qtok->is_identifier()) {
+    else if(qtok->is_keyword()) {
       // Accept a literal.
-      if(qtok->as_identifier() == "null") {
+      if(qtok->as_keyword() == keyword_null) {
         tstrm.shift();
         value = nullopt;
       }
-      else if(qtok->as_identifier() == "true") {
+      else if(qtok->as_keyword() == keyword_true) {
         tstrm.shift();
         value = true;
       }
-      else if(qtok->as_identifier() == "false") {
+      else if(qtok->as_keyword() == keyword_false) {
         tstrm.shift();
         value = false;
-      }
-      else if((qtok->as_identifier() == "Infinity") || (qtok->as_identifier() == "infinity")) {
-        tstrm.shift();
-        value = ::std::numeric_limits<double>::infinity();
-      }
-      else if((qtok->as_identifier() == "NaN") || (qtok->as_identifier() == "nan")) {
-        tstrm.shift();
-        value = ::std::numeric_limits<double>::quiet_NaN();
       }
       else
         ASTERIA_THROW(("Value expected at '$1'"), tstrm.next_sloc());
@@ -671,7 +728,6 @@ std_system_load_conf(V_string path)
     // Initialize tokenizer options. Unlike JSON5, we support genuine integers
     // and single-quoted string literals.
     Compiler_Options opts;
-    opts.keywords_as_identifiers = true;
 
     Token_Stream tstrm(opts);
     ::rocket::tinyfmt_file cbuf(path.safe_c_str(), tinyfmt::open_read);

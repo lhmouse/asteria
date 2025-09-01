@@ -186,8 +186,7 @@ do_collect_digits(cow_string& tstr, size_t& tlen, Text_Reader& reader, uint8_t m
   }
 
 bool
-do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
-                          bool integers_as_reals)
+do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader)
   {
     // numeric-literal ::=
     //   ``[+-]?nan``
@@ -330,9 +329,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
       throw Compiler_Error(xtc_status,
                 compiler_status_numeric_literal_suffix_invalid, reader.tell());
 
-    // It is cast to an integer only when `integers_as_reals` is `false` and
-    // it does not contain a radix point.
-    if(!integers_as_reals && !has_point) {
+    if(!has_point) {
       // Try casting the value to an `integer`. Integers never underflow.
       Token::S_integer_literal xtoken;
       numg.cast_I(xtoken.val, INT64_MIN, INT64_MAX);
@@ -495,8 +492,7 @@ do_accept_punctuator(cow_vector<Token>& tokens, Text_Reader& reader)
   }
 
 bool
-do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char head,
-                         bool escapable)
+do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char head)
   {
     // string-literal ::=
     //   ( escape-string-literal | noescape-string-literal ) string-literal ?
@@ -525,7 +521,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
         // The end of this string is encountered. Finish.
         break;
       }
-      else if(!escapable || (next != '\\')) {
+      else if((head != '\"') || (next != '\\')) {
         // This character does not start an escape sequence. Copy it as is.
         val.push_back(next);
         continue;
@@ -713,8 +709,7 @@ constexpr s_keywords[] =
   };
 
 bool
-do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Text_Reader& reader,
-                                bool keywords_as_identifiers)
+do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Text_Reader& reader)
   {
     // identifier ::=
     //   [A-Za-z_][A-Za-z_0-9]*
@@ -725,20 +720,18 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Text_Reader& reader,
     size_t tlen = 0;
     do_cmask_length(tlen, reader, cmask_name);
 
-    if(!keywords_as_identifiers) {
-      auto r = do_prefix_range(s_keywords, reader.peek());
-      while(r.first != r.second) {
-        const auto& cur = *(r.first++);
+    auto r = do_prefix_range(s_keywords, reader.peek());
+    while(r.first != r.second) {
+      const auto& cur = *(r.first++);
 
-        if(::strlen(cur.str) != tlen)
-          continue;
+      if(::strlen(cur.str) != tlen)
+        continue;
 
-        if(::memcmp(reader.data(), cur.str, tlen) != 0)
-          continue;
+      if(::memcmp(reader.data(), cur.str, tlen) != 0)
+        continue;
 
-        Token::S_keyword xtoken = { cur.kwrd, cur.str };
-        return do_push_token(tokens, reader, tlen, move(xtoken));
-      }
+      Token::S_keyword xtoken = { cur.kwrd, cur.str };
+      return do_push_token(tokens, reader, tlen, move(xtoken));
     }
 
     // Accept a plain identifier.
@@ -845,14 +838,11 @@ reload(const cow_string& file, int start_line, tinyfmt&& cbuf)
           }
         }
 
-        bool found = do_accept_numeric_literal(tokens, reader,
-                                   this->m_opts.integers_as_reals) ||
+        bool found = do_accept_numeric_literal(tokens, reader) ||
                      do_accept_punctuator(tokens, reader) ||
-                     do_accept_string_literal(tokens, reader, '\"', true) ||
-                     do_accept_string_literal(tokens, reader, '\'',
-                                   this->m_opts.escapable_single_quotes) ||
-                     do_accept_identifier_or_keyword(tokens, reader,
-                                   this->m_opts.keywords_as_identifiers);
+                     do_accept_string_literal(tokens, reader, '\"') ||
+                     do_accept_string_literal(tokens, reader, '\'') ||
+                     do_accept_identifier_or_keyword(tokens, reader);
         if(!found)
           throw Compiler_Error(xtc_status,
                     compiler_status_token_character_unrecognized, reader.tell());

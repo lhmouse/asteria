@@ -845,18 +845,8 @@ struct Compiler_Options_template<versionT, 0>
 template<>
 struct Compiler_Options_fragment<1>
   {
-    // Make single quotes behave similar to double quotes.
-    // [useful when parsing JSON5 text]
-    bool escapable_single_quotes = false;
-
-    // Parse keywords as identifiers.
-    // `NaN` and `Infinity`, as well as their lowercase forms, are not keywords.
-    // [useful when parsing JSON text]
-    bool keywords_as_identifiers = false;
-
-    // Parse integer literals as real literals.
-    // [useful when parsing JSON text]
-    bool integers_as_reals = false;
+    // Don't use.
+    bool reserved_rnnbzqv7[3];
 
     // Enable proper tail calls.
     // This is semantical behavior and is not subject to optimization.
