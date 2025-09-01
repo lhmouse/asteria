@@ -252,10 +252,10 @@ do_quote_string(tinyfmt& fmt, const cow_string& str)
   }
 
 void
-do_format_object_key(tinyfmt& fmt, bool json5, const Indenter& indent, const cow_string& name)
+do_format_object_key(tinyfmt& fmt, const Indenter& indent, const cow_string& name)
   {
     // Write the key.
-    if(json5 && name.size() && is_cmask(name[0], cmask_namei)
+    if(false && name.size() && is_cmask(name[0], cmask_namei)
          && ::std::all_of(name.begin() + 1, name.end(),
                           [](char c) { return is_cmask(c, cmask_name);  }))
       fmt << name;
@@ -298,7 +298,7 @@ struct Xformat_object
 using Xformat = ::rocket::variant<Xformat_array, Xformat_object>;
 
 void
-do_format_nonrecursive(::rocket::tinyfmt& fmt, const Value& value, bool json5, Indenter&& indent)
+do_format_nonrecursive(::rocket::tinyfmt& fmt, const Value& value, Indenter&& indent)
   {
     // Transform recursion to iteration using a handwritten stack.
     auto qval = &value;
@@ -317,9 +317,9 @@ do_format_nonrecursive(::rocket::tinyfmt& fmt, const Value& value, bool json5, I
       int cls = ::std::fpclassify(rval);
       if((cls == FP_ZERO) || (cls == FP_NORMAL) || (cls == FP_SUBNORMAL))
         fmt << rval;
-      else if((cls == FP_NAN) && json5)
+      else if((cls == FP_NAN) && false)
         fmt << "NaN";
-      else if((cls == FP_INFINITE) && json5)
+      else if((cls == FP_INFINITE) && false)
         fmt << ("-Infinity" + !::std::signbit(rval));
       else
         fmt << "null";
@@ -351,7 +351,7 @@ do_format_nonrecursive(::rocket::tinyfmt& fmt, const Value& value, bool json5, I
         fmt << '{';
         indent.increment_level();
         indent.break_line(fmt);
-        do_format_object_key(fmt, json5, indent, ctxo.curp->first);
+        do_format_object_key(fmt, indent, ctxo.curp->first);
 
         qval = &(ctxo.curp->second);
         stack.emplace_back(move(ctxo));
@@ -381,7 +381,7 @@ do_format_nonrecursive(::rocket::tinyfmt& fmt, const Value& value, bool json5, I
             }
 
             // Close this array.
-            if(json5 && indent.has_indention())
+            if(false && indent.has_indention())
               fmt << ',';
 
             indent.decrement_level();
@@ -396,7 +396,7 @@ do_format_nonrecursive(::rocket::tinyfmt& fmt, const Value& value, bool json5, I
             if(do_find_uncensored(++(ctxo.curp), *(ctxo.refo))) {
               fmt << ',';
               indent.break_line(fmt);
-              do_format_object_key(fmt, json5, indent, ctxo.curp->first);
+              do_format_object_key(fmt, indent, ctxo.curp->first);
 
               // Format the next value.
               qval = &(ctxo.curp->second);
@@ -404,7 +404,7 @@ do_format_nonrecursive(::rocket::tinyfmt& fmt, const Value& value, bool json5, I
             }
 
             // Close this object.
-            if(json5 && indent.has_indention())
+            if(false && indent.has_indention())
               fmt << ',';
 
             indent.decrement_level();
@@ -654,48 +654,48 @@ do_parse(tinyfmt& cbuf)
 }  // namespace
 
 V_string
-std_json_format(Value value, optV_string indent, optV_boolean json5)
+std_json_format(Value value, optV_string indent)
   {
     ::rocket::tinyfmt_str fmt;
     if(indent && (indent->length() != 0))
-      do_format_nonrecursive(fmt, value, json5 == true, Indenter_string(*indent));
+      do_format_nonrecursive(fmt, value, Indenter_string(*indent));
     else
-      do_format_nonrecursive(fmt, value, json5 == true, Indenter_none());
+      do_format_nonrecursive(fmt, value, Indenter_none());
     return fmt.extract_string();
   }
 
 V_string
-std_json_format(Value value, V_integer indent, optV_boolean json5)
+std_json_format(Value value, V_integer indent)
   {
     ::rocket::tinyfmt_str fmt;
     if(indent > 0)
-      do_format_nonrecursive(fmt, value, json5 == true, Indenter_spaces(indent));
+      do_format_nonrecursive(fmt, value, Indenter_spaces(indent));
     else
-      do_format_nonrecursive(fmt, value, json5 == true, Indenter_none());
+      do_format_nonrecursive(fmt, value, Indenter_none());
     return fmt.extract_string();
   }
 
 void
-std_json_format_to_file(V_string path, Value value, optV_string indent, optV_boolean json5)
+std_json_format_to_file(V_string path, Value value, optV_string indent)
   {
     ::rocket::tinyfmt_file fmt;
     fmt.open(path.safe_c_str(), tinyfmt::open_write);
     if(indent && (indent->length() != 0))
-      do_format_nonrecursive(fmt, value, json5 == true, Indenter_string(*indent));
+      do_format_nonrecursive(fmt, value, Indenter_string(*indent));
     else
-      do_format_nonrecursive(fmt, value, json5 == true, Indenter_none());
+      do_format_nonrecursive(fmt, value, Indenter_none());
     fmt.flush();
   }
 
 void
-std_json_format_to_file(V_string path, Value value, V_integer indent, optV_boolean json5)
+std_json_format_to_file(V_string path, Value value, V_integer indent)
   {
     ::rocket::tinyfmt_file fmt;
     fmt.open(path.safe_c_str(), tinyfmt::open_write);
     if(indent > 0)
-      do_format_nonrecursive(fmt, value, json5 == true, Indenter_spaces(indent));
+      do_format_nonrecursive(fmt, value, Indenter_spaces(indent));
     else
-      do_format_nonrecursive(fmt, value, json5 == true, Indenter_none());
+      do_format_nonrecursive(fmt, value, Indenter_none());
     fmt.flush();
   }
 
@@ -726,21 +726,18 @@ create_bindings_json(V_object& result, API_Version version)
         Value value;
         optV_string sind;
         V_integer iind;
-        optV_boolean json5;
 
         reader.start_overload();
         reader.optional(value);
         reader.save_state(0);
         reader.optional(sind);
-        reader.optional(json5);
         if(reader.end_overload())
-          return (Value) std_json_format(value, sind, json5);
+          return (Value) std_json_format(value, sind);
 
         reader.load_state(0);
         reader.required(iind);
-        reader.optional(json5);
         if(reader.end_overload())
-          return (Value) std_json_format(value, iind, json5);
+          return (Value) std_json_format(value, iind);
 
         reader.throw_no_matching_function_call();
       });
@@ -755,22 +752,19 @@ create_bindings_json(V_object& result, API_Version version)
           Value value;
           optV_string sind;
           V_integer iind;
-          optV_boolean json5;
 
           reader.start_overload();
           reader.required(path);
           reader.optional(value);
           reader.save_state(0);
           reader.optional(sind);
-          reader.optional(json5);
           if(reader.end_overload())
-            return (void) std_json_format_to_file(path, value, sind, json5);
+            return (void) std_json_format_to_file(path, value, sind);
 
           reader.load_state(0);
           reader.required(iind);
-          reader.optional(json5);
           if(reader.end_overload())
-            return (void) std_json_format_to_file(path, value, iind, json5);
+            return (void) std_json_format_to_file(path, value, iind);
 
           reader.throw_no_matching_function_call();
         });

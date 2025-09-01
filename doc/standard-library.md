@@ -2277,7 +2277,7 @@ variable. Individual components are categorized into sub-objects.
 
 ## `std.json`
 
-### `std.json.format([value], [indent], [json5])`
+### `std.json.format([value], [indent])`
 
 * Converts a value to a string in the JSON format, according to [RFC 7159](
   https://www.rfc-editor.org/rfc/rfc7159.html). This function generates text
@@ -2288,12 +2288,11 @@ variable. Individual components are categorized into sub-objects.
   integer, it is clamped between `1` and `10` inclusively and this function
   behaves as if a string of this number of spaces was set. If `indent` is an
   empty string or zero, or is absent, no indention or line break will be
-  inserted. If `json5` is set to `true`, the [JSON5](https://json5.org/)
-  alternative format is used.
+  inserted.
 
 * Returns the formatted text as a string.
 
-### `std.json.format_to_file(path, [value], [indent], [json5])`
+### `std.json.format_to_file(path, [value], [indent])`
 
 * Writes a value to the file denoted by `path` in the JSON format, according
   to [RFC 7159](https://www.rfc-editor.org/rfc/rfc7159.html). This function
@@ -2304,26 +2303,14 @@ variable. Individual components are categorized into sub-objects.
   a positive integer, it is clamped between `1` and `10` inclusively and this
   function behaves as if a string of this number of spaces was set. If
   `indent` is an empty string or zero, or is absent, no indention or line
-  break will be inserted. If `json5` is set to `true`, the
-  [JSON5](https://json5.org/) alternative format is used.
+  break will be inserted.
 
 * Throws an exception if a write error occurs.
 
 ### `std.json.parse(text)`
 
 * Parses a string containing data encoded in the JSON format. This function
-  reuses the tokenizer of Asteria and allows quite a few extensions, many of
-  which are also supported by JSON5:
-
-  * Single-line and multiple-line comments are allowed.
-  * Binary and hexadecimal numbers are allowed.
-  * Numbers can have binary exponents.
-  * Infinities and NaNs are allowed.
-  * Numbers can start with plus signs.
-  * Strings and object keys may be single-quoted.
-  * Escape sequences (including UTF-32) are allowed in strings.
-  * Element lists of arrays and objects may end in commas.
-  * Object keys may be unquoted if they are valid identifiers.
+  allows trailing commas as an extension.
 
 * Returns the parsed value.
 

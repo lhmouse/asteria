@@ -9,17 +9,17 @@ namespace asteria {
 
 // `std.json.format`
 V_string
-std_json_format(Value value, optV_string indent, optV_boolean json5);
+std_json_format(Value value, optV_string indent);
 
 V_string
-std_json_format(Value value, V_integer indent, optV_boolean json5);
+std_json_format(Value value, V_integer indent);
 
 // `std.json.format_to_file`
 void
-std_json_format_to_file(V_string path, Value value, optV_string indent, optV_boolean json5);
+std_json_format_to_file(V_string path, Value value, optV_string indent);
 
 void
-std_json_format_to_file(V_string path, Value value, V_integer indent, optV_boolean json5);
+std_json_format_to_file(V_string path, Value value, V_integer indent);
 
 // `std.json.parse`
 Value

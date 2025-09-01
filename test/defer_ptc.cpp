@@ -27,7 +27,7 @@ int main()
         st[$] = [ v.frame, v.line >= ln - 3 ? 12345 : v.line ];
 
       // print the backtrace
-      std.debug.logf("$1", std.json.format(bt, 2, true));
+      std.debug.logf("$1", std.json.format(bt, 2));
     }
 
     func deferred(s) {
