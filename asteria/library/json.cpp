@@ -6,6 +6,7 @@
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/binding_generator.hpp"
 #include "../utils.hpp"
+#include <algorithm>
 namespace asteria {
 namespace {
 
@@ -200,6 +201,70 @@ struct Unified_Sink
           ::fwrite(s, 1, n, this->fp);
         else
           this->fmt->putn(s, n);
+      }
+  };
+
+struct Indent
+  {
+    cow_string cur;
+    cow_string add;
+
+    Indent(const cow_string& xadd)
+      {
+        if(xadd.empty())
+          return;
+
+        this->cur = &"\n";
+        this->add = xadd;
+      }
+
+    Indent(int64_t xadd)
+      {
+        if(xadd <= 0)
+          return;
+
+        this->cur = &"\n";
+        this->add.append(::rocket::clamp_cast<size_t>(xadd, 0, 10), ' ');
+      }
+  };
+
+struct String_Pool
+  {
+    cow_vector<phcow_string> st;
+
+    struct hash_less
+      {
+        bool
+        operator()(const phcow_string& x, const phcow_string& y)
+          const noexcept
+          { return x.rdhash() < y.rdhash();  }
+
+        bool
+        operator()(const phcow_string& x, size_t y)
+          const noexcept
+          { return x.rdhash() < y;  }
+
+        bool
+        operator()(size_t x, const phcow_string& y)
+          const noexcept
+          { return x < y.rdhash();  }
+      };
+
+    const phcow_string&
+    intern(const char* str, size_t len)
+      {
+        size_t hval = phcow_string::hasher()(str, len);
+        auto range = ::std::equal_range(this->st.begin(), this->st.end(), hval, hash_less());
+
+        // String already exists?
+        for(auto it = range.first;  it != range.second;  ++it)
+          if(it->rdstr().equals(str, len))
+            return *it;
+
+        // No. Allocate a new one, while keeping the pool sorted.
+        auto it = this->st.insert(range.second, cow_string(str, len));
+        ROCKET_ASSERT(it->rdhash() == hval);
+        return *it;
       }
   };
 
@@ -533,6 +598,7 @@ do_parse_with(Value& root, Parser_Context& ctx, const Unified_Source& usrc)
     cow_vector<xFrame> stack;
     cow_string token;
     ::rocket::ascii_numget numg;
+    String_Pool key_pool;
     Value* pstor = &root;
 
     do_token(token, ctx, usrc);
@@ -588,7 +654,7 @@ do_parse_with(Value& root, Parser_Context& ctx, const Unified_Source& usrc)
         if(token[0] != '\"')
           return do_err(ctx, "Missing key string");
 
-        auto emr = frm.pso->try_emplace(cow_string(token.data() + 1, token.size() - 1));
+        auto emr = frm.pso->try_emplace(key_pool.intern(token.data() + 1, token.size() - 1));
         ROCKET_ASSERT(emr.second);
 
         do_token(token, ctx, usrc);
@@ -676,7 +742,7 @@ do_parse_with(Value& root, Parser_Context& ctx, const Unified_Source& usrc)
             if(token[0] != '\"')
               return do_err(ctx, "Missing key string");
 
-            auto emr = frm.pso->try_emplace(cow_string(token.data() + 1, token.size() - 1));
+            auto emr = frm.pso->try_emplace(key_pool.intern(token.data() + 1, token.size() - 1));
             if(!emr.second)
               return do_err(ctx, "Duplicate key string");
 
@@ -809,30 +875,6 @@ do_escape_string_utf16(const Unified_Sink& usink, const cow_string& str)
         }
     }
   }
-
-struct Indent
-  {
-    cow_string cur;
-    cow_string add;
-
-    Indent(const cow_string& xadd)
-      {
-        if(xadd.empty())
-          return;
-
-        this->cur = &"\n";
-        this->add = xadd;
-      }
-
-    Indent(int64_t xadd)
-      {
-        if(xadd <= 0)
-          return;
-
-        this->cur = &"\n";
-        this->add.append(::rocket::clamp_cast<size_t>(xadd, 0, 10), ' ');
-      }
-  };
 
 void
 do_print_to(const Unified_Sink& usink, Indent& indent, const Value& root)
