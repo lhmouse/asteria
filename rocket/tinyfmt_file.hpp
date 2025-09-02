@@ -5,6 +5,7 @@
 #define ROCKET_TINYFMT_FILE_
 
 #include "tinyfmt.hpp"
+#include "unique_posix_fd.hpp"
 #include "unique_posix_file.hpp"
 #include "xuchar.hpp"
 #include "xthrow.hpp"
