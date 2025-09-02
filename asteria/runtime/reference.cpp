@@ -92,11 +92,11 @@ do_dereference_readonly_slow()
       // Check whether initialization was skipped, which may happen if its
       // initializer references itself like in `var n = n + 1;`.
       auto var = unerase_cast<Variable*>(st2->var.get());
-      if(!var->is_initialized())
+      if(!var->initialized())
         throw Runtime_Error(xtc_format, "Variable not initialized");
 
       // Apply subscripts.
-      auto valp = &(var->get_value());
+      auto valp = &(var->value());
       for(auto it = st2->subs.begin();  it != st2->subs.end();  ++it) {
         valp = it->apply_read_opt(*valp);
         if(!valp) {
@@ -149,11 +149,11 @@ do_dereference_copy_slow()
       // have to ensure that the variable doesn't get destroyed by
       // `m_stor.emplace<St_temp()`.
       auto var = unerase_pointer_cast<Variable>(st2->var);
-      if(!var->is_initialized())
+      if(!var->initialized())
         throw Runtime_Error(xtc_format, "Variable not initialized");
 
       // Apply subscripts.
-      auto valp = &(var->get_value());
+      auto valp = &(var->value());
       for(auto it = st2->subs.begin();  it != st2->subs.end();  ++it) {
         valp = it->apply_read_opt(*valp);
         if(!valp) {
@@ -190,10 +190,10 @@ dereference_mutable()
       // Check whether initialization was skipped, which may happen if its
       // initializer references itself like in `var n = n + 1;`.
       auto var = unerase_cast<Variable*>(st2->var.get());
-      if(!var->is_initialized())
+      if(!var->initialized())
         throw Runtime_Error(xtc_format, "Variable not initialized");
 
-      if(var->is_immutable())
+      if(var->immutable())
         throw Runtime_Error(xtc_format, "`const` variable not modifiable");
 
       // Apply subscripts.
@@ -227,10 +227,10 @@ dereference_unset()
       // Check whether initialization was skipped, which may happen if its
       // initializer references itself like in `var n = n + 1;`.
       auto var = unerase_cast<Variable*>(st2->var.get());
-      if(!var->is_initialized())
+      if(!var->initialized())
         throw Runtime_Error(xtc_format, "Variable not initialized");
 
-      if(var->is_immutable())
+      if(var->immutable())
         throw Runtime_Error(xtc_format, "`const` variable not modifiable");
 
       // Get the parent value of the final subelement.

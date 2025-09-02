@@ -904,7 +904,7 @@ solidify(AVM_Rod& rod)
                 // been empty for this function.
                 const Value& val = ctx.stack().top().dereference_readonly();
                 auto var = ctx.stack().top(1).unphase_variable_opt();
-                ROCKET_ASSERT(var && !var->is_initialized());
+                ROCKET_ASSERT(var && !var->initialized());
 
                 // Initialize it with this value.
                 var->initialize(val);
@@ -4114,13 +4114,13 @@ solidify(AVM_Rod& rod)
                   // Pop variables from from right to left.
                   auto var = ctx.stack().top().unphase_variable_opt();
                   ctx.stack().pop();
-                  ROCKET_ASSERT(var && !var->is_initialized());
+                  ROCKET_ASSERT(var && !var->initialized());
 
                   if(ROCKET_EXPECT(init.is_array()))
                     if(auto ielem = init.as_array().ptr(i))
                       var->initialize(*ielem);
 
-                  if(ROCKET_UNEXPECT(!var->is_initialized()))
+                  if(ROCKET_UNEXPECT(!var->initialized()))
                     var->initialize(nullopt);
 
                   var->set_immutable(immutable);
@@ -4171,13 +4171,13 @@ solidify(AVM_Rod& rod)
                   // Pop variables from from right to left.
                   auto var = ctx.stack().top().unphase_variable_opt();
                   ctx.stack().pop();
-                  ROCKET_ASSERT(var && !var->is_initialized());
+                  ROCKET_ASSERT(var && !var->initialized());
 
                   if(ROCKET_EXPECT(init.is_object()))
                     if(auto ielem = init.as_object().ptr(*it))
                       var->initialize(*ielem);
 
-                  if(ROCKET_UNEXPECT(!var->is_initialized()))
+                  if(ROCKET_UNEXPECT(!var->initialized()))
                     var->initialize(nullopt);
 
                   var->set_immutable(immutable);

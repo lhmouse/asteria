@@ -13,9 +13,13 @@ class Variable
     public rcfwd<Variable>
   {
   private:
+    friend class Garbage_Collector;
+    friend class Reference;
+
     Value m_value;
     bool m_init = false;
-    bool m_immut = false;
+    bool m_immutable = false;
+    bool m_gc_managed = false;
     int m_gc_ref;  // uninitialized by default
 
   public:
@@ -30,12 +34,12 @@ class Variable
 
     // accessors
     bool
-    is_initialized()
+    initialized()
       const noexcept
       { return this->m_init;  }
 
     const Value&
-    get_value()
+    value()
       const noexcept
       { return this->m_value;  }
 
@@ -61,25 +65,14 @@ class Variable
       }
 
     bool
-    is_immutable()
+    immutable()
       const noexcept
-      { return this->m_immut;  }
+      { return this->m_immutable;  }
 
     void
     set_immutable(bool immut = true)
       noexcept
-      { this->m_immut = immut;  }
-
-    // GC interfaces
-    int
-    get_gc_ref()
-      const noexcept
-      { return this->m_gc_ref;  }
-
-    void
-    set_gc_ref(int ref)
-      noexcept
-      { this->m_gc_ref = ref;  }
+      { this->m_immutable = immut;  }
   };
 
 }  // namespace asteria

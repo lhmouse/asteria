@@ -12,8 +12,8 @@ int main()
 
     auto var = code.open_global_variable(&"some_fancy_variable");
     var->initialize(42);  // integer
-    ASTERIA_TEST_CHECK(var->get_value().is_integer());
-    ASTERIA_TEST_CHECK(var->get_value().as_integer() == 42);
+    ASTERIA_TEST_CHECK(var->value().is_integer());
+    ASTERIA_TEST_CHECK(var->value().as_integer() == 42);
 
     code.reload_string(
       &__FILE__, __LINE__, &R"__(
@@ -33,6 +33,6 @@ int main()
       )__");
     code.execute();
 
-    ASTERIA_TEST_CHECK(var->get_value().is_string());
-    ASTERIA_TEST_CHECK(var->get_value().as_string() == "meow!");
+    ASTERIA_TEST_CHECK(var->value().is_string());
+    ASTERIA_TEST_CHECK(var->value().as_string() == "meow!");
   }

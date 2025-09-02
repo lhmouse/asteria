@@ -51,9 +51,9 @@ do_collect_generation(uint32_t gen)
       // Each variable that is encountered here shall have a direct reference
       // from either `tracked` or `m_staged`, so its `gc_ref` counter shall be
       // initialized to one.
-      var->set_gc_ref(1);
-      ROCKET_ASSERT(var->get_gc_ref() <= var->use_count() - 1);
-      var->get_value().collect_variables(this->m_staged, this->m_temp_1);
+      var->m_gc_ref = 1;
+      ROCKET_ASSERT(var->m_gc_ref <= var->use_count() - 1);
+      var->value().collect_variables(this->m_staged, this->m_temp_1);
     }
 
     this->m_temp_1.clear();
@@ -61,8 +61,8 @@ do_collect_generation(uint32_t gen)
     while(this->m_staged.extract_variable(var)) {
       // Each key in `m_staged` denotes an internal reference, so its `gc_ref`
       // counter shall be incremented.
-      var->set_gc_ref(var->get_gc_ref() + 1);
-      ROCKET_ASSERT(var->get_gc_ref() <= var->use_count() - 1);
+      var->m_gc_ref ++;
+      ROCKET_ASSERT(var->m_gc_ref <= var->use_count() - 1);
       this->m_temp_1.insert(var.get(), var);
     }
 
@@ -73,7 +73,7 @@ do_collect_generation(uint32_t gen)
       // Each variable whose `gc_ref` counter equals its reference count is
       // marked as possibly unreachable. Note `var` here owns a reference
       // which must be excluded.
-      if(var->get_gc_ref() == var->use_count() - 1)
+      if(ROCKET_EXPECT(var->m_gc_ref == var->use_count() - 1))
         this->m_unreach.insert(var.get(), var);
       else
         this->m_temp_2.insert(var.get(), var);
@@ -83,11 +83,11 @@ do_collect_generation(uint32_t gen)
 
     while(this->m_temp_2.extract_variable(var)) {
       // Mark this indirectly reachable variable, too.
-      var->set_gc_ref(0);
+      var->m_gc_ref = 0;
       this->m_temp_1.erase(var.get());
       this->m_unreach.erase(var.get());
 
-      var->get_value().collect_variables(this->m_staged, this->m_temp_2);
+      var->value().collect_variables(this->m_staged, this->m_temp_2);
 
       if(next_opt && tracked.erase(var.get()))
         try {
@@ -107,7 +107,7 @@ do_collect_generation(uint32_t gen)
       if(!tracked.erase(var.get()))
         continue;
 
-      ROCKET_ASSERT(var->get_gc_ref() != 0);
+      ROCKET_ASSERT(var->m_gc_ref != 0);
       nvars += 1;
 
       try {

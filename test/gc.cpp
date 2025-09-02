@@ -78,8 +78,8 @@ int main()
     }
 
     ASTERIA_TEST_CHECK(foreign->use_count() == 1);
-    ASTERIA_TEST_CHECK(foreign->is_initialized() == true);
-    ASTERIA_TEST_CHECK(foreign->get_value().type() == type_string);
+    ASTERIA_TEST_CHECK(foreign->initialized() == true);
+    ASTERIA_TEST_CHECK(foreign->value().type() == type_string);
     foreign = nullptr;
 
     ::rocket::xmemclean();
