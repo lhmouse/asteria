@@ -36,7 +36,7 @@ optV_integer
 std_debug_dump(Value value, optV_integer indent)
   {
     // Clamp the suggested indent so we don't produce overlong lines.
-    size_t rindent = ::rocket::clamp_cast<size_t>(indent.value_or(2), 0, 10);
+    size_t rindent = ::rocket::clamp_cast<size_t>(indent.value_or(2), 0, 40);
 
     // Format the value.
     ::rocket::tinyfmt_str fmt;

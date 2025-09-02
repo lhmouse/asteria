@@ -197,7 +197,7 @@ variable. Individual components are categorized into sub-objects.
 ### `std.debug.dump([value], [indent])`
 
 * Prints the value to standard error with detailed information. `indent`
-  specifies the number of spaces, clamped between `0` and `10`, to use for
+  specifies the number of spaces, clamped between `0` and `40`, to use for
   each level of indention. If it is set to `0`, no line break is inserted
   and output lines are not indented. Its default value is `2`.
 
@@ -2285,7 +2285,7 @@ variable. Individual components are categorized into sub-objects.
   JSON are replaced with `null` in arrays, and are discarded elsewhere. If
   `indent` is specified as a non-empty string, it is used for each level of
   indention following a line break; if `indent` is specified as a positive
-  integer, it is clamped between `1` and `10` inclusively and this function
+  integer, it is clamped between `0` and `40` inclusively and this function
   behaves as if a string of this number of spaces was set. If `indent` is an
   empty string or zero, or is absent, no indention or line break will be
   inserted.
@@ -2300,7 +2300,7 @@ variable. Individual components are categorized into sub-objects.
   represented in JSON are replaced with `null` in arrays, and are discarded
   elsewhere. If `indent` is specified as a non-empty string, it is used for
   each level of indention following a line break; if `indent` is specified as
-  a positive integer, it is clamped between `1` and `10` inclusively and this
+  a positive integer, it is clamped between `0` and `40` inclusively and this
   function behaves as if a string of this number of spaces was set. If
   `indent` is an empty string or zero, or is absent, no indention or line
   break will be inserted.

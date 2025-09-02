@@ -213,7 +213,7 @@ struct Indent
           return;
 
         this->cur = &"\n";
-        this->add.append(::rocket::clamp_cast<size_t>(xadd, 0, 10), ' ');
+        this->add.append(::rocket::clamp_cast<size_t>(xadd, 0, 40), ' ');
       }
   };
 
