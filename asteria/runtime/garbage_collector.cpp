@@ -157,6 +157,7 @@ create_variable(GC_Generation gen_hint)
     size_t gen = gMax - gen_hint;
     this->m_tracked.mut(gen).insert(var.get(), var);
     this->m_counts.mut(gen) += 1;
+    var->m_gc_managed = true;
     return var;
   }
 

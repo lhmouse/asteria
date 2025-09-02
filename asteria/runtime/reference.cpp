@@ -23,6 +23,15 @@ Reference::
 do_destroy_variant_slow()
   noexcept
   {
+    if(auto st2 = this->m_stor.ptr<St_var>()) {
+      // If the variable is only reachable from this reference and its
+      // collector (if any), then the value is orphan and can be destroyed
+      // immediately, to reduce memory footprint.
+      auto var = unerase_cast<Variable*>(st2->var.get());
+      if(var->use_count() - var->m_gc_managed <= 1)
+        var->uninitialize();
+    }
+
     this->m_stor.~variant_type();
   }
 
