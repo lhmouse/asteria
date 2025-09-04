@@ -49,7 +49,7 @@ do_csv_format(::rocket::tinyfmt& fmt, const V_array& value)
   }
 
 V_array
-do_csv_parse(tinyfmt& buf)
+do_csv_parse(tinyfmt& fmt)
   {
     V_array root;
     V_string* cell = nullptr;
@@ -59,7 +59,7 @@ do_csv_parse(tinyfmt& buf)
     // Read source file in lines.
     cow_string line;
     size_t nlines = 0;
-    while(getline(line, buf)) {
+    while(getline(line, fmt)) {
       nlines ++;
 
       // Remove the UTF-8 BOM, if any.
@@ -159,7 +159,7 @@ void
 std_csv_format_to_file(V_string path, V_array value)
   {
     ::rocket::tinyfmt_file fmt;
-    fmt.open(path.safe_c_str(), tinyfmt::open_write);
+    fmt.open(path.safe_c_str(), tinyfmt::open_write | tinyfmt::open_binary);
     do_csv_format(fmt, value);
     fmt.flush();
   }
@@ -167,17 +167,17 @@ std_csv_format_to_file(V_string path, V_array value)
 V_array
 std_csv_parse(V_string text)
   {
-    ::rocket::tinyfmt_str cbuf;
-    cbuf.set_string(text, tinyfmt::open_read);
-    return do_csv_parse(cbuf);
+    ::rocket::tinyfmt_str fmt;
+    fmt.set_string(text, tinyfmt::open_read);
+    return do_csv_parse(fmt);
   }
 
 V_array
 std_csv_parse_file(V_string path)
   {
-    ::rocket::tinyfmt_file cbuf;
-    cbuf.open(path.safe_c_str(), tinyfmt::open_read);
-    return do_csv_parse(cbuf);
+    ::rocket::tinyfmt_file fmt;
+    fmt.open(path.safe_c_str(), tinyfmt::open_read | tinyfmt::open_binary);
+    return do_csv_parse(fmt);
   }
 
 void
