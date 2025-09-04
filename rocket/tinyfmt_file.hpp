@@ -176,7 +176,7 @@ class basic_tinyfmt_file
         }
 
         // Open the file.
-        unique_posix_fd fd(::open(path, flags, 0666));
+        unique_posix_fd fd(::open(path, flags | O_NOCTTY, 0666));
         if(!fd)
           noadl::sprintf_and_throw<runtime_error>(
               "basic_tinyfmt_file: `open()` failed (path `%s`, flags `%u`, errno `%d`)",
