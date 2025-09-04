@@ -10,7 +10,7 @@ namespace asteria {
 namespace {
 
 void
-do_csv_format(::rocket::tinyfmt& fmt, const V_array& value)
+do_print_to(::rocket::tinyfmt& fmt, const V_array& value)
   {
     for(auto rowp = value.begin();  rowp != value.end();  ++rowp) {
       const auto& row = rowp->as_array();
@@ -48,10 +48,9 @@ do_csv_format(::rocket::tinyfmt& fmt, const V_array& value)
     }
   }
 
-V_array
-do_csv_parse(tinyfmt& fmt)
+void
+do_parse_from(V_array& root, tinyfmt& fmt)
   {
-    V_array root;
     V_string* cell = nullptr;
     bool quote_allowed = true;
     size_t quote_at_line = 0;
@@ -141,8 +140,6 @@ do_csv_parse(tinyfmt& fmt)
 
     if(quote_at_line != 0)
       ASTERIA_THROW(("Unmatched \" at line $1"), quote_at_line);
-
-    return root;
   }
 
 }  // namespace
@@ -151,7 +148,7 @@ V_string
 std_csv_format(V_array value)
   {
     ::rocket::tinyfmt_str fmt;
-    do_csv_format(fmt, value);
+    do_print_to(fmt, value);
     return fmt.extract_string();
   }
 
@@ -160,24 +157,28 @@ std_csv_format_to_file(V_string path, V_array value)
   {
     ::rocket::tinyfmt_file fmt;
     fmt.open(path.safe_c_str(), tinyfmt::open_write | tinyfmt::open_binary);
-    do_csv_format(fmt, value);
+    do_print_to(fmt, value);
     fmt.flush();
   }
 
 V_array
 std_csv_parse(V_string text)
   {
+    V_array value;
     ::rocket::tinyfmt_str fmt;
     fmt.set_string(text, tinyfmt::open_read);
-    return do_csv_parse(fmt);
+    do_parse_from(value, fmt);
+    return value;
   }
 
 V_array
 std_csv_parse_file(V_string path)
   {
+    V_array value;
     ::rocket::tinyfmt_file fmt;
     fmt.open(path.safe_c_str(), tinyfmt::open_read | tinyfmt::open_binary);
-    return do_csv_parse(fmt);
+    do_parse_from(value, fmt);
+    return value;
   }
 
 void

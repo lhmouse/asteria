@@ -75,7 +75,7 @@ do_format_check_scalar(const Value& value)
   }
 
 void
-do_format(::rocket::tinyfmt& fmt, const V_object& value)
+do_format_to(::rocket::tinyfmt& fmt, const V_object& value)
   {
     size_t nlines = 0;
 
@@ -123,10 +123,9 @@ do_format(::rocket::tinyfmt& fmt, const V_object& value)
       }
   }
 
-V_object
-do_ini_parse(tinyfmt& fmt)
+void
+do_parse_from(V_object& root, tinyfmt& fmt)
   {
-    V_object root;
     V_object* sink = &root;
 
     // Read source file in lines.
@@ -200,8 +199,6 @@ do_ini_parse(tinyfmt& fmt)
       // Insert a new value.
       sink->insert_or_assign(move(key), move(value));
     }
-
-    return root;
   }
 
 }  // namespace
@@ -210,7 +207,7 @@ V_string
 std_ini_format(V_object value)
   {
     ::rocket::tinyfmt_str fmt;
-    do_format(fmt, value);
+    do_format_to(fmt, value);
     return fmt.extract_string();
   }
 
@@ -219,24 +216,28 @@ std_ini_format_to_file(V_string path, V_object value)
   {
     ::rocket::tinyfmt_file fmt;
     fmt.open(path.safe_c_str(), tinyfmt::open_write | tinyfmt::open_binary);
-    do_format(fmt, value);
+    do_format_to(fmt, value);
     fmt.flush();
   }
 
 V_object
 std_ini_parse(V_string text)
   {
+    V_object value;
     ::rocket::tinyfmt_str fmt;
     fmt.set_string(text, tinyfmt::open_read);
-    return do_ini_parse(fmt);
+    do_parse_from(value, fmt);
+    return value;
   }
 
 V_object
 std_ini_parse_file(V_string path)
   {
+    V_object value;
     ::rocket::tinyfmt_file fmt;
     fmt.open(path.safe_c_str(), tinyfmt::open_read | tinyfmt::open_binary);
-    return do_ini_parse(fmt);
+    do_parse_from(value, fmt);
+    return value;
   }
 
 void
