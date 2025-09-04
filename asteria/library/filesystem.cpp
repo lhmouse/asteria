@@ -482,7 +482,7 @@ std_filesystem_stream(Global_Context& global, V_string path, V_function callback
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY | O_NOCTTY));
     if(!fd)
       ASTERIA_THROW((
-          "Could not open file '$1'",
+          "Could not open file '$1' for reading",
           "[`open()` failed: ${errno:full}]"),
           path);
 
@@ -545,30 +545,33 @@ std_filesystem_write(V_string path, optV_integer offset, V_string data)
       ASTERIA_THROW((
           "Negative file offset (offset `$1`)"), *offset);
 
-    // Calculate the `flags` argument.
-    int flags = O_WRONLY | O_CREAT | O_APPEND | O_NOCTTY;
+    // Open the file for writing, truncating it at `offset`.
+    ::rocket::unique_posix_fd fd;
+    if(!offset) {
+      fd.reset(::open(path.safe_c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_APPEND | O_NOCTTY, 0666));
+      if(!fd)
+        ASTERIA_THROW((
+            "Could not open file '$1' for writing",
+            "[`open()` failed: ${errno:full}]"),
+            path);
+    }
+    else {
+      fd.reset(::open(path.safe_c_str(), O_WRONLY | O_CREAT | O_APPEND | O_NOCTTY, 0666));
+      if(!fd)
+        ASTERIA_THROW((
+            "Could not open file '$1' for writing",
+            "[`open()` failed: ${errno:full}]"),
+            path);
 
-    // If we are to write from the beginning, truncate the file at creation.
-    int64_t roffset = offset.value_or(0);
-    if(roffset == 0)
-      flags |= O_TRUNC;
-
-    // Open the file for writing.
-    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), flags, 0666));
-    if(!fd)
-      ASTERIA_THROW((
-          "Could not open file '$1'",
-          "[`open()` failed: ${errno:full}]"),
-          path);
-
-    // Set the file pointer when an offset is specified, even when it is an explicit
-    // zero. This ensures that the file is actually seekable (not a pipe or socket
-    // whatsoever).
-    if(offset && (::ftruncate(fd, roffset) != 0))
-      ASTERIA_THROW((
-          "Could not truncate file '$1'",
-          "[`ftruncate()` failed: ${errno:full}]"),
-          path);
+      // Set the file pointer when an offset is specified, even when it is an
+      // explicit zero. This ensures that the file is actually seekable (not a
+      // pipe or socket whatsoever).
+      if(::ftruncate(fd, *offset) != 0)
+        ASTERIA_THROW((
+            "Could not truncate file '$1'",
+            "[`ftruncate()` failed: ${errno:full}]"),
+            path);
+    }
 
     // Write all data.
     do_write_loop(fd, data.data(), data.size(), path);
@@ -577,20 +580,24 @@ std_filesystem_write(V_string path, optV_integer offset, V_string data)
 void
 std_filesystem_append(V_string path, V_string data, optV_boolean exclusive)
   {
-    // Calculate the `flags` argument.
-    int flags = O_WRONLY | O_CREAT | O_APPEND | O_NOCTTY;
-
-    // Treat `exclusive` as `false` if it is not specified at all.
-    if(exclusive == true)
-      flags |= O_EXCL;
-
     // Open the file for appending.
-    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), flags, 0666));
-    if(!fd)
-      ASTERIA_THROW((
-          "Could not open file '$1'",
-          "[`open()` failed: ${errno:full}]"),
-          path);
+    ::rocket::unique_posix_fd fd;
+    if(exclusive != true) {
+      fd.reset(::open(path.safe_c_str(), O_WRONLY | O_CREAT | O_APPEND | O_NOCTTY, 0666));
+      if(!fd)
+        ASTERIA_THROW((
+            "Could not open file '$1' for appending",
+            "[`open()` failed: ${errno:full}]"),
+            path);
+    }
+    else {
+      fd.reset(::open(path.safe_c_str(), O_WRONLY | O_CREAT | O_APPEND | O_EXCL | O_NOCTTY, 0666));
+      if(!fd)
+        ASTERIA_THROW((
+            "Could not exclusive file '$1' for appending",
+            "[`open()` failed: ${errno:full}]"),
+            path);
+    }
 
     // Append all data to the end.
     do_write_loop(fd, data.data(), data.size(), path);
