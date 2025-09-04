@@ -420,7 +420,7 @@ std_filesystem_read(V_string path, optV_integer offset, optV_integer limit)
           "Negative file offset (offset `$1`)"), *offset);
 
     // Open the file for reading.
-    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY));
+    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY | O_NOCTTY));
     if(!fd)
       ASTERIA_THROW((
           "Could not open file '$1'",
@@ -479,7 +479,7 @@ std_filesystem_stream(Global_Context& global, V_string path, V_function callback
           "Negative file offset (offset `$1`)"), *offset);
 
     // Open the file for reading.
-    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY));
+    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY | O_NOCTTY));
     if(!fd)
       ASTERIA_THROW((
           "Could not open file '$1'",
@@ -546,7 +546,7 @@ std_filesystem_write(V_string path, optV_integer offset, V_string data)
           "Negative file offset (offset `$1`)"), *offset);
 
     // Calculate the `flags` argument.
-    int flags = O_WRONLY | O_CREAT | O_APPEND;
+    int flags = O_WRONLY | O_CREAT | O_APPEND | O_NOCTTY;
 
     // If we are to write from the beginning, truncate the file at creation.
     int64_t roffset = offset.value_or(0);
@@ -578,7 +578,7 @@ void
 std_filesystem_append(V_string path, V_string data, optV_boolean exclusive)
   {
     // Calculate the `flags` argument.
-    int flags = O_WRONLY | O_CREAT | O_APPEND;
+    int flags = O_WRONLY | O_CREAT | O_APPEND | O_NOCTTY;
 
     // Treat `exclusive` as `false` if it is not specified at all.
     if(exclusive == true)
@@ -600,17 +600,18 @@ void
 std_filesystem_copy_file(V_string path_new, V_string path_old)
   {
     // Open the old file.
-    ::rocket::unique_posix_fd fd_old(::open(path_old.safe_c_str(), O_RDONLY));
+    ::rocket::unique_posix_fd fd_old(::open(path_old.safe_c_str(), O_RDONLY | O_NOCTTY));
     if(!fd_old)
       ASTERIA_THROW((
           "Could not open source file '$1'",
           "[`open()` failed: ${errno:full}]"),
           path_old);
 
-    // Create the new file, discarding its contents.
-    // The file is initially write-only.
-    int flags = O_WRONLY | O_CREAT | O_TRUNC | O_APPEND;
-    ::rocket::unique_posix_fd fd_new(::open(path_new.safe_c_str(), flags, 0200));
+    // Create the new file, discarding its contents. The file is initially
+    // write-only.
+    ::rocket::unique_posix_fd fd_new(::open(path_new.safe_c_str(),
+                                            O_WRONLY | O_CREAT | O_TRUNC | O_APPEND | O_NOCTTY,
+                                            0200));
     if(!fd_new)
       ASTERIA_THROW((
           "Could not create destination file '$1'",

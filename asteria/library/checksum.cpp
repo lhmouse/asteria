@@ -1283,7 +1283,7 @@ decltype(declval<xHasher&>().finish())
 do_hash_file(const V_string& path)
   {
     // Open the file for reading.
-    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY));
+    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY | O_NOCTTY));
     if(!fd)
       ASTERIA_THROW((
           "Could not open file '$1'",
