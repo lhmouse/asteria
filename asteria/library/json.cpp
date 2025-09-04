@@ -566,10 +566,9 @@ do_token(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
   }
 
 void
-do_parse_with(Value& root, Parser_Context& ctx, const Unified_Source& usrc)
+do_parse_from(Value& root, const Unified_Source& usrc)
   {
-    // Initialize parser state.
-    ::std::memset(&ctx, 0, sizeof(ctx));
+    Parser_Context ctx = { };
     ctx.c = -1;
 
     // Break deep recursion with a handwritten stack.
@@ -1009,7 +1008,7 @@ void
 std_json_format_to_file(V_string path, Value value, optV_string indent)
   {
     ::rocket::tinyfmt_file fmt;
-    fmt.open(path.safe_c_str(), tinyfmt::open_write);
+    fmt.open(path.safe_c_str(), tinyfmt::open_write | tinyfmt::open_binary);
     do_print_to(fmt.get_handle(), indent.value_or(&""), value);
     fmt.flush();
   }
@@ -1018,7 +1017,7 @@ void
 std_json_format_to_file(V_string path, Value value, V_integer indent)
   {
     ::rocket::tinyfmt_file fmt;
-    fmt.open(path.safe_c_str(), tinyfmt::open_write);
+    fmt.open(path.safe_c_str(), tinyfmt::open_write | tinyfmt::open_binary);
     do_print_to(fmt.get_handle(), indent, value);
     fmt.flush();
   }
@@ -1027,9 +1026,8 @@ Value
 std_json_parse(V_string text)
   {
     Value value;
-    Parser_Context ctx;
     Memory_Source msrc(text.data(), text.size());
-    do_parse_with(value, ctx, &msrc);
+    do_parse_from(value, &msrc);
     return value;
   }
 
@@ -1037,10 +1035,9 @@ Value
 std_json_parse_file(V_string path)
   {
     Value value;
-    Parser_Context ctx;
     ::rocket::tinyfmt_file fmt;
-    fmt.open(path.safe_c_str(), tinyfmt::open_read);
-    do_parse_with(value, ctx, fmt.get_handle());
+    fmt.open(path.safe_c_str(), tinyfmt::open_read | tinyfmt::open_binary);
+    do_parse_from(value, fmt.get_handle());
     return value;
   }
 
