@@ -207,7 +207,7 @@ std_string_iconv(V_string to_encoding, V_string text, optV_string from_encoding)
 
 // `std.string.visual_length`
 V_integer
-std_string_visual_width(V_string text);
+std_string_visual_length(V_string text);
 
 // Create an object that is to be referenced as `std.string`.
 void

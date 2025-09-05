@@ -1785,10 +1785,10 @@ std_string_iconv(V_string to_encoding, V_string text, optV_string from_encoding)
   }
 
 V_integer
-std_string_visual_width(V_string text)
+std_string_visual_length(V_string text)
   {
 #if defined __CYGWIN__
-    ASTERIA_THROW(("`std.string.visual_width()` is not implemented in Cygwin or MSYS2"));
+    ASTERIA_THROW(("`std.string.visual_length()` is not implemented in Cygwin or MSYS2"));
 #else
     V_integer width = 0;
 
@@ -2745,7 +2745,7 @@ create_bindings_string(V_object& result, API_Version version)
           reader.start_overload();
           reader.required(text);
           if(reader.end_overload())
-            return (Value) std_string_visual_width(text);
+            return (Value) std_string_visual_length(text);
 
           reader.throw_no_matching_function_call();
         });
