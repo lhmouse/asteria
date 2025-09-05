@@ -272,19 +272,20 @@ do_load_next(Parser_Context& ctx, const Unified_Source& usrc)
       // Parse a multibyte Unicode character.
       uint32_t u8len = ::rocket::lzcnt32((static_cast<uint32_t>(ctx.c) << 24) ^ UINT32_MAX);
       ctx.c &= (1 << (7 - u8len)) - 1;
-      for(uint32_t k = 1;  k < u8len;  ++k) {
-        int next = usrc.getc();
-        if(next < 0) {
-          ctx.eof = true;
-          return do_err(ctx, "Incomplete UTF-8 sequence");
-        }
 
-        if(!is_within(next, 0x80, 0xBF))
-          return do_err(ctx, "Invalid UTF-8 sequence");
-
-        ctx.c <<= 6;
-        ctx.c |= next & 0x3F;
+      char tbytes[4];
+      if(usrc.getn(tbytes, u8len - 1) != u8len - 1) {
+        ctx.eof = true;
+        return do_err(ctx, "Incomplete UTF-8 sequence");
       }
+
+      for(uint32_t k = 0;  k != u8len - 1;  ++k)
+        if(!is_within(static_cast<uint8_t>(tbytes[k]), 0x80, 0xBF))
+          return do_err(ctx, "Invalid UTF-8 sequence");
+        else {
+          ctx.c <<= 6;
+          ctx.c |= tbytes[k] & 0x3F;
+        }
 
       if((ctx.c < 0x80)  // overlong
           || (ctx.c < (1 << (u8len * 5 - 4)))  // overlong
