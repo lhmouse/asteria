@@ -1590,15 +1590,7 @@ std_string_url_query_decode(V_string text)
 V_boolean
 std_string_utf8_validate(V_string text)
   {
-    size_t offset = 0;
-    while(offset < text.size()) {
-      // Try decoding a code point.
-      char32_t cp;
-      if(!utf8_decode(cp, text, offset))
-        // This sequence is invalid.
-        return false;
-    }
-    return true;
+    return utf8_validate(text);
   }
 
 V_string

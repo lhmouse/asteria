@@ -301,6 +301,26 @@ utf8_decode(char32_t& cp, const cow_string& text, size_t& offset)
   }
 
 bool
+utf8_validate(const char* str, size_t len)
+  noexcept
+  {
+    const char* bptr = str;
+    while(bptr != str + len) {
+      char32_t cp;
+      if(!utf8_decode(cp, bptr, (size_t) (str + len - bptr)))
+        return false;
+    }
+    return true;
+  }
+
+bool
+utf8_validate(const cow_string& str)
+  noexcept
+  {
+    return utf8_validate(str.data(), str.size());
+  }
+
+bool
 utf16_encode(char16_t*& pos, char32_t cp)
   noexcept
   {
@@ -373,6 +393,26 @@ utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset)
     // Update the offset.
     offset = (size_t) (pos - text.data());
     return true;
+  }
+
+bool
+utf16_validate(const char16_t* str, size_t len)
+  noexcept
+  {
+    const char16_t* bptr = str;
+    while(bptr != str + len) {
+      char32_t cp;
+      if(!utf16_decode(cp, bptr, (size_t) (str + len - bptr)))
+        return false;
+    }
+    return true;
+  }
+
+bool
+utf16_validate(const cow_u16string& str)
+  noexcept
+  {
+    return utf16_validate(str.data(), str.size());
   }
 
 tinyfmt&

@@ -202,6 +202,14 @@ utf8_decode(char32_t& cp, const char*& pos, size_t avail)
 bool
 utf8_decode(char32_t& cp, const cow_string& text, size_t& offset);
 
+bool
+utf8_validate(const char* str, size_t len)
+  noexcept;
+
+bool
+utf8_validate(const cow_string& str)
+  noexcept;
+
 // UTF-16 conversion functions
 bool
 utf16_encode(char16_t*& pos, char32_t cp)
@@ -216,6 +224,14 @@ utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail)
 
 bool
 utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
+
+bool
+utf16_validate(const char16_t* str, size_t len)
+  noexcept;
+
+bool
+utf16_validate(const cow_u16string& str)
+  noexcept;
 
 // C-style quoting
 tinyfmt&
