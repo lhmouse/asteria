@@ -348,6 +348,13 @@ do_token(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
       do_load_next(ctx, usrc);
       if(ctx.c < 0)
         return;
+
+      // Skip the UTF-8 BOM, if any.
+      if((ctx.saved_offset == 0) && (ctx.c == 0xFEFF)) {
+        do_load_next(ctx, usrc);
+        if(ctx.c < 0)
+          return;
+      }
     }
 
     while(is_any(ctx.c, ' ', '\t', '\r', '\n')) {
