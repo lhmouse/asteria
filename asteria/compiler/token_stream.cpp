@@ -17,6 +17,7 @@ class Text_Reader
     tinyfmt& m_cbuf;
     cow_string m_file;
     int m_line = 0;
+    int m_column = 0;
 
     // current line
     size_t m_off = 0;
@@ -26,9 +27,9 @@ class Text_Reader
     cow_dictionary<bool> m_interned_strings;
 
   public:
-    Text_Reader(tinyfmt& xcbuf, const cow_string& xfile, int xline)
+    Text_Reader(tinyfmt& xcbuf, const cow_string& xfile, int start_line)
       :
-        m_cbuf(xcbuf), m_file(xfile), m_line(xline)
+        m_cbuf(xcbuf), m_file(xfile), m_line(start_line - 1)
       {
       }
 
@@ -41,23 +42,24 @@ class Text_Reader
     int
     line()
       const noexcept
-      { return this->m_line - 1;  }
+      { return this->m_line;  }
 
     int
     column()
       const noexcept
-      { return static_cast<int>(this->m_off) + 1;  }
+      { return this->m_column;  }
 
     Source_Location
     tell()
       const noexcept
       {
-        return { this->file(), this->line(), this->column() };
+        return { this->m_file, this->m_line, this->m_column };
       }
 
     bool
-    advance()
+    next_line()
       {
+        this->m_column = 1;
         this->m_off = 0;
         bool succ = getline(this->m_str, this->m_cbuf);
         this->m_line += succ;
@@ -96,15 +98,25 @@ class Text_Reader
     consume(size_t nadd)
       noexcept
       {
-        ROCKET_ASSERT(nadd <= this->navail());
-        this->m_off += nadd;
-      }
+        size_t end_off = this->m_off + nadd;
+        while(this->m_off != end_off) {
+          char32_t cp;
+          ROCKET_ASSERT(utf8_decode(cp, this->m_str, this->m_off));
+          ROCKET_ASSERT(this->m_off <= end_off);
 
-    void
-    rewind()
-      noexcept
-      {
-        this->m_off = 0;
+          if(cp == '\t')
+            this->m_column += 1 + (- this->m_column & 7);
+          else if((cp >= 0x20) && (cp != 0x7F) && (cp != 0xFEFF)) {
+            int width;
+#if defined __CYGWIN__
+            width = 1;
+#else
+            width = ::wcwidth(static_cast<wchar_t>(cp));
+#endif
+            if(width > 0)
+              this->m_column += width;
+          }
+        }
       }
 
     const phcow_string&
@@ -528,7 +540,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
       }
 
       // Translate this escape sequence.
-      // Read the next charactter.
+      // Read the next character.
       next = reader.peek(tlen);
       if(next == 0)
         throw Compiler_Error(xtc_status,
@@ -633,7 +645,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
         default:
           throw Compiler_Error(xtc_status,
                     compiler_status_escape_sequence_unknown, reader.tell());
-      }
+        }
     }
 
     Token::S_string_literal xtoken = { reader.intern_string(move(val)) };
@@ -765,7 +777,7 @@ reload(const cow_string& file, int start_line, tinyfmt&& cbuf)
 
     // Read source code line by line.
     Text_Reader reader(cbuf, file, start_line);
-    while(reader.advance()) {
+    while(reader.next_line()) {
       if(reader.line() == start_line) {
         // Remove the UTF-8 BOM, if any.
         if(reader.starts_with("\xEF\xBB\xBF", 3))
@@ -776,38 +788,22 @@ reload(const cow_string& file, int start_line, tinyfmt&& cbuf)
           continue;
       }
 
-      // Check for conflict markers.
+      if(!utf8_validate(reader.data(), reader.navail()))
+        throw Compiler_Error(xtc_status,
+                  compiler_status_utf8_sequence_invalid, reader.tell());
+
+      if(::strlen(reader.data()) != reader.navail())
+        throw Compiler_Error(xtc_status,
+                  compiler_status_null_character_disallowed, reader.tell());
+
       for(const char* marker : { "<<<<<<<", "|||||||", "=======", ">>>>>>>" })
         if(reader.starts_with(marker, 7))
           throw Compiler_Error(xtc_status,
                     compiler_status_conflict_marker_detected, reader.tell());
 
-      // Ensure this line is a valid UTF-8 string.
-      while(reader.navail() != 0) {
-        // Decode a code point.
-        char32_t cp;
-        auto tptr = reader.data();
-        if(!utf8_decode(cp, tptr, reader.navail()))
-          throw Compiler_Error(xtc_status,
-                    compiler_status_utf8_sequence_invalid, reader.tell());
-
-        // Disallow plain null characters in source data.
-        if(cp == 0)
-          throw Compiler_Error(xtc_status,
-                    compiler_status_null_character_disallowed, reader.tell());
-
-        // Accept this code point.
-        reader.consume(static_cast<size_t>(tptr - reader.data()));
-      }
-
-      // Re-scan this line from the beginning.
-      reader.rewind();
-
-      // Break this line down into tokens.
       while(reader.navail() != 0) {
         // Are we inside a block comment?
         if(bcomm) {
-          // Search for the terminator of this block comment.
           auto tptr = ::strchr(reader.data(), '*');
           if(!(tptr && (tptr[1] == '/')))
             break;
