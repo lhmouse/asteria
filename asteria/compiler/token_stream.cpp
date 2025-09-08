@@ -107,12 +107,7 @@ class Text_Reader
           if(cp == '\t')
             this->m_column += 1 + (- this->m_column & 7);
           else if((cp >= 0x20) && (cp != 0x7F) && (cp != 0xFEFF)) {
-            int width;
-#if defined __CYGWIN__
-            width = 1;
-#else
-            width = ::wcwidth(static_cast<wchar_t>(cp));
-#endif
+            int width = ::wcwidth(static_cast<wchar_t>(cp));
             if(width > 0)
               this->m_column += width;
           }

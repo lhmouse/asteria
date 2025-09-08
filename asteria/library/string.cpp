@@ -1787,9 +1787,6 @@ std_string_iconv(V_string to_encoding, V_string text, optV_string from_encoding)
 V_integer
 std_string_visual_length(V_string text)
   {
-#if defined __CYGWIN__
-    ASTERIA_THROW(("`std.string.visual_length()` is not implemented in Cygwin or MSYS2"));
-#else
     V_integer width = 0;
 
     size_t offset = 0;
@@ -1806,7 +1803,6 @@ std_string_visual_length(V_string text)
       width += w;
     }
     return width;
-#endif
   }
 
 void

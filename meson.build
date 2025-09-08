@@ -143,7 +143,7 @@ cxx_is_amd64 = cxx.has_define('__amd64__')
 
 add_project_arguments(
     '-Winvalid-pch', '-D_FILE_OFFSET_BITS=64', '-D_POSIX_C_SOURCE=200809',
-    '-D_DEFAULT_SOURCE', '-D_DARWIN_C_SOURCE',
+    '-D_XOPEN_SOURCE=700', '-D_DEFAULT_SOURCE', '-D_DARWIN_C_SOURCE',
     cxx.get_supported_arguments(
       '-fno-elide-constructors', '-fvisibility-inlines-hidden', '-fstrict-aliasing',
       '-fno-stack-protector', '-fstrict-overflow', '-fmerge-all-constants',
