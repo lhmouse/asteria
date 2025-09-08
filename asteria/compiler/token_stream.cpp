@@ -14,10 +14,11 @@ namespace {
 class Text_Reader
   {
   private:
+    uint8_t m_tab_stop;
     tinyfmt& m_cbuf;
     cow_string m_file;
-    int m_line = 0;
-    int m_column = 0;
+    int m_line;
+    int m_column;
 
     // current line
     size_t m_off = 0;
@@ -27,13 +28,20 @@ class Text_Reader
     cow_dictionary<bool> m_interned_strings;
 
   public:
-    Text_Reader(tinyfmt& xcbuf, const cow_string& xfile, int start_line)
+    Text_Reader(const Compiler_Options& opts,
+                tinyfmt& xcbuf, const cow_string& xfile, int start_line)
       :
+        m_tab_stop(::rocket::clamp_cast<uint8_t>(opts.tab_stop, 1, 8)),
         m_cbuf(xcbuf), m_file(xfile), m_line(start_line - 1)
       {
       }
 
   public:
+    uint8_t
+    tab_stop()
+      const noexcept
+      { return this->m_tab_stop;  }
+
     const cow_string&
     file()
       const noexcept
@@ -105,8 +113,8 @@ class Text_Reader
           ROCKET_ASSERT(this->m_off <= end_off);
 
           if(cp == '\t')
-            this->m_column += 1 + (- this->m_column & 7);
-          else if((cp >= 0x20) && (cp != 0x7F) && (cp != 0xFEFF)) {
+            this->m_column += this->m_tab_stop - (this->m_column - 1) % this->m_tab_stop;
+          else {
             int width = ::wcwidth(static_cast<wchar_t>(cp));
             if(width > 0)
               this->m_column += width;
@@ -771,7 +779,7 @@ reload(const cow_string& file, int start_line, tinyfmt&& cbuf)
     opt<Source_Location> bcomm;
 
     // Read source code line by line.
-    Text_Reader reader(cbuf, file, start_line);
+    Text_Reader reader(this->m_opts, cbuf, file, start_line);
     while(reader.next_line()) {
       if(reader.line() == start_line) {
         // Remove the UTF-8 BOM, if any.

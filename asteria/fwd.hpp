@@ -794,6 +794,14 @@ enum Compare : uint8_t
     compare_greater    = 3,
   };
 
+// Garbage collection generations
+enum GC_Generation : uint8_t
+  {
+    gc_generation_newest  = 0,
+    gc_generation_middle  = 1,
+    gc_generation_oldest  = 2,
+  };
+
 // API versioning of the standard library
 enum API_Version : uint32_t
   {
@@ -803,79 +811,39 @@ enum API_Version : uint32_t
     api_version_latest     = 0xFFFFFFFF,  // everything
   };
 
-// Garbage collection generations
-enum GC_Generation : uint8_t
+template<uint16_t versionT>
+struct Compiler_Options_v
   {
-    gc_generation_newest  = 0,
-    gc_generation_middle  = 1,
-    gc_generation_oldest  = 2,
-  };
+    uint16_t version = versionT;
+    // (0x0002)
 
-// Options for source parsing and code generation
-template<uint32_t... paramsT>
-struct Compiler_Options_template;
-
-template<uint32_t fragmentT>
-struct Compiler_Options_fragment;
-
-template<uint32_t versionT>
-struct Compiler_Options_template<versionT>
-  :
-    Compiler_Options_template<versionT, versionT>
-  {
-  };
-
-template<uint32_t versionT, uint32_t fragmentT>
-struct Compiler_Options_template<versionT, fragmentT>
-  :
-    Compiler_Options_template<versionT, fragmentT - 1>, Compiler_Options_fragment<fragmentT>
-  {
-    // All members from `Compiler_Options_fragment<fragmentT>` have been brought in.
-    // This struct does not define anything by itself.
-  };
-
-template<uint32_t versionT>
-struct Compiler_Options_template<versionT, 0>
-  {
-    // This member exists in all derived structs. We would like these structs to be
-    // trivial, hence virtual bases are not an option.
-    uint8_t version = versionT;
-  };
-
-template<>
-struct Compiler_Options_fragment<1>
-  {
-    // Don't use.
-    bool reserved_rnnbzqv7[3];
-
-    // Enable proper tail calls.
-    // This is semantical behavior and is not subject to optimization.
-    // [more commonly known as tail call optimization]
+    // Enable proper tail calls. Although more commonly this known as sibling
+    // or tail call optimization, it is a semantical characteristic and is not
+    // subject to optimization.
     bool proper_tail_calls = true;
+    // (0x0003)
 
-    // Generate calls to single-step hooks for every expression, not just function
-    // calls.
+    // Generate single-step hooks for all operators. By default, hooks are only
+    // generated for function calls.
     bool verbose_single_step_traps = false;
+    // (0x0004)
 
-    // Treat unresolved names as global references.
+    // Treat unresolved names as global references. By default, an undeclared
+    // name causes a parser error.
     bool implicit_global_names = false;
+    // (0x0005)
 
     // Enable optimization.
     uint8_t optimization_level = 1;
+    // (0x0006)
+
+    // Set the number of spaces per tab. This controls how column numbers are
+    // calculated in source information.
+    uint8_t tab_stop = 8;
+    // (0x0007)
   };
 
-template<>
-struct Compiler_Options_fragment<2>
-  {
-    // Note: Please keep this struct as compact as possible.
-  };
-
-// These are aliases for historical versions.
-using Compiler_Options_v1 = Compiler_Options_template<1>;
-using Compiler_Options_v2 = Compiler_Options_template<2>;
-
-// This is always an alias for the latest version.
-using Compiler_Options = Compiler_Options_v2;
+using Compiler_Options = Compiler_Options_v<(api_version_latest >> 16)>;
 
 // This value is initialized statically and never destroyed.
 extern const char null_storage[];
