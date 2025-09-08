@@ -14,6 +14,7 @@ void
 read_execute_print_single()
   {
     // Prepare for the next snippet.
+    repl_index ++;
     repl_source.clear();
     repl_file.clear();
     repl_args.clear();
@@ -26,9 +27,9 @@ read_execute_print_single()
     size_t pos;
 
     // Prompt for the first line.
-    long linenum = 0;
+    long linenum = 1;
     int indent;
-    libedit_set_prompt("#%lu:%lu%n> ", ++repl_index, ++linenum, &indent);
+    libedit_set_prompt("#%-3lu%2lu%n> ", repl_index, linenum, &indent);
 
     while(libedit_gets(linestr)) {
       // Remove trailing new line characters, if any.
@@ -63,7 +64,8 @@ read_execute_print_single()
 
       // Prompt for the next line.
       repl_source.push_back('\n');
-      libedit_set_prompt("%*lu> ", indent, ++linenum);
+      linenum ++;
+      libedit_set_prompt("%*lu> ", indent, linenum);
 
       // Auto-indent it.
       pos = linestr.find_not_of(" \t");
