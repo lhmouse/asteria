@@ -111,14 +111,10 @@ class Text_Reader
           char32_t cp;
           ROCKET_ASSERT(utf8_decode(cp, this->m_str, this->m_off));
           ROCKET_ASSERT(this->m_off <= end_off);
-
           if(cp == '\t')
             this->m_column += this->m_tab_stop - (this->m_column - 1) % this->m_tab_stop;
-          else {
-            int width = ::wcwidth(static_cast<wchar_t>(cp));
-            if(width > 0)
-              this->m_column += width;
-          }
+          else
+            this->m_column += ::rocket::max(0, ::wcwidth(static_cast<wchar_t>(cp)));
         }
       }
 
