@@ -158,7 +158,7 @@ std_io_getln()
 
       if(!utf8_encode(u8str, (char32_t) wch))
         ASTERIA_THROW((
-            "Invalid UTF code point from standard input (value `$1`)"),
+            "Invalid Unicode character from standard input (value `$1`)"),
             wch);
     }
 
@@ -177,12 +177,12 @@ std_io_putc(V_integer value)
 
     if((value < 0) || (value > 0x10FFFF))
       ASTERIA_THROW((
-          "Invalid UTF code point (value `$1`)"),
+          "Invalid Unicode character (value `$1`)"),
           value);
 
     if(!utf8_encode(u8ptr, (char32_t) value))
       ASTERIA_THROW((
-          "Invalid UTF code point (value `$1`)"),
+          "Invalid Unicode character (value `$1`)"),
           value);
 
     if(::fputwc((wchar_t) value, sentry) == WEOF)

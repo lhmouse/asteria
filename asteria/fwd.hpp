@@ -710,7 +710,7 @@ enum Compiler_Status : uint32_t
     // lexical errors
     compiler_status_utf8_sequence_invalid                      = 1001,
     compiler_status_utf8_sequence_incomplete                   = 1002,
-    compiler_status_utf_code_point_invalid                     = 1003,
+    compiler_status_unicode_character_invalid                  = 1003,
     compiler_status_null_character_disallowed                  = 1004,
     compiler_status_conflict_marker_detected                   = 1005,
     compiler_status_token_character_unrecognized               = 1006,
@@ -718,7 +718,7 @@ enum Compiler_Status : uint32_t
     compiler_status_escape_sequence_unknown                    = 1008,
     compiler_status_escape_sequence_incomplete                 = 1009,
     compiler_status_escape_sequence_invalid_hex                = 1010,
-    compiler_status_escape_utf_code_point_invalid              = 1011,
+    compiler_status_escape_unicode_character_invalid           = 1011,
     compiler_status_reserved_1012                              = 1012,
     compiler_status_integer_literal_overflow                   = 1013,
     compiler_status_integer_literal_inexact                    = 1014,

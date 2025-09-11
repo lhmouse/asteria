@@ -634,10 +634,10 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
             val.push_back(static_cast<char>(cp));
           }
           else {
-            // Write a Unicode code point.
+            // Write a Unicode character.
             if(!utf8_encode(val, cp))
               throw Compiler_Error(xtc_status,
-                        compiler_status_escape_utf_code_point_invalid, reader.tell());
+                        compiler_status_escape_unicode_character_invalid, reader.tell());
           }
           break;
 

@@ -1604,7 +1604,7 @@ std_string_utf8_encode(V_integer code_point, optV_boolean permissive)
     if(!utf8_encode(text, cp)) {
       // This comparison with `true` is by intention, because it may be unset.
       if(permissive != true)
-        ASTERIA_THROW(("Invalid UTF code point (value `$1`)"), code_point);
+        ASTERIA_THROW(("Invalid Unicode character (value `$1`)"), code_point);
 
       utf8_encode(text, 0xFFFD);
     }
@@ -1623,7 +1623,7 @@ std_string_utf8_encode(V_array code_points, optV_boolean permissive)
       if(!utf8_encode(text, cp)) {
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true)
-          ASTERIA_THROW(("Invalid UTF code point (value `$1`)"), value);
+          ASTERIA_THROW(("Invalid Unicode character (value `$1`)"), value);
 
         utf8_encode(text, 0xFFFD);
       }

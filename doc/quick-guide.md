@@ -203,7 +203,7 @@ values that they 'literally' look like:
    9) `\t` produces the ASCII horizontal tab character `U+0009`.
    10) `\U` which shall be followed by six hexadecimal digits, and `\u` which
        shall be followed by four hexadecimal digits, produce the UTF-8 byte
-       sequence of their operand, which must be a valid UTF code point.
+       sequence of their operand, which must be a valid Unicode character.
    11) `\v` produces the ASCII vertical tab character `U+000B`.
    12) `\x` which shall be followed by two hexadecimal digits, produces a
        single byte with that value.

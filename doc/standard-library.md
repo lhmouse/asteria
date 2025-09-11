@@ -619,8 +619,8 @@ variable. Individual components are categorized into sub-objects.
 
 ### `std.string.utf8_decode(text, [permissive])`
 
-* Decodes the UTF-8 string, `text`, into UTF code points, represented as an
-  array of integers. When an invalid code sequence is encountered, if
+* Decodes the UTF-8 string, `text`, into Unicode characters, represented as
+  an array of integers. When an invalid code sequence is encountered, if
   `permissive` is set to `true`, all its code units are re-interpreted as
   isolated bytes according to ISO/IEC 8859-1; otherwise this function fails.
 
@@ -2239,9 +2239,10 @@ variable. Individual components are categorized into sub-objects.
 
   The function `update()` is used to put a byte string into the hasher. After
   all data have been put, the function `finish()` extracts the checksum as a
-  string of 128 hexadecimal digits, then resets the hasher, making it suitable
-  for further data as if it had just been created. The function `clear()`
-  discards all input data and resets the hasher to its initial state.
+  string of 128 hexadecimal digits, then resets the hasher, making it
+  suitable for further data as if it had just been created. The function
+  `clear()` discards all input data and resets the hasher to its initial
+  state.
 
 ### `std.checksum.sha512(data)`
 
@@ -2415,7 +2416,7 @@ variable. Individual components are categorized into sub-objects.
 
 ### `std.io.getc()`
 
-* Reads a UTF code point from standard input.
+* Reads a Unicode character from standard input.
 
 * Returns the code point that has been read as an integer. If the end of
   input is encountered, `null` is returned.
@@ -2433,54 +2434,54 @@ variable. Individual components are categorized into sub-objects.
   encountered, `null` is returned.
 
 * Throws an exception if standard input is binary-oriented, or if a read
-  error occurs, or if source data cannot be converted to a valid UTF code
+  error occurs, or if source data cannot be converted to a valid Unicode code
   point sequence.
 
 ### `std.io.putc(value)`
 
 * Writes a UTF-8 string to standard output. `value` may be either an integer
-  representing a UTF code point or a UTF-8 string.
+  representing a Unicode character or a UTF-8 string.
 
-* Returns the number of UTF code points that have been written.
+* Returns the number of Unicode characters that have been written.
 
 * Throws an exception if standard output is binary-oriented, or if source
-  data cannot be converted to a valid UTF code point sequence, or if a write
-  error occurs.
+  data cannot be converted to a valid Unicode character sequence, or if a
+  write error occurs.
 
 ### `std.io.putln(text)`
 
 * Writes a UTF-8 string to standard output, followed by an LF, which may
   flush the stream automatically. `text` shall be a UTF-8 string.
 
-* Returns the number of UTF code points that have been written, including the
-  terminating LF.
+* Returns the number of Unicode characters that have been written, including
+  the terminating LF.
 
 * Throws an exception if standard output is binary-oriented, or if source
-  data cannot be converted to a valid UTF code point sequence, or if a write
-  error occurs.
+  data cannot be converted to a valid Unicode character sequence, or if a
+  write error occurs.
 
 ### `std.io.putf(templ, ...)`
 
 * Compose a string in the same way as `std.string.format()`, but instead of
   returning it, write it to standard output.
 
-* Returns the number of UTF code points that have been written.
+* Returns the number of Unicode characters that have been written.
 
 * Throws an exception if standard output is binary-oriented, or if source
-  data cannot be converted to a valid UTF code point sequence, or if a write
-  error occurs.
+  data cannot be converted to a valid Unicode character sequence, or if a
+  write error occurs.
 
 ### `std.io.putfln(templ, ...)`
 
 * Compose a string in the same way as `std.string.format()`, but instead of
   returning it, write it to standard output, followed by an LF.
 
-* Returns the number of UTF code points that have been written, including the
-  terminating LF.
+* Returns the number of Unicode characters that have been written, including
+  the terminating LF.
 
 * Throws an exception if standard output is binary-oriented, or if source
-  data cannot be converted to a valid UTF code point sequence, or if a write
-  error occurs.
+  data cannot be converted to a valid Unicode character sequence, or if a
+  write error occurs.
 
 ### `std.io.read([limit])`
 
@@ -2491,7 +2492,7 @@ variable. Individual components are categorized into sub-objects.
   encountered, `null` is returned.
 
 * Throws an exception if standard input is text-oriented, or if a read error
-  occurs, or if source data cannot be converted to a valid UTF code point
+  occurs, or if source data cannot be converted to a valid Unicode character
   sequence.
 
 ### `std.io.write(data)`

@@ -290,7 +290,7 @@ do_load_next(Parser_Context& ctx, const Unified_Source& usrc)
           || (ctx.c < (1 << (u8len * 5 - 4)))  // overlong
           || is_within(ctx.c, 0xD800, 0xDFFF)  // surrogates
           || (ctx.c > 0x10FFFF))
-        return do_err(ctx, "Invalid UTF character");
+        return do_err(ctx, "Invalid Unicode character");
     }
   }
 

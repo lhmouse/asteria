@@ -692,7 +692,7 @@ formatv(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
 
     for(;;) {
       // Look for the next placeholder.
-      // XXX: For non-UTF multi-byte strings this is faulty, as trailing
+      // XXX: For non-Unicode multi-byte strings this is faulty, as trailing
       //      bytes may match the dollar sign coincidentally.
       while((*next != charT()) && (*next != charT('$')))
         next ++;

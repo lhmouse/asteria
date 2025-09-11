@@ -167,8 +167,8 @@ describe_compiler_status(Compiler_Status status)
       case compiler_status_utf8_sequence_incomplete:
         return "incomplete UTF-8 sequence";
 
-      case compiler_status_utf_code_point_invalid:
-        return "invalid UTF code point";
+      case compiler_status_unicode_character_invalid:
+        return "invalid Unicode character";
 
       case compiler_status_null_character_disallowed:
         return "null character disallowed";
@@ -191,8 +191,8 @@ describe_compiler_status(Compiler_Status status)
       case compiler_status_escape_sequence_invalid_hex:
         return "hexadecimal digit expected";
 
-      case compiler_status_escape_utf_code_point_invalid:
-        return "invalid UTF code point value";
+      case compiler_status_escape_unicode_character_invalid:
+        return "invalid Unicode escape sequence";
 
       case compiler_status_reserved_1012:
         return "";
