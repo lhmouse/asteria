@@ -42,9 +42,8 @@ do_err(Parser_Context& ctx, const char* error)
 
     if(error)
       ASTERIA_THROW((
-          "Could not parse JSON string: $1",
-          "[at offset `$2`]"),
-          error, ctx.saved_offset);
+          "Could not parse JSON string: $1 at offset `$2`"),
+          error, ctx.offset);
   }
 
 struct Memory_Source
