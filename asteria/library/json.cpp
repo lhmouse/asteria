@@ -357,17 +357,14 @@ do_token(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
       case '-':
         // Take a floating-point number. Strictly, JSON doesn't allow plus signs
         // or leading zeroes, but we accept them as extensions.
-        if(is_any(ctx.c, '+', '-')) {
-          token.push_back(static_cast<char>(ctx.c));
-          do_load_next(ctx, usrc);
-        }
+        token.push_back(static_cast<char>(ctx.c));
+        do_load_next(ctx, usrc);
 
         if(!is_within(ctx.c, '0', '9'))
           return do_err(ctx, "Invalid number");
 
-        // fallthrough
+        do {  // fallthrough
       case '0' ... '9':
-        do {
           token.push_back(static_cast<char>(ctx.c));
           do_load_next(ctx, usrc);
         }
