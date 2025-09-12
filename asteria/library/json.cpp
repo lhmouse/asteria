@@ -294,48 +294,6 @@ do_load_next(Parser_Context& ctx, const Unified_Source& usrc)
     }
   }
 
-void
-do_mov(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
-  {
-    if(ROCKET_EXPECT(ctx.c <= 0x7F))
-      token.push_back(static_cast<char>(ctx.c));
-    else {
-      // Re-encode the character. This will not fail.
-      char mbs[4];
-      char* eptr = mbs;
-      utf8_encode(eptr, static_cast<char32_t>(ctx.c));
-      token.append(mbs, eptr);
-    }
-
-    // If the token is an incomplete string, then try loading some characters
-    // that are known to require no escaping.
-    if(ROCKET_UNEXPECT(token[0] == '\"')) {
-      if(usrc.mem) {
-        auto tptr = usrc.mem->sptr;
-        while(usrc.mem->eptr != tptr) {
-          if(is_any(*tptr, '\\', '\"') || !is_within(*tptr, 0x20, 0x7E))
-            break;
-          ++ tptr;
-        }
-
-        if(tptr != usrc.mem->sptr)
-          token.append(usrc.mem->sptr, static_cast<size_t>(tptr - usrc.mem->sptr));
-        usrc.mem->sptr = tptr;
-      }
-      else if(usrc.fp) {
-        char temp[256];
-        size_t len;
-        while(::fscanf(usrc.fp, "%255[]-~ !#-[]%zn", temp, &len) == 1) {
-          token.append(temp, len);
-          if(len < 256)
-            break;
-        }
-      }
-    }
-
-    do_load_next(ctx, usrc);
-  }
-
 ROCKET_FLATTEN
 void
 do_token(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
@@ -395,37 +353,57 @@ do_token(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
         ctx.c = -1;
         break;
 
-      case '0' ... '9':
       case '+':
       case '-':
         // Take a floating-point number. Strictly, JSON doesn't allow plus signs
         // or leading zeroes, but we accept them as extensions.
-        do
-          do_mov(token, ctx, usrc);
+        if(is_any(ctx.c, '+', '-')) {
+          token.push_back(static_cast<char>(ctx.c));
+          do_load_next(ctx, usrc);
+        }
+
+        if(!is_within(ctx.c, '0', '9'))
+          return do_err(ctx, "Invalid number");
+
+        // fallthrough
+      case '0' ... '9':
+        do {
+          token.push_back(static_cast<char>(ctx.c));
+          do_load_next(ctx, usrc);
+        }
         while(is_within(ctx.c, '0', '9'));
 
         if(ctx.c == '.') {
-          do_mov(token, ctx, usrc);
+          token.push_back(static_cast<char>(ctx.c));
+          do_load_next(ctx, usrc);
+
           if(!is_within(ctx.c, '0', '9'))
             return do_err(ctx, "Invalid number");
-          else {
-            do
-              do_mov(token, ctx, usrc);
-            while(is_within(ctx.c, '0', '9'));
+
+          do {
+            token.push_back(static_cast<char>(ctx.c));
+            do_load_next(ctx, usrc);
           }
+          while(is_within(ctx.c, '0', '9'));
         }
 
         if(is_any(ctx.c, 'e', 'E')) {
-          do_mov(token, ctx, usrc);
-          if(is_any(ctx.c, '+', '-'))
-            do_mov(token, ctx, usrc);
+          token.push_back(static_cast<char>(ctx.c));
+          do_load_next(ctx, usrc);
+
+          if(is_any(ctx.c, '+', '-')) {
+            token.push_back(static_cast<char>(ctx.c));
+            do_load_next(ctx, usrc);
+          }
+
           if(!is_within(ctx.c, '0', '9'))
             return do_err(ctx, "Invalid number");
-          else {
-            do
-              do_mov(token, ctx, usrc);
-            while(is_within(ctx.c, '0', '9'));
+
+          do {
+            token.push_back(static_cast<char>(ctx.c));
+            do_load_next(ctx, usrc);
           }
+          while(is_within(ctx.c, '0', '9'));
         }
 
         // If the end of input has been reached, `ctx.error` may be set. We will
@@ -434,14 +412,16 @@ do_token(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
         ctx.eof = false;
         break;
 
-      case 'A' ... 'Z':
-      case 'a' ... 'z':
       case '_':
       case '$':
+      case 'A' ... 'Z':
+      case 'a' ... 'z':
         // Take an identifier. As in JavaScript, we accept dollar signs in
         // identifiers as an extension.
-        do
-          do_mov(token, ctx, usrc);
+        do {
+          token.push_back(static_cast<char>(ctx.c));
+          do_load_next(ctx, usrc);
+        }
         while(is_any(ctx.c, '_', '$') || is_within(ctx.c, 'A', 'Z')
               || is_within(ctx.c, 'a', 'z') || is_within(ctx.c, '0', '9'));
 
@@ -455,15 +435,39 @@ do_token(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
         // Take a double-quoted string. When stored in `token`, it shall start
         // with a double-quote character, followed by the decoded string. No
         // terminating double-quote character is appended.
-        do_mov(token, ctx, usrc);
-        while(ctx.c != '\"')
+        token.push_back('\"');
+        for(;;) {
+          if(usrc.mem) {
+            auto tptr = usrc.mem->sptr;
+            while(usrc.mem->eptr != tptr) {
+              if(is_any(*tptr, '\\', '\"') || !is_within(*tptr, 0x20, 0x7E))
+                break;
+              ++ tptr;
+            }
+
+            if(tptr != usrc.mem->sptr)
+              token.append(usrc.mem->sptr, static_cast<size_t>(tptr - usrc.mem->sptr));
+            usrc.mem->sptr = tptr;
+          }
+          else if(usrc.fp) {
+            char temp[256];
+            size_t len;
+            while(::fscanf(usrc.fp, "%255[]-~ !#-[]%zn", temp, &len) == 1) {
+              token.append(temp, len);
+              if(len < 256)
+                break;
+            }
+          }
+
+          do_load_next(ctx, usrc);
           if(ctx.eof)
             return do_err(ctx, "String not terminated properly");
           else if((ctx.c <= 0x1F) || (ctx.c == 0x7F))
             return do_err(ctx, "Control character not allowed in string");
-          else if(ROCKET_EXPECT(ctx.c != '\\'))
-            do_mov(token, ctx, usrc);
-          else {
+          else if(ctx.c == '\"')
+            break;
+
+          if(ROCKET_UNEXPECT(ctx.c == '\\')) {
             // Read an escape sequence.
             int next = usrc.getc();
             if(next < 0) {
@@ -557,10 +561,18 @@ do_token(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
               default:
                 return do_err(ctx, "Invalid escape sequence");
               }
-
-            // Move the unescaped character into the token.
-            do_mov(token, ctx, usrc);
           }
+
+          // Move the unescaped character into the token.
+          if(ROCKET_EXPECT(ctx.c <= 0x7F))
+            token.push_back(static_cast<char>(ctx.c));
+          else {
+            char mbs[4];
+            char* eptr = mbs;
+            utf8_encode(eptr, static_cast<char32_t>(ctx.c));
+            token.append(mbs, eptr);
+          }
+        }
 
         // Drop the terminating quotation mark for simplicity; do not attempt to
         // get the next character, as the stream may be blocking but we can't
