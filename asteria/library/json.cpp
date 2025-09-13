@@ -353,6 +353,25 @@ do_token(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
         ctx.c = -1;
         break;
 
+      case '_':
+      case '$':
+      case 'A' ... 'Z':
+      case 'a' ... 'z':
+        // Take an identifier. As in JavaScript, we accept dollar signs in
+        // identifiers as an extension.
+        do {
+          token.push_back(static_cast<char>(ctx.c));
+          do_load_next(ctx, usrc);
+        }
+        while(is_any(ctx.c, '_', '$') || is_within(ctx.c, 'A', 'Z')
+              || is_within(ctx.c, 'a', 'z') || is_within(ctx.c, '0', '9'));
+
+        // If the end of input has been reached, `ctx.error` may be set. We will
+        // not return an error, so clear it.
+        ROCKET_ASSERT(token.size() != 0);
+        ctx.eof = false;
+        break;
+
       case '+':
       case '-':
         // Take a floating-point number. Strictly, JSON doesn't allow plus signs
@@ -402,25 +421,6 @@ do_token(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
           }
           while(is_within(ctx.c, '0', '9'));
         }
-
-        // If the end of input has been reached, `ctx.error` may be set. We will
-        // not return an error, so clear it.
-        ROCKET_ASSERT(token.size() != 0);
-        ctx.eof = false;
-        break;
-
-      case '_':
-      case '$':
-      case 'A' ... 'Z':
-      case 'a' ... 'z':
-        // Take an identifier. As in JavaScript, we accept dollar signs in
-        // identifiers as an extension.
-        do {
-          token.push_back(static_cast<char>(ctx.c));
-          do_load_next(ctx, usrc);
-        }
-        while(is_any(ctx.c, '_', '$') || is_within(ctx.c, 'A', 'Z')
-              || is_within(ctx.c, 'a', 'z') || is_within(ctx.c, '0', '9'));
 
         // If the end of input has been reached, `ctx.error` may be set. We will
         // not return an error, so clear it.
