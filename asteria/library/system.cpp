@@ -358,7 +358,7 @@ std_system_random_uuid()
     uint64_t quads[2];
     ::RAND_bytes((unsigned char*) quads, sizeof(quads));
 
-    auto do_char_from_nibble = [](uint64_t quad, unsigned index)
+    auto y = [](uint64_t quad, unsigned index)
       {
         int value = (int) (quad >> index * 4) & 0x0F;
         int shift_to_digit = 0x30 - (((9 - value) & -0x2700) >> 8);
@@ -368,43 +368,47 @@ std_system_random_uuid()
     // `xxxxxxxx-xxxx-4xxx-Vxxx-xxxxxxxxxxxx`
     //            1         2         3
     //  01234567 9012 4567 9012 4567 9012345
-    V_string str;
-    str.resize(36, '-');
-    char* wptr = str.mut_data();
+    char temp[36];
+    char* wptr = temp;
 
-    wptr[ 0] = do_char_from_nibble(    quads[0],   0);
-    wptr[ 1] = do_char_from_nibble(    quads[0],   1);
-    wptr[ 2] = do_char_from_nibble(    quads[0],   2);
-    wptr[ 3] = do_char_from_nibble(    quads[0],   3);
-    wptr[ 4] = do_char_from_nibble(    quads[0],   4);
-    wptr[ 5] = do_char_from_nibble(    quads[0],   5);
-    wptr[ 6] = do_char_from_nibble(    quads[0],   6);
-    wptr[ 7] = do_char_from_nibble(    quads[0],   7);
-    wptr[ 9] = do_char_from_nibble(    quads[0],   8);
-    wptr[10] = do_char_from_nibble(    quads[0],   9);
-    wptr[11] = do_char_from_nibble(    quads[0],  10);
-    wptr[12] = do_char_from_nibble(    quads[0],  11);
-    wptr[14] =                    '4'                ;
-    wptr[15] = do_char_from_nibble(    quads[0],  12);
-    wptr[16] = do_char_from_nibble(    quads[0],  13);
-    wptr[17] = do_char_from_nibble(    quads[0],  14);
-    wptr[19] = do_char_from_nibble(8 | quads[1],   0);
-    wptr[20] = do_char_from_nibble(    quads[1],   1);
-    wptr[21] = do_char_from_nibble(    quads[1],   2);
-    wptr[22] = do_char_from_nibble(    quads[1],   3);
-    wptr[24] = do_char_from_nibble(    quads[1],   4);
-    wptr[25] = do_char_from_nibble(    quads[1],   5);
-    wptr[26] = do_char_from_nibble(    quads[1],   6);
-    wptr[27] = do_char_from_nibble(    quads[1],   7);
-    wptr[28] = do_char_from_nibble(    quads[1],   8);
-    wptr[29] = do_char_from_nibble(    quads[1],   9);
-    wptr[30] = do_char_from_nibble(    quads[1],  10);
-    wptr[31] = do_char_from_nibble(    quads[1],  11);
-    wptr[32] = do_char_from_nibble(    quads[1],  12);
-    wptr[33] = do_char_from_nibble(    quads[1],  13);
-    wptr[34] = do_char_from_nibble(    quads[1],  14);
-    wptr[35] = do_char_from_nibble(    quads[1],  15);
-    return str;
+    *(wptr ++) = y(quads[0],  0);
+    *(wptr ++) = y(quads[0],  1);
+    *(wptr ++) = y(quads[0],  2);
+    *(wptr ++) = y(quads[0],  3);
+    *(wptr ++) = y(quads[0],  4);
+    *(wptr ++) = y(quads[0],  5);
+    *(wptr ++) = y(quads[0],  6);
+    *(wptr ++) = y(quads[0],  7);
+    *(wptr ++) =   '-';
+    *(wptr ++) = y(quads[0],  8);
+    *(wptr ++) = y(quads[0],  9);
+    *(wptr ++) = y(quads[0], 10);
+    *(wptr ++) = y(quads[0], 11);
+    *(wptr ++) =   '-';
+    *(wptr ++) =   '4';
+    *(wptr ++) = y(quads[0], 12);
+    *(wptr ++) = y(quads[0], 13);
+    *(wptr ++) = y(quads[0], 14);
+    *(wptr ++) =   '-';
+    *(wptr ++) = y(8 | quads[1], 0);
+    *(wptr ++) = y(quads[1],  1);
+    *(wptr ++) = y(quads[1],  2);
+    *(wptr ++) = y(quads[1],  3);
+    *(wptr ++) =   '-';
+    *(wptr ++) = y(quads[1],  4);
+    *(wptr ++) = y(quads[1],  5);
+    *(wptr ++) = y(quads[1],  6);
+    *(wptr ++) = y(quads[1],  7);
+    *(wptr ++) = y(quads[1],  8);
+    *(wptr ++) = y(quads[1],  9);
+    *(wptr ++) = y(quads[1], 10);
+    *(wptr ++) = y(quads[1], 11);
+    *(wptr ++) = y(quads[1], 12);
+    *(wptr ++) = y(quads[1], 13);
+    *(wptr ++) = y(quads[1], 14);
+    *(wptr ++) = y(quads[1], 15);
+
+    return V_string(temp, wptr);
   }
 
 V_integer
