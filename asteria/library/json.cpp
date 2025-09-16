@@ -611,11 +611,7 @@ do_parse_from(Value& root, const Unified_Source& usrc)
     if(stack.size() > 32)
       return do_err(ctx, "Nesting limit exceeded");
 
-    if(token[0] == '\"') {
-      // string
-      pstor->open_string().assign(token.data() + 1, token.size() - 1);
-    }
-    else if(token[0] == '[') {
+    if(token[0] == '[') {
       // array
       do_token(token, ctx, usrc);
       if(ctx.eof)
@@ -678,6 +674,10 @@ do_parse_from(Value& root, const Unified_Source& usrc)
       numg.cast_D(pstor->open_real(), -DBL_MAX, DBL_MAX);
       if(numg.overflowed())
         return do_err(ctx, "Number value out of range");
+    }
+    else if(token[0] == '\"') {
+      // string
+      pstor->open_string().assign(token.data() + 1, token.size() - 1);
     }
     else if(token == "null")
       *pstor = nullopt;
