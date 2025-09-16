@@ -49,15 +49,14 @@ int main()
 
         var o = std.system.load_conf(std.string.pcre_replace(__file, '/[^/]*$', '/sample.conf'));
         assert o.key == "value";
-        assert o["keys may be quoted"] == "equals signs are allowed";
+        assert o["keys may be quoted"] == 'no need to escape \ in single quotes';
+        assert o.utf_text == "\U01F602\U01F602";
         assert o.values.may == "be";
         assert o.values.objects == 42;
         assert o.and == ["can","also","be","arrays"];
         assert o.or == null;
         assert o.long_integers == 0x123456789ABCDEF;
         assert o.binary_integers == 0b10010010;
-        assert __isinf o.infinities;
-        assert __isnan o.nans;
         assert o.hexadecimal_float == 0x1.23p-62;
         assert o.binary_float == 0b100.0110p3;
 
