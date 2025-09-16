@@ -673,7 +673,8 @@ do_parse_from(Value& root, const Unified_Source& usrc)
     }
     else if(is_any(token[0], '+', '-') || is_within(token[0], '0', '9')) {
       // number
-      numg.parse_DD(token.data(), token.size());
+      size_t n = numg.parse_DD(token.data(), token.size());
+      ROCKET_ASSERT(n == token.size());
       numg.cast_D(pstor->open_real(), -DBL_MAX, DBL_MAX);
       if(numg.overflowed())
         return do_err(ctx, "Number value out of range");
