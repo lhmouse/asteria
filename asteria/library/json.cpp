@@ -604,6 +604,8 @@ do_parse_from(Value& root, const Unified_Source& usrc)
     Value* pstor = &root;
 
     do_token(token, ctx, usrc);
+    if(token.empty())
+      return do_err(ctx, "Blank input");
 
   do_pack_value_loop_:
     if(stack.size() > 32)
