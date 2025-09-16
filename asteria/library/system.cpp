@@ -7,9 +7,6 @@
 #include "../runtime/binding_generator.hpp"
 #include "../runtime/global_context.hpp"
 #include "../runtime/random_engine.hpp"
-#include "../compiler/token_stream.hpp"
-#include "../compiler/compiler_error.hpp"
-#include "../compiler/enums.hpp"
 #include "../utils.hpp"
 #include <spawn.h>  // ::posix_spawnp()
 #include <poll.h>  // ::poll()
@@ -20,260 +17,6 @@
 #include <time.h>  // ::clock_gettime()
 extern "C" char** environ;
 namespace asteria {
-namespace {
-
-opt<Punctuator>
-do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<Punctuator> accept)
-  {
-    auto qtok = tstrm.peek_opt();
-    if(!qtok)
-      return nullopt;
-
-    if(!qtok->is_punctuator())
-      return nullopt;
-
-    auto punct = qtok->as_punctuator();
-    if(::rocket::is_none_of(punct, accept))
-      return nullopt;
-
-    tstrm.shift();
-    return punct;
-  }
-
-struct Xparse_array
-  {
-    V_array arr;
-  };
-
-struct Xparse_object
-  {
-    V_object obj;
-    phcow_string key;
-    Source_Location key_sloc;
-  };
-
-using Xparse = ::rocket::variant<Xparse_array, Xparse_object>;
-
-void
-do_accept_object_key(Xparse_object& ctxo, Token_Stream& tstrm)
-  {
-    auto qtok = tstrm.peek_opt();
-    if(!qtok)
-      ASTERIA_THROW(("identifier or string expected at '$1'"), tstrm.next_sloc());
-
-    if(qtok->is_identifier())
-      ctxo.key = qtok->as_identifier();
-    else if(qtok->is_string_literal())
-      ctxo.key = qtok->as_string_literal();
-    else if(qtok->is_keyword()) {
-      switch(qtok->as_keyword())
-        {
-        case keyword_var:         ctxo.key = &"var"; break;
-        case keyword_const:       ctxo.key = &"const"; break;
-        case keyword_func:        ctxo.key = &"func"; break;
-        case keyword_if:          ctxo.key = &"if"; break;
-        case keyword_else:        ctxo.key = &"else"; break;
-        case keyword_switch:      ctxo.key = &"switch"; break;
-        case keyword_case:        ctxo.key = &"case"; break;
-        case keyword_default:     ctxo.key = &"default"; break;
-        case keyword_do:          ctxo.key = &"do"; break;
-        case keyword_while:       ctxo.key = &"while"; break;
-        case keyword_for:         ctxo.key = &"for"; break;
-        case keyword_each:        ctxo.key = &"each"; break;
-        case keyword_try:         ctxo.key = &"try"; break;
-        case keyword_catch:       ctxo.key = &"catch"; break;
-        case keyword_defer:       ctxo.key = &"defer"; break;
-        case keyword_break:       ctxo.key = &"break"; break;
-        case keyword_continue:    ctxo.key = &"continue"; break;
-        case keyword_throw:       ctxo.key = &"throw"; break;
-        case keyword_return:      ctxo.key = &"return"; break;
-        case keyword_null:        ctxo.key = &"null"; break;
-        case keyword_true:        ctxo.key = &"true"; break;
-        case keyword_false:       ctxo.key = &"false"; break;
-        case keyword_import:      ctxo.key = &"import"; break;
-        case keyword_ref:         ctxo.key = &"ref"; break;
-        case keyword_this:        ctxo.key = &"this"; break;
-        case keyword_unset:       ctxo.key = &"unset"; break;
-        case keyword_countof:     ctxo.key = &"countof"; break;
-        case keyword_typeof:      ctxo.key = &"typeof"; break;
-        case keyword_and:         ctxo.key = &"and"; break;
-        case keyword_or:          ctxo.key = &"or"; break;
-        case keyword_not:         ctxo.key = &"not"; break;
-        case keyword_assert:      ctxo.key = &"assert"; break;
-        case keyword_sqrt:        ctxo.key = &"__sqrt"; break;
-        case keyword_isnan:       ctxo.key = &"__isnan"; break;
-        case keyword_isinf:       ctxo.key = &"__isinf"; break;
-        case keyword_abs:         ctxo.key = &"__abs"; break;
-        case keyword_sign:        ctxo.key = &"__sign"; break;
-        case keyword_round:       ctxo.key = &"__round"; break;
-        case keyword_floor:       ctxo.key = &"__floor"; break;
-        case keyword_ceil:        ctxo.key = &"__ceil"; break;
-        case keyword_trunc:       ctxo.key = &"__trunc"; break;
-        case keyword_iround:      ctxo.key = &"__iround"; break;
-        case keyword_ifloor:      ctxo.key = &"__ifloor"; break;
-        case keyword_iceil:       ctxo.key = &"__iceil"; break;
-        case keyword_itrunc:      ctxo.key = &"__itrunc"; break;
-        case keyword_fma:         ctxo.key = &"__fma"; break;
-        case keyword_extern:      ctxo.key = &"extern"; break;
-        case keyword_vcall:       ctxo.key = &"__vcall"; break;
-        case keyword_lzcnt:       ctxo.key = &"__lzcnt"; break;
-        case keyword_tzcnt:       ctxo.key = &"__tzcnt"; break;
-        case keyword_popcnt:      ctxo.key = &"__popcnt"; break;
-        case keyword_addm:        ctxo.key = &"__addm"; break;
-        case keyword_subm:        ctxo.key = &"__subm"; break;
-        case keyword_mulm:        ctxo.key = &"__mulm"; break;
-        case keyword_adds:        ctxo.key = &"__adds"; break;
-        case keyword_subs:        ctxo.key = &"__subs"; break;
-        case keyword_muls:        ctxo.key = &"__muls"; break;
-        case keyword_isvoid:      ctxo.key = &"__isvoid"; break;
-        case keyword_ifcomplete:  ctxo.key = &"__ifcomplete"; break;
-        default:   ASTERIA_THROW(("identifier or string expected at '$1'"), tstrm.next_sloc());
-        };
-    }
-    else
-      ASTERIA_THROW(("identifier or string expected at '$1'"), tstrm.next_sloc());
-
-    ctxo.key_sloc = qtok->sloc();
-    tstrm.shift();
-
-    // A colon or equals sign may follow, but it has no meaning whatsoever.
-    do_accept_punctuator_opt(tstrm, { punctuator_colon, punctuator_assign });
-  }
-
-Value
-do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
-  {
-    // Implement a non-recursive descent parser.
-    Value value;
-    cow_vector<Xparse> stack;
-
-    // Accept a value. No other things such as closed brackets are allowed.
-  parse_next:
-    auto qtok = tstrm.peek_opt();
-    if(!qtok)
-      ASTERIA_THROW(("Value expected at '$1'"), tstrm.next_sloc());
-
-    if(qtok->is_punctuator()) {
-      // Accept an `[` or `{`.
-      if(qtok->as_punctuator() == punctuator_bracket_op) {
-        tstrm.shift();
-
-        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
-        if(!kpunct) {
-          stack.emplace_back(Xparse_array());
-          goto parse_next;
-        }
-
-        // Accept an empty array.
-        value = V_array();
-      }
-      else if(qtok->as_punctuator() == punctuator_brace_op) {
-        tstrm.shift();
-
-        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
-        if(!kpunct) {
-          stack.emplace_back(Xparse_object());
-          do_accept_object_key(stack.mut_back().mut<Xparse_object>(), tstrm);
-          goto parse_next;
-        }
-
-        // Accept an empty object.
-        value = V_object();
-      }
-      else
-        ASTERIA_THROW(("Value expected at '$1'"), tstrm.next_sloc());
-    }
-    else if(qtok->is_keyword()) {
-      // Accept a literal.
-      if(qtok->as_keyword() == keyword_null) {
-        tstrm.shift();
-        value = nullopt;
-      }
-      else if(qtok->as_keyword() == keyword_true) {
-        tstrm.shift();
-        value = true;
-      }
-      else if(qtok->as_keyword() == keyword_false) {
-        tstrm.shift();
-        value = false;
-      }
-      else
-        ASTERIA_THROW(("Value expected at '$1'"), tstrm.next_sloc());
-    }
-    else if(qtok->is_integer_literal()) {
-      // Accept an integer.
-      value = qtok->as_integer_literal();
-      tstrm.shift();
-    }
-    else if(qtok->is_real_literal()) {
-      // Accept a real number.
-      value = qtok->as_real_literal();
-      tstrm.shift();
-    }
-    else if(qtok->is_string_literal()) {
-      // Accept a UTF-8 string.
-      value = qtok->as_string_literal();
-      tstrm.shift();
-    }
-    else
-      ASTERIA_THROW(("Value expected at '$1'"), tstrm.next_sloc());
-
-    while(stack.size()) {
-      // Advance to the next element.
-      auto& ctx = stack.mut_back();
-      switch(ctx.index())
-        {
-        case 0:
-          {
-            auto& ctxa = ctx.mut<Xparse_array>();
-            ctxa.arr.emplace_back(move(value));
-
-            // A comma or semicolon may follow, but it has no meaning whatsoever.
-            do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
-
-            // Look for the next element.
-            auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
-            if(!kpunct)
-              goto parse_next;
-
-            // Close this array.
-            value = move(ctxa.arr);
-            break;
-          }
-
-        case 1:
-          {
-            auto& ctxo = ctx.mut<Xparse_object>();
-            auto pair = ctxo.obj.try_emplace(move(ctxo.key), move(value));
-            if(!pair.second)
-              ASTERIA_THROW(("Duplicate key encountered at '$1'"), tstrm.next_sloc());
-
-            // A comma or semicolon may follow, but it has no meaning whatsoever.
-            do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
-
-            // Look for the next element.
-            auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
-            if(!kpunct) {
-              do_accept_object_key(stack.mut_back().mut<Xparse_object>(), tstrm);
-              goto parse_next;
-            }
-
-            // Close this object.
-            value = move(ctxo.obj);
-            break;
-          }
-
-        default:
-          ROCKET_ASSERT(false);
-      }
-
-      stack.pop_back();
-    }
-
-    return value;
-  }
-
-}  // namespace
 
 V_string
 std_system_get_working_directory()
@@ -729,30 +472,715 @@ std_system_sleep(V_real duration)
 V_object
 std_system_load_conf(V_string path)
   {
-    // Initialize tokenizer options. Unlike JSON5, we support genuine integers
-    // and single-quoted string literals.
-    Compiler_Options opts;
+    ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"));
+    if(!fp)
+      ASTERIA_THROW((
+          "Could not open configuration file '$1'",
+          "[`fopen()` failed: ${errno:full}]"),
+          path);
 
-    Token_Stream tstrm(opts);
-    ::rocket::tinyfmt_file cbuf(path.safe_c_str(), tinyfmt::open_read);
-    tstrm.reload(path, 1, move(cbuf));
+    // Define the internal state of the parser.
+    int next_ln = 1, next_col = 1;
+    int ch = -1;
+    int tok_ln = 1, tok_col = 1;
+    cow_string token;
 
-    Xparse_object ctxo;
-    while(!tstrm.empty()) {
-      // Parse the stream for a key-value pair.
-      do_accept_object_key(ctxo, tstrm);
-      auto value = do_conf_parse_value_nonrecursive(tstrm);
+    auto do_load_next = [&]
+      {
+        ch = getc_unlocked(fp);
+        if(ch < 0)
+          return;
 
-      auto pair = ctxo.obj.try_emplace(move(ctxo.key), move(value));
-      if(!pair.second)
-        ASTERIA_THROW(("Duplicate key encountered at '$1'"), tstrm.next_sloc());
+        if((ch >= 0x80) && (ch <= 0xBF))
+          ASTERIA_THROW(("Invalid UTF-8 byte at '$1:$2:$3'"), path, next_ln, next_col);
+        else if(ROCKET_UNEXPECT(ch > 0x7F)) {
+          // Parse a multibyte Unicode character.
+          uint32_t u8len = ::rocket::lzcnt32((static_cast<uint32_t>(ch) << 24) ^ UINT32_MAX);
+          ch &= (1 << (7 - u8len)) - 1;
 
-      // A comma or semicolon may follow, but it has no meaning whatsoever.
-      do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
+          unsigned char tbytes[4];
+          if(::fread(tbytes, 1, u8len - 1, fp) != u8len - 1)
+            ASTERIA_THROW(("Incomplete UTF-8 sequence at '$1:$2:$3'"), path, next_ln, next_col);
+
+          for(uint32_t k = 0;  k != u8len - 1;  ++k)
+            if((tbytes[k] < 0x80) || (tbytes[k] > 0xBF))
+              ASTERIA_THROW(("Invalid UTF-8 sequence at '$1:$2:$3'"), path, next_ln, next_col);
+            else {
+              ch <<= 6;
+              ch |= tbytes[k] & 0x3F;
+            }
+
+          if((ch < 0x80)  // overlong
+              || (ch < (1 << (u8len * 5 - 4)))  // overlong
+              || ((ch >= 0xD800) && (ch <= 0xDFFF))  // surrogates
+              || (ch > 0x10FFFF))
+            ASTERIA_THROW(("Invalid Unicode character at '$1:$2:$3'"), path, next_ln, next_col);
+        }
+
+        if(ch == '\n') {
+          next_ln ++;
+          next_col = 1;
+        }
+        else if(ch == '\t')
+          next_col += 8 - ((next_col - 1) & 7);
+        else if(ch >= 0)
+          next_col += ::rocket::max(0, ::wcwidth(static_cast<wchar_t>(ch)));
+      };
+
+    auto do_token = [&]
+      {
+        // Clear the current token and skip whitespace.
+        token.clear();
+
+        if(ch < 0) {
+          tok_ln = next_ln;
+          tok_col = next_col;
+          do_load_next();
+          if(ch < 0)
+            return;
+
+          // Skip the UTF-8 BOM, if any.
+          if((tok_ln == 1) && (tok_col == 1) && (ch == 0xFEFF)) {
+            tok_ln = next_ln;
+            tok_col = next_col;
+            do_load_next();
+            if(ch < 0)
+              return;
+          }
+        }
+
+        while(::rocket::is_any_of(ch, { '/', ' ', '\t', '\r', '\n', '\v', '\f' })) {
+          if(ch == '/') {
+            do_load_next();
+            switch(ch)
+              {
+              case '/':
+                // line comment
+                for(;;) {
+                  do_load_next();
+                  if(ch < 0)
+                    return;
+                  else if(ch == '\n')
+                    break;
+                }
+                break;
+
+              case '*':
+                // block comment
+                for(;;) {
+                  do_load_next();
+                  if(ch < 0)
+                    ASTERIA_THROW(("Incomplete comment at '$1:$2:$3'"), path, tok_ln, tok_col);
+                  else if(ch == '*') {
+                    do_load_next();
+                    if(ch < 0)
+                      ASTERIA_THROW(("Incomplete comment at '$1:$2:$3'"), path, tok_ln, tok_col);
+                    else if(ch == '/')
+                      break;
+                  }
+                }
+                break;
+
+              default:
+                ASTERIA_THROW(("Invalid character at '$1:$2:$3'"), path, tok_ln, tok_col);
+              }
+          }
+
+          tok_ln = next_ln;
+          tok_col = next_col;
+          do_load_next();
+          if(ch < 0)
+            return;
+        }
+
+        switch(ch)
+          {
+          case '[':
+          case ']':
+          case '{':
+          case '}':
+          case ':':
+          case '=':
+          case ',':
+          case ';':
+            // Take each of these characters as a single token; do not attempt to get
+            // the next character, as some of these tokens may terminate the input,
+            // and the stream may be blocking but we can't really know whether there
+            // are more data.
+            token.push_back(static_cast<char>(ch));
+            ch = -1;
+            break;
+
+          case '_':
+          case '$':
+          case 'A' ... 'Z':
+          case 'a' ... 'z':
+            // Take an identifier.
+            do {
+              token.push_back(static_cast<char>(ch));
+              do_load_next();
+            }
+            while((ch == '_') || (ch == '$')  || ((ch >= 'A') && (ch <= 'Z'))
+                  || ((ch >= 'a') && (ch <= 'z')) || ((ch >= '0') && (ch <= '9')));
+
+            // An identifier has been accepted.
+            ROCKET_ASSERT(token.size() != 0);
+            break;
+
+          case '+':
+          case '-':
+            // Take a floating-point number. `Infinity` and `NaN` are not supported.
+            token.push_back(static_cast<char>(ch));
+            do_load_next();
+
+            if((ch < '0') || (ch > '9'))
+              ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+            if(ch == '0') {  // fallthrough
+          case '0':
+              token.push_back(static_cast<char>(ch));
+              do_load_next();
+
+              if((ch == 'b') || (ch == 'B')) {
+                // binary
+                auto is_valid_digit = [&]
+                  {
+                    return (ch == '0') || (ch == '1');
+                  };
+
+                token.push_back(static_cast<char>(ch));
+                do_load_next();
+
+                if(!is_valid_digit())
+                  ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+                do {
+                  token.push_back(static_cast<char>(ch));
+                  do_load_next();
+                  if(ch == '`')
+                    do_load_next();
+                }
+                while(is_valid_digit());
+
+                if(ch == '.') {
+                  token.push_back(static_cast<char>(ch));
+                  do_load_next();
+
+                  if(!is_valid_digit())
+                    ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+                  do {
+                    token.push_back(static_cast<char>(ch));
+                    do_load_next();
+                    if(ch == '`')
+                      do_load_next();
+                  }
+                  while(is_valid_digit());
+                }
+
+                if((ch == 'p') || (ch == 'P')) {
+                  token.push_back(static_cast<char>(ch));
+                  do_load_next();
+
+                  if((ch == '+') || (ch == '-')) {
+                    token.push_back(static_cast<char>(ch));
+                    do_load_next();
+                  }
+
+                  if((ch < '0') || (ch > '9'))
+                    ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+                  do {
+                    token.push_back(static_cast<char>(ch));
+                    do_load_next();
+                    if(ch == '`')
+                      do_load_next();
+                  }
+                  while((ch >= '0') && (ch <= '9'));
+                }
+
+                // A binary number has been accepted.
+                ROCKET_ASSERT(token.size() != 0);
+                break;
+              }
+              else if((ch == 'x') || (ch == 'X')) {
+                // hexadecimal
+                auto is_valid_digit = [&]
+                  {
+                    return ((ch >= '0') && (ch <= '9'))
+                           || ((ch >= 'a') && (ch <= 'f'))
+                           || ((ch >= 'A') && (ch <= 'F'));
+                  };
+
+                token.push_back(static_cast<char>(ch));
+                do_load_next();
+
+                if(!is_valid_digit())
+                  ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+                do {
+                  token.push_back(static_cast<char>(ch));
+                  do_load_next();
+                  if(ch == '`')
+                    do_load_next();
+                }
+                while(is_valid_digit());
+
+                if(ch == '.') {
+                  token.push_back(static_cast<char>(ch));
+                  do_load_next();
+
+                  if(!is_valid_digit())
+                    ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+                  do {
+                    token.push_back(static_cast<char>(ch));
+                    do_load_next();
+                    if(ch == '`')
+                      do_load_next();
+                  }
+                  while(is_valid_digit());
+                }
+
+                if((ch == 'p') || (ch == 'P')) {
+                  token.push_back(static_cast<char>(ch));
+                  do_load_next();
+
+                  if((ch == '+') || (ch == '-')) {
+                    token.push_back(static_cast<char>(ch));
+                    do_load_next();
+                  }
+
+                  if((ch < '0') || (ch > '9'))
+                    ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+                  do {
+                    token.push_back(static_cast<char>(ch));
+                    do_load_next();
+                    if(ch == '`')
+                      do_load_next();
+                  }
+                  while((ch >= '0') && (ch <= '9'));
+                }
+
+                // A hexadecimal number has been accepted.
+                ROCKET_ASSERT(token.size() != 0);
+                break;
+              }
+            }
+
+            // decimal
+            token.push_back(static_cast<char>(ch));
+            do_load_next();
+
+            if((ch < '0') || (ch > '9'))
+              ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+            do {  // fallthrough
+          case '1' ... '9':
+              token.push_back(static_cast<char>(ch));
+              do_load_next();
+              if(ch == '`')
+                do_load_next();
+            }
+            while((ch >= '0') && (ch <= '9'));
+
+            if(ch == '.') {
+              token.push_back(static_cast<char>(ch));
+              do_load_next();
+
+              if((ch < '0') || (ch > '9'))
+                ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+              do {
+                token.push_back(static_cast<char>(ch));
+                do_load_next();
+                if(ch == '`')
+                  do_load_next();
+              }
+              while((ch >= '0') && (ch <= '9'));
+            }
+
+            if((ch == 'e') || (ch == 'E')) {
+              token.push_back(static_cast<char>(ch));
+              do_load_next();
+
+              if((ch == '+') || (ch == '-')) {
+                token.push_back(static_cast<char>(ch));
+                do_load_next();
+              }
+
+              if((ch < '0') || (ch > '9'))
+                ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+              do {
+                token.push_back(static_cast<char>(ch));
+                do_load_next();
+                if(ch == '`')
+                  do_load_next();
+              }
+              while((ch >= '0') && (ch <= '9'));
+            }
+
+            // A decimal number has been accepted.
+            ROCKET_ASSERT(token.size() != 0);
+            break;
+
+          case '\'':
+            // Take a single-quote string. When stored in `token`, it shall start
+            // with a double-quote character, followed by the decoded string. No
+            // terminating double-quote character is appended.
+            token.push_back('\"');
+            for(;;) {
+              int ch_ln = next_ln;
+              int ch_col = next_col;
+              do_load_next();
+              if(ch < 0)
+                ASTERIA_THROW(("Incomplete string at '$1:$2:$3'"), path, tok_ln, tok_col);
+              else if((ch <= 0x1F) || (ch == 0x7F))
+                ASTERIA_THROW(("Control character not allowed at '$1:$2:$3'"), path, ch_ln, ch_col);
+              else if(ch == '\'')
+                break;
+
+              // Escape sequences are not allowed.
+              token.push_back(static_cast<char>(ch));
+            }
+
+            // Discard the terminating single-quote character.
+            ROCKET_ASSERT(token.size() != 0);
+            ch = -1;
+            break;
+
+          case '\"':
+            // Take a double-quote string. When stored in `token`, it shall start
+            // with a double-quote character, followed by the decoded string. No
+            // terminating double-quote character is appended.
+            token.push_back('\"');
+            for(;;) {
+              int ch_ln = next_ln;
+              int ch_col = next_col;
+              do_load_next();
+              if(ch < 0)
+                ASTERIA_THROW(("Incomplete string at '$1:$2:$3'"), path, tok_ln, tok_col);
+              else if((ch <= 0x1F) || (ch == 0x7F))
+                ASTERIA_THROW(("Control character not allowed at '$1:$2:$3'"), path, ch_ln, ch_col);
+              else if(ch == '\"')
+                break;
+
+              if(ROCKET_UNEXPECT(ch == '\\')) {
+                // Read an escape sequence.
+                do_load_next();
+                if(ch < 0)
+                  ASTERIA_THROW(("Incomplete escape sequence at '$1:$2:$3'"), path, ch_ln, ch_col);
+
+                switch(ch)
+                  {
+                  case '\\':
+                  case '\"':
+                  case '/':
+                    break;
+
+                  case 'b':
+                    ch = '\b';
+                    break;
+
+                  case 'f':
+                    ch = '\f';
+                    break;
+
+                  case 'n':
+                    ch = '\n';
+                    break;
+
+                  case 'r':
+                    ch = '\r';
+                    break;
+
+                  case 't':
+                    ch = '\t';
+                    break;
+
+                  case 'u':
+                    {
+                      // Read the first UTF-16 code unit.
+                      int utf_ch = 0;
+                      for(uint32_t k = 0;  k != 4;  ++k) {
+                        do_load_next();
+                        if(ch < 0)
+                          ASTERIA_THROW(("Incomplete escape sequence at '$1:$2:$3'"),
+                                        path, ch_ln, ch_col);
+
+                        utf_ch <<= 4;
+                        if((ch >= '0') && (ch <= '9'))
+                          utf_ch |= ch - '0';
+                        else if((ch >= 'A') && (ch <= 'F'))
+                          utf_ch |= ch - 'A' + 10;
+                        else if((ch >= 'a') && (ch <= 'f'))
+                          utf_ch |= ch - 'a' + 10;
+                        else
+                          ASTERIA_THROW(("Incomplete escape sequence at '$1:$2:$3'"),
+                                        path, ch_ln, ch_col);
+                      }
+
+                      if((utf_ch >= 0xDC00) && (utf_ch <= 0xDFFF))
+                        ASTERIA_THROW(("Dangling UTF-16 trailing surrogate at '$1:$2:$3'"),
+                                      path, ch_ln, ch_col);
+
+                      if((utf_ch >= 0xD800) && (utf_ch <= 0xDBFF)) {
+                        // Look for the trailing surrogate, which must also be a
+                        // UTF-16 escape sequence.
+                        do_load_next();
+                        if(ch != '\\')
+                          ASTERIA_THROW(("Missing UTF-16 trailing surrogate at '$1:$2:$3'"),
+                                        path, ch_ln, ch_col);
+
+                        do_load_next();
+                        if(ch != 'u')
+                          ASTERIA_THROW(("Missing UTF-16 trailing surrogate at '$1:$2:$3'"),
+                                        path, ch_ln, ch_col);
+
+                        int ts_ch = 0;
+                        for(uint32_t k = 0;  k != 4;  ++k) {
+                          do_load_next();
+                          if(ch < 0)
+                            ASTERIA_THROW(("Incomplete escape sequence at '$1:$2:$3'"),
+                                          path, ch_ln, ch_col);
+
+                          ts_ch <<= 4;
+                          if((ch >= '0') && (ch <= '9'))
+                            ts_ch |= ch - '0';
+                          else if((ch >= 'A') && (ch <= 'F'))
+                            ts_ch |= ch - 'A' + 10;
+                          else if((ch >= 'a') && (ch <= 'f'))
+                            ts_ch |= ch - 'a' + 10;
+                          else
+                            ASTERIA_THROW(("Incomplete escape sequence at '$1:$2:$3'"),
+                                          path, ch_ln, ch_col);
+                        }
+
+                        if((ts_ch < 0xDC00) || (ts_ch > 0xDFFF))
+                          ASTERIA_THROW(("Invalid UTF-16 trailing surrogate at '$1:$2:$3'"),
+                                        path, ch_ln, ch_col);
+
+                        utf_ch = 0x10000 + ((utf_ch - 0xD800) << 10) + (ts_ch - 0xDC00);
+                      }
+
+                      ch = utf_ch;
+                    }
+                    break;
+
+                  case 'U':
+                    {
+                      // Read a UTF-32 code unit.
+                      int utf_ch = 0;
+                      for(uint32_t k = 0;  k != 6;  ++k) {
+                        do_load_next();
+                        if(ch < 0)
+                          ASTERIA_THROW(("Incomplete escape sequence at '$1:$2:$3'"),
+                                        path, ch_ln, ch_col);
+
+                        utf_ch <<= 4;
+                        if((ch >= '0') && (ch <= '9'))
+                          utf_ch |= ch - '0';
+                        else if((ch >= 'A') && (ch <= 'F'))
+                          utf_ch |= ch - 'A' + 10;
+                        else if((ch >= 'a') && (ch <= 'f'))
+                          utf_ch |= ch - 'a' + 10;
+                        else
+                          ASTERIA_THROW(("Incomplete escape sequence at '$1:$2:$3'"),
+                                        path, ch_ln, ch_col);
+                      }
+
+                      if(utf_ch >= 0x10FFFF)
+                        ASTERIA_THROW(("Invalid UTF-32 character at '$1:$2:$3'"),
+                                      path, ch_ln, ch_col);
+
+                      if((utf_ch >= 0xD800) && (utf_ch <= 0xDFFF))
+                        ASTERIA_THROW(("Dangling UTF-16 surrogate at '$1:$2:$3'"),
+                                      path, ch_ln, ch_col);
+
+                      ch = utf_ch;
+                    }
+                    break;
+
+                  default:
+                    ASTERIA_THROW(("Invalid escape sequence at '$1:$2:$3'"), path, ch_ln, ch_col);
+                  }
+              }
+
+              // Move the unescaped character into the token.
+              if(ROCKET_EXPECT(ch <= 0x7F))
+                token.push_back(static_cast<char>(ch));
+              else {
+                char mbs[4];
+                char* eptr = mbs;
+                utf8_encode(eptr, static_cast<char32_t>(ch));
+                token.append(mbs, eptr);
+              }
+            }
+
+            // Discard the terminating double-quote character.
+            ROCKET_ASSERT(token.size() != 0);
+            ch = -1;
+            break;
+
+          default:
+            ASTERIA_THROW(("Invalid character at '$1:$2:$3'"), path, tok_ln, tok_col);
+          }
+      };
+
+    // Break deep recursion with a handwritten stack.
+    struct xFrame
+      {
+        V_array* psa;
+        V_object* pso;
+      };
+
+    V_object root;
+    V_array* psa = nullptr;
+    V_object* pso = &root;
+    Value* pstor = nullptr;
+    cow_vector<xFrame> stack;
+    ::rocket::ascii_numget numg;
+
+    do_token();
+    if(token.empty())
+      return root;
+
+  do_pack_value_loop_:
+    if(stack.size() > 32)
+      ASTERIA_THROW(("Nesting limit exceeded at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+    if(psa) {
+      // in array
+      pstor = &(psa->emplace_back());
+    }
+    else {
+      // in object
+      cow_string key;
+      if(token[0] == '\"')
+        key.assign(token, 1);
+      else if((token[0] == '_') || (token[0] == '$') || ((token[0] >= 'A') && (token[0] <= 'Z'))
+              || ((token[0] >= 'a') && (token[0] <= 'z')))
+        key.assign(token, 0);
+      else
+        ASTERIA_THROW(("Key expected at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+      do_token();
+      if((token[0] == ':') || (token[0] == '='))
+        do_token();
+
+      auto emr = pso->try_emplace(key);
+      if(!emr.second)
+        ASTERIA_THROW(("Duplicate key `$4` at '$1:$2:$3'"), path, tok_ln, tok_col, key);
+
+      pstor = &(emr.first->second);
     }
 
-    // Extract the value.
-    return move(ctxo.obj);
+    if(token[0] == '[') {
+      // array
+      do_token();
+      if(token.empty())
+        ASTERIA_THROW(("Array not terminated properly at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+      if(token[0] != ']') {
+        // open
+        auto& frm = stack.emplace_back();
+        frm.psa = psa;
+        frm.pso = pso;
+
+        psa = &(pstor->open_array());
+        pso = nullptr;
+        goto do_pack_value_loop_;
+      }
+
+      // empty
+      pstor->open_array();
+    }
+    else if(token[0] == '{') {
+      // object
+      do_token();
+      if(token.empty())
+        ASTERIA_THROW(("Object not terminated properly at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+      if(token[0] != '}') {
+        // open
+        auto& frm = stack.emplace_back();
+        frm.psa = psa;
+        frm.pso = pso;
+
+        psa = nullptr;
+        pso = &(pstor->open_object());
+        goto do_pack_value_loop_;
+      }
+
+      // empty
+      pstor->open_object();
+    }
+    else if((token[0] == '+') || (token[0] == '-') || ((token[0] >= '0') && (token[0] <= '9'))) {
+      // number
+      if(token.find('.') == cow_string::npos) {
+        // integer
+        size_t n = numg.parse_I(token.data(), token.size());
+        ROCKET_ASSERT(n == token.size());
+        numg.cast_I(pstor->open_integer(), INT64_MIN, INT64_MAX);
+        if(numg.overflowed())
+          ASTERIA_THROW(("Integer out of range at '$1:$2:$3'"), path, tok_ln, tok_col);
+      }
+      else {
+        // real number
+        size_t n = numg.parse_D(token.data(), token.size());
+        ROCKET_ASSERT(n == token.size());
+        numg.cast_D(pstor->open_real(), -DBL_MAX, DBL_MAX);
+        if(numg.overflowed())
+          ASTERIA_THROW(("Real number out of range at '$1:$2:$3'"), path, tok_ln, tok_col);
+      }
+    }
+    else if(token[0] == '\"') {
+      // string
+      pstor->open_string().assign(token.data() + 1, token.size() - 1);
+    }
+    else if(token == "null")
+      pstor->clear();
+    else if(token == "true")
+      pstor->open_boolean() = true;
+    else if(token == "false")
+      pstor->open_boolean() = false;
+    else
+      ASTERIA_THROW(("Invalid token at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+    for(;;) {
+      do_token();
+      if((token[0] == ',') || (token[0] == ';'))
+        do_token();
+
+      if(pso && token.empty() && stack.empty())
+        break;
+
+      if(psa) {
+        // in array
+        if(token.empty())
+          ASTERIA_THROW(("Array not terminated properly at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+        if(token[0] != ']')
+          goto do_pack_value_loop_;
+      }
+      else {
+        // in object
+        if(token.empty())
+          ASTERIA_THROW(("Object not terminated properly at '$1:$2:$3'"), path, tok_ln, tok_col);
+
+        if(token[0] != '}')
+          goto do_pack_value_loop_;
+      }
+
+      // close
+      psa = stack.back().psa;
+      pso = stack.back().pso;
+      stack.pop_back();
+    }
+
+    return root;
   }
 
 void
