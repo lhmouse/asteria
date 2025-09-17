@@ -216,46 +216,6 @@ struct Indent
       }
   };
 
-struct String_Pool
-  {
-    cow_vector<phcow_string> st;
-
-    struct hash_less
-      {
-        bool
-        operator()(const phcow_string& x, const phcow_string& y)
-          const noexcept
-          { return x.rdhash() < y.rdhash();  }
-
-        bool
-        operator()(const phcow_string& x, size_t y)
-          const noexcept
-          { return x.rdhash() < y;  }
-
-        bool
-        operator()(size_t x, const phcow_string& y)
-          const noexcept
-          { return x < y.rdhash();  }
-      };
-
-    const phcow_string&
-    intern(const char* str, size_t len)
-      {
-        size_t hval = phcow_string::hasher()(str, len);
-        auto range = ::std::equal_range(this->st.begin(), this->st.end(), hval, hash_less());
-
-        // String already exists?
-        for(auto it = range.first;  it != range.second;  ++it)
-          if(it->rdstr().equals(str, len))
-            return *it;
-
-        // No. Allocate a new one, while keeping the pool sorted.
-        auto it = this->st.insert(range.second, cow_string(str, len));
-        ROCKET_ASSERT(it->rdhash() == hval);
-        return *it;
-      }
-  };
-
 void
 do_load_next(Parser_Context& ctx, const Unified_Source& usrc)
   {
@@ -600,7 +560,6 @@ do_parse_from(Value& root, const Unified_Source& usrc)
     cow_vector<xFrame> stack;
     cow_string token;
     ::rocket::ascii_numget numg;
-    String_Pool key_pool;
     Value* pstor = &root;
 
     do_token(token, ctx, usrc);
@@ -648,7 +607,7 @@ do_parse_from(Value& root, const Unified_Source& usrc)
         if(token[0] != '\"')
           return do_err(ctx, "Missing key string");
 
-        auto emr = frm.pso->try_emplace(key_pool.intern(token.data() + 1, token.size() - 1));
+        auto emr = frm.pso->try_emplace(token.substr(1));
         ROCKET_ASSERT(emr.second);
 
         do_token(token, ctx, usrc);
@@ -731,7 +690,7 @@ do_parse_from(Value& root, const Unified_Source& usrc)
             if(token[0] != '\"')
               return do_err(ctx, "Missing key string");
 
-            auto emr = frm.pso->try_emplace(key_pool.intern(token.data() + 1, token.size() - 1));
+            auto emr = frm.pso->try_emplace(token.substr(1));
             if(!emr.second)
               return do_err(ctx, "Duplicate key string");
 
