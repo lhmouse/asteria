@@ -487,7 +487,7 @@ std_system_load_conf(V_string path)
 
     auto do_load_next = [&]
       {
-        ch = getc_unlocked(fp);
+        ch = getc_unlocked(fp.get());
         if(ch < 0)
           return;
 
