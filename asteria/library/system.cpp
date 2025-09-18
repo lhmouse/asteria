@@ -472,7 +472,7 @@ std_system_sleep(V_real duration)
 V_object
 std_system_load_conf(V_string path)
   {
-    ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"));
+    ::rocket::unique_ptr<::FILE, int (::FILE*)> fp(::fopen(path.safe_c_str(), "rb"),::fclose);
     if(!fp)
       ASTERIA_THROW((
           "Could not open configuration file '$1'",
@@ -487,7 +487,7 @@ std_system_load_conf(V_string path)
 
     auto do_load_next = [&]
       {
-        ch = getc_unlocked(fp.get());
+        ch = getc_unlocked(fp);
         if(ch < 0)
           return;
 
