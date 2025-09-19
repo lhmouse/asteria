@@ -838,9 +838,8 @@ std_string_replace(V_string text, optV_integer from, optV_integer length, V_stri
     }
     else {
       // Search for `pattern` in `text`.
-      opt<cow_string::const_iterator> qbrk;
       const auto srch = do_create_searcher_for_pattern(pattern.begin(), pattern.end());
-      while(!!(qbrk = srch.search_opt(range.first, range.second))) {
+      while(auto qbrk = srch.search_opt(range.first, range.second)) {
         res.append(range.first, *qbrk);
         res.append(replacement);
         range.first = *qbrk + pattern.ssize();
