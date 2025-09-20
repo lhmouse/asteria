@@ -56,13 +56,13 @@ std_filesystem_write(V_string path, optV_integer offset, V_string data);
 void
 std_filesystem_append(V_string path, V_string data, optV_boolean exclusive);
 
-// `std.filesystem.copy_file`
+// `std.filesystem.copy`
 void
-std_filesystem_copy_file(V_string path_new, V_string path_old);
+std_filesystem_copy(V_string path_new, V_string path_old);
 
-// `std.filesystem.remove_file`
+// `std.filesystem.remove`
 V_integer
-std_filesystem_remove_file(V_string path);
+std_filesystem_remove(V_string path);
 
 // Create an object that is to be referenced as `std.filesystem`.
 void

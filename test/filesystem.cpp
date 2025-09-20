@@ -41,7 +41,7 @@ int main()
         assert catch( std.filesystem.move(dname + "/f5", dname + "/f2") ) != null;
         assert std.array.sort(std.array.copy_keys(std.filesystem.list(dname))) == ["f3","f4","f5"];
 
-        assert catch( std.filesystem.remove_file(dname) ) != null;
+        assert catch( std.filesystem.remove(dname) ) != null;
         assert catch( std.filesystem.remove_directory(dname) ) != null;
         assert std.filesystem.remove_recursive(dname) == 8;
         assert std.filesystem.remove_directory(dname) == 0;
@@ -69,7 +69,7 @@ int main()
         assert std.filesystem.read(fname, 2, 1000) == "lHE#??!!";
         assert std.filesystem.read(fname, 2, 3) == "lHE";
 
-        std.filesystem.copy_file(fname + ".2", fname);
+        std.filesystem.copy(fname + ".2", fname);
         assert std.filesystem.read(fname + ".2") == "helHE#??!!";
 
         var data = "";
@@ -91,12 +91,12 @@ int main()
         assert data == "lHE";
 
         assert catch( std.filesystem.create_directory(fname) ) != null;
-        assert std.filesystem.remove_file(fname) == 1;
-        assert std.filesystem.remove_file(fname) == 0;
-        assert std.filesystem.remove_file(fname + ".2") == 1;
+        assert std.filesystem.remove(fname) == 1;
+        assert std.filesystem.remove(fname) == 0;
+        assert std.filesystem.remove(fname + ".2") == 1;
 
         assert std.filesystem.create_directory(fname) == 1;
-        assert catch( std.filesystem.remove_file(fname) ) != null;
+        assert catch( std.filesystem.remove(fname) ) != null;
         assert std.filesystem.remove_directory(fname) == 1;
 
 ///////////////////////////////////////////////////////////////////////////////

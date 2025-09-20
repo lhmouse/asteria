@@ -207,8 +207,8 @@ variable. Individual components are categorized into sub-objects.
     10. [`std.filesystem.stream(path, callback, [offset, [limit]])`](#stdfilesystemstreampath-callback-offset-limit)
     11. [`std.filesystem.write(path, [offset], data)`](#stdfilesystemwritepath-offset-data)
     12. [`std.filesystem.append(path, data, [exclusive])`](#stdfilesystemappendpath-data-exclusive)
-    13. [`std.filesystem.copy_file(path_new, path_old)`](#stdfilesystemcopy_filepath_new-path_old)
-    14. [`std.filesystem.remove_file(path)`](#stdfilesystemremove_filepath)
+    13. [`std.filesystem.copy(path_new, path_old)`](#stdfilesystemcopypath_new-path_old)
+    14. [`std.filesystem.remove(path)`](#stdfilesystemremovepath)
 11. [`std.checksum`](#stdchecksum)
     1. [`std.checksum.CRC32()`](#stdchecksumcrc32)
     2. [`std.checksum.crc32(data)`](#stdchecksumcrc32data)
@@ -2090,7 +2090,7 @@ variable. Individual components are categorized into sub-objects.
 
 * Throws an exception if a write error occurs.
 
-### `std.filesystem.copy_file(path_new, path_old)`
+### `std.filesystem.copy(path_new, path_old)`
 
 * Copies the file at `path_old` to `path_new`. If `path_old` is a symbolic
   link, its target file is copied, instead of the symbolic link itself. This
@@ -2098,7 +2098,7 @@ variable. Individual components are categorized into sub-objects.
 
 * Throws an exception on failure.
 
-### `std.filesystem.remove_file(path)`
+### `std.filesystem.remove(path)`
 
 * Removes the file at `path`. This function fails if `path` designates a
   directory.

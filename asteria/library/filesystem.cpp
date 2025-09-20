@@ -604,7 +604,7 @@ std_filesystem_append(V_string path, V_string data, optV_boolean exclusive)
   }
 
 void
-std_filesystem_copy_file(V_string path_new, V_string path_old)
+std_filesystem_copy(V_string path_new, V_string path_old)
   {
     // Open the old file.
     ::rocket::unique_posix_fd fd_old(::open(path_old.safe_c_str(), O_RDONLY | O_NOCTTY));
@@ -662,7 +662,7 @@ std_filesystem_copy_file(V_string path_new, V_string path_old)
   }
 
 V_integer
-std_filesystem_remove_file(V_string path)
+std_filesystem_remove(V_string path)
   {
     if(::unlink(path.safe_c_str()) == 0)
       return 1;
@@ -880,9 +880,9 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(&"copy_file",
+    result.insert_or_assign(&"copy",
       ASTERIA_BINDING(
-        "std.filesystem.copy_file", "path_new, path_old",
+        "std.filesystem.copy", "path_new, path_old",
         Argument_Reader&& reader)
       {
         V_string path_new, path_old;
@@ -891,14 +891,14 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.required(path_new);
         reader.required(path_old);
         if(reader.end_overload())
-          return (void) std_filesystem_copy_file(path_new, path_old);
+          return (void) std_filesystem_copy(path_new, path_old);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(&"remove_file",
+    result.insert_or_assign(&"remove",
       ASTERIA_BINDING(
-        "std.filesystem.remove_file", "path",
+        "std.filesystem.remove", "path",
         Argument_Reader&& reader)
       {
         V_string path;
@@ -906,7 +906,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value) std_filesystem_remove_file(path);
+          return (Value) std_filesystem_remove(path);
 
         reader.throw_no_matching_function_call();
       });
