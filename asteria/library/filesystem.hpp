@@ -60,6 +60,10 @@ std_filesystem_append(V_string path, V_string data, optV_boolean exclusive);
 void
 std_filesystem_copy(V_string path_new, V_string path_old);
 
+// `std.filesystem.symlink`
+void
+std_filesystem_symlink(V_string path_new, V_string target);
+
 // `std.filesystem.remove`
 V_integer
 std_filesystem_remove(V_string path);

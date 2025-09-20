@@ -72,6 +72,9 @@ int main()
         std.filesystem.copy(fname + ".2", fname);
         assert std.filesystem.read(fname + ".2") == "helHE#??!!";
 
+        std.filesystem.symlink(fname + ".3", fname);
+        assert std.filesystem.read(fname + ".3") == "helHE#??!!";
+
         var data = "";
         var appender = func(off, str) { data += str;  };
         assert catch( std.filesystem.stream("/nonexistent", appender) ) != null;
@@ -94,6 +97,7 @@ int main()
         assert std.filesystem.remove(fname) == 1;
         assert std.filesystem.remove(fname) == 0;
         assert std.filesystem.remove(fname + ".2") == 1;
+        assert std.filesystem.remove(fname + ".3") == 1;
 
         assert std.filesystem.create_directory(fname) == 1;
         assert catch( std.filesystem.remove(fname) ) != null;

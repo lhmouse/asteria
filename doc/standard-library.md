@@ -208,7 +208,8 @@ variable. Individual components are categorized into sub-objects.
     11. [`std.filesystem.write(path, [offset], data)`](#stdfilesystemwritepath-offset-data)
     12. [`std.filesystem.append(path, data, [exclusive])`](#stdfilesystemappendpath-data-exclusive)
     13. [`std.filesystem.copy(path_new, path_old)`](#stdfilesystemcopypath_new-path_old)
-    14. [`std.filesystem.remove(path)`](#stdfilesystemremovepath)
+    14. [`std.filesystem.symlink(path_new, target)`](#stdfilesystemsymlinkpath_new-target)
+    15. [`std.filesystem.remove(path)`](#stdfilesystemremovepath)
 11. [`std.checksum`](#stdchecksum)
     1. [`std.checksum.CRC32()`](#stdchecksumcrc32)
     2. [`std.checksum.crc32(data)`](#stdchecksumcrc32data)
@@ -2095,6 +2096,12 @@ variable. Individual components are categorized into sub-objects.
 * Copies the file at `path_old` to `path_new`. If `path_old` is a symbolic
   link, its target file is copied, instead of the symbolic link itself. This
   function fails if `path_old` designates a directory.
+
+* Throws an exception on failure.
+
+### `std.filesystem.symlink(path_new, target)`
+
+* Creates a symbolic link at `path_new` to `target`.
 
 * Throws an exception on failure.
 

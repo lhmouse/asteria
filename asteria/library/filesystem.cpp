@@ -661,6 +661,16 @@ std_filesystem_copy(V_string path_new, V_string path_old)
           path_new);
   }
 
+void
+std_filesystem_symlink(V_string path_new, V_string target)
+  {
+    if(::symlink(target.safe_c_str(), path_new.safe_c_str()) != 0)
+      ASTERIA_THROW((
+          "Could not create symbolic link '$2' to '$1'",
+          "[`symlink()` failed: ${errno:full}]"),
+          target, path_new);
+  }
+
 V_integer
 std_filesystem_remove(V_string path)
   {
@@ -892,6 +902,22 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.required(path_old);
         if(reader.end_overload())
           return (void) std_filesystem_copy(path_new, path_old);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(&"symlink",
+      ASTERIA_BINDING(
+        "std.filesystem.symlink", "path_new, target",
+        Argument_Reader&& reader)
+      {
+        V_string path_new, target;
+
+        reader.start_overload();
+        reader.required(path_new);
+        reader.required(target);
+        if(reader.end_overload())
+          return (void) std_filesystem_symlink(path_new, target);
 
         reader.throw_no_matching_function_call();
       });
