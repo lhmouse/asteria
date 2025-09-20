@@ -31,11 +31,11 @@ std_filesystem_glob(V_string pattern);
 optV_object
 std_filesystem_list(V_string path);
 
-// `std.filesystem.directory_create`
+// `std.filesystem.create_directory`
 V_integer
 std_filesystem_create_directory(V_string path);
 
-// `std.filesystem.directory_remove`
+// `std.filesystem.remove_directory`
 V_integer
 std_filesystem_remove_directory(V_string path);
 
