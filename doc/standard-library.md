@@ -1967,7 +1967,7 @@ variable. Individual components are categorized into sub-objects.
   * `inode`          integer: unique file ID on this device
   * `link_count`     integer: number of hard links
   * `is_directory`   boolean: whether this is a directory
-  * `is_symbolic`    boolean: whether this is a symbolic link
+  * `is_symlink`    boolean: whether this is a symbolic link
   * `size`           integer: size of contents in bytes
   * `size_on_disk`   integer: size of storage on disk in bytes
   * `time_accessed`  integer: timestamp of last access
@@ -2013,7 +2013,7 @@ variable. Individual components are categorized into sub-objects.
 
   * `inode`          integer: unique file ID on this device
   * `is_directory`   boolean: whether this is a directory
-  * `is_symbolic`    boolean: whether this is a symbolic link
+  * `is_symlink`     boolean: whether this is a symbolic link
 
   If the path does not exist, `null` is returned.
 

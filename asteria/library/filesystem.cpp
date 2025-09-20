@@ -104,7 +104,7 @@ std_filesystem_get_properties(V_string path)
         S_ISDIR(stb.st_mode)  // whether this is a directory
       ));
 
-    stat.try_emplace(&"is_symbolic",
+    stat.try_emplace(&"is_symlink",
       V_boolean(
         S_ISLNK(stb.st_mode)  // whether this is a symbolic link
       ));
@@ -369,7 +369,7 @@ std_filesystem_list(V_string path)
           is_dir  // whether this is a directory
         ));
 
-      entry.try_emplace(&"is_symbolic",
+      entry.try_emplace(&"is_symlink",
         V_boolean(
           is_sym  // whether this is a symbolic link
         ));
