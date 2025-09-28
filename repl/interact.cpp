@@ -14,7 +14,7 @@ void
 read_execute_print_single()
   {
     // Prepare for the next snippet.
-    repl_index ++;
+    repl_index = (repl_index + 1) % 1000;
     repl_source.clear();
     repl_file.clear();
     repl_args.clear();
@@ -23,13 +23,12 @@ read_execute_print_single()
     heredoc.swap(repl_heredoc);
 
     bool iscmd = false, more = false;
+    long linenum = 1;
     cow_string linestr;
     size_t pos;
 
     // Prompt for the first line.
-    long linenum = 1;
-    int indent;
-    libedit_set_prompt("#%-3lu%2lu%n> ", repl_index, linenum, &indent);
+    libedit_set_prompt("#%.3lu:1> ", repl_index);
 
     while(libedit_gets(linestr)) {
       // Remove trailing new line characters, if any.
@@ -65,7 +64,7 @@ read_execute_print_single()
       // Prompt for the next line.
       repl_source.push_back('\n');
       linenum ++;
-      libedit_set_prompt("%*lu> ", indent, linenum);
+      libedit_set_prompt("%6lu> ", linenum);
 
       // Auto-indent it.
       pos = linestr.find_not_of(" \t");
@@ -131,7 +130,7 @@ read_execute_print_single()
       real_name = repl_file;
       if(ROCKET_EXPECT(real_name.empty())) {
         char strbuf[64];
-        ::sprintf(strbuf, "expression #%lu", repl_index);
+        ::sprintf(strbuf, "expression #%.3lu", repl_index);
         real_name.assign(strbuf);
       }
 
@@ -148,7 +147,7 @@ read_execute_print_single()
         real_name = repl_file;
         if(ROCKET_EXPECT(real_name.empty())) {
           char strbuf[64];
-          ::sprintf(strbuf, "snippet #%lu", repl_index);
+          ::sprintf(strbuf, "snippet #%.3lu", repl_index);
           real_name.assign(strbuf);
         }
 
@@ -184,7 +183,7 @@ read_execute_print_single()
       val.dump(fmt);
     }
 
-    repl_printf("* result #%lu: %s", repl_index, fmt.c_str());
+    repl_printf("* result #%.3lu: %s", repl_index, fmt.c_str());
   }
 
 }  // namespace asteria
