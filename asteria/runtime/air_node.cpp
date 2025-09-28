@@ -2129,7 +2129,8 @@ solidify(AVM_Rod& rod)
                         top.set_temporary(val);
                       val = result;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Increment not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2172,7 +2173,8 @@ solidify(AVM_Rod& rod)
                         top.set_temporary(val);
                       val = result;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Decrement not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2335,7 +2337,8 @@ solidify(AVM_Rod& rod)
                       Subscript::S_object_key xsub = { move(rhs.open_string()) };
                       do_push_subscript_and_check(top, move(xsub));
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Subscript value not valid (operand was `$1`)", rhs);
 
                     ctx.stack().pop();
@@ -2398,7 +2401,8 @@ solidify(AVM_Rod& rod)
                       V_real& val = rhs.open_real();
                       val = -val;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Arithmetic negation not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2437,7 +2441,8 @@ solidify(AVM_Rod& rod)
                       for(auto it = val.mut_begin();  it != val.end();  ++it)
                         *it = static_cast<char>(~*it);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Bitwise NOT not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2495,7 +2500,8 @@ solidify(AVM_Rod& rod)
                     else if(rhs.is_object()) {
                       rhs = V_integer(rhs.as_object().size());
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "`countof` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2545,7 +2551,8 @@ solidify(AVM_Rod& rod)
                       // __sqrt; always real
                       rhs = ::std::sqrt(rhs.as_real());
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "`__sqrt` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2576,7 +2583,8 @@ solidify(AVM_Rod& rod)
                       // __isnan real
                       rhs = ::std::isnan(rhs.as_real());
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "`__isnan` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2607,7 +2615,8 @@ solidify(AVM_Rod& rod)
                       // __isinf real
                       rhs = ::std::isinf(rhs.as_real());
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "`__isinf` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2645,7 +2654,8 @@ solidify(AVM_Rod& rod)
                       V_real& val = rhs.open_real();
                       val = ::std::fabs(val);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "`__abs` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2676,7 +2686,8 @@ solidify(AVM_Rod& rod)
                       // __sign real
                       rhs = ::std::signbit(rhs.as_real());
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "`__sign` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2707,7 +2718,8 @@ solidify(AVM_Rod& rod)
                       // __round real
                       rhs = ::std::round(rhs.as_real());
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "`__round` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2738,7 +2750,8 @@ solidify(AVM_Rod& rod)
                       // __floor real
                       rhs = ::std::floor(rhs.as_real());
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "`__floor` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2769,7 +2782,8 @@ solidify(AVM_Rod& rod)
                       // __ceil real
                       rhs = ::std::ceil(rhs.as_real());
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "`__ceil` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2800,7 +2814,8 @@ solidify(AVM_Rod& rod)
                       // __trunc real
                       rhs = ::std::trunc(rhs.as_real());
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "`__trunc` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2831,7 +2846,8 @@ solidify(AVM_Rod& rod)
                       // __iround real
                       rhs = safe_double_to_int64(::std::round(rhs.as_real()));
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "`__iround` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2862,7 +2878,8 @@ solidify(AVM_Rod& rod)
                       // __ifloor real
                       rhs = safe_double_to_int64(::std::floor(rhs.as_real()));
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                              "`__ifloor` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2893,7 +2910,8 @@ solidify(AVM_Rod& rod)
                       // __iceil real
                       rhs = safe_double_to_int64(::std::ceil(rhs.as_real()));
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "`__iceil` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2924,7 +2942,8 @@ solidify(AVM_Rod& rod)
                       // __itrunc real
                       rhs = safe_double_to_int64(::std::trunc(rhs.as_real()));
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "`__itrunc` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2952,7 +2971,8 @@ solidify(AVM_Rod& rod)
                       V_integer& val = rhs.open_integer();
                       val = static_cast<V_integer>(::rocket::lzcnt64(static_cast<uint64_t>(val)));
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "`__lzcnt` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2980,7 +3000,8 @@ solidify(AVM_Rod& rod)
                       V_integer& val = rhs.open_integer();
                       val = static_cast<V_integer>(::rocket::tzcnt64(static_cast<uint64_t>(val)));
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                              "`__tzcnt` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -3008,7 +3029,8 @@ solidify(AVM_Rod& rod)
                       V_integer& val = rhs.open_integer();
                       val = static_cast<V_integer>(::rocket::popcnt64(static_cast<uint64_t>(val)));
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                              "`__popcnt` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -3276,7 +3298,8 @@ solidify(AVM_Rod& rod)
                       V_string& val = lhs.open_string();
                       val += rhs.as_string();
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3322,7 +3345,8 @@ solidify(AVM_Rod& rod)
                       V_boolean& val = lhs.open_boolean();
                       val ^= rhs.as_boolean();
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3388,7 +3412,8 @@ solidify(AVM_Rod& rod)
                       V_array temp = do_duplicate_sequence(rhs.as_array(), lhs.as_integer());
                       lhs = move(temp);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3436,7 +3461,8 @@ solidify(AVM_Rod& rod)
                       val += '/';
                       val += rhs.as_string();
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Division not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3478,7 +3504,8 @@ solidify(AVM_Rod& rod)
                       V_real& val = lhs.open_real();
                       val = ::std::fmod(val, rhs.as_real());
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Modulo not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3524,7 +3551,8 @@ solidify(AVM_Rod& rod)
                       for(auto it = val.mut_begin();  it != val.end();  ++it, ++mc)
                         *it = static_cast<char>(*it & *mc);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Bitwise AND not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3570,7 +3598,8 @@ solidify(AVM_Rod& rod)
                       for(auto mc = mask.begin();  mc != mask.end();  ++it, ++mc)
                         *it = static_cast<char>(*it | *mc);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Bitwise OR not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3616,7 +3645,8 @@ solidify(AVM_Rod& rod)
                       for(auto mc = mask.begin();  mc != mask.end();  ++it, ++mc)
                         *it = static_cast<char>(*it ^ *mc);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3648,7 +3678,8 @@ solidify(AVM_Rod& rod)
                       V_integer result = ::rocket::addm(val, rhs.as_integer());
                       val = result;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Modular addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3680,7 +3711,8 @@ solidify(AVM_Rod& rod)
                       V_integer result = ::rocket::subm(val, rhs.as_integer());
                       val = result;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Modular subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3712,7 +3744,8 @@ solidify(AVM_Rod& rod)
                       V_integer result = ::rocket::mulm(val, rhs.as_integer());
                       val = result;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Modular multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3747,7 +3780,8 @@ solidify(AVM_Rod& rod)
                         result = (val >> 63) ^ INT64_MAX;
                       val = result;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Saturating addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3782,7 +3816,8 @@ solidify(AVM_Rod& rod)
                         result = (val >> 63) ^ INT64_MAX;
                       val = result;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Saturating subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3817,7 +3852,8 @@ solidify(AVM_Rod& rod)
                         result = (val >> 63) ^ (rhs.as_integer() >> 63) ^ INT64_MAX;
                       val = result;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Saturating multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3872,7 +3908,8 @@ solidify(AVM_Rod& rod)
                       val.erase(0, n);
                       val.append(n);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Logical left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3927,7 +3964,8 @@ solidify(AVM_Rod& rod)
                       val.pop_back(n);
                       val.insert(0, n);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Logical right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -3982,7 +4020,8 @@ solidify(AVM_Rod& rod)
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, PTRDIFF_MAX);
                       val.append(n);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -4034,7 +4073,8 @@ solidify(AVM_Rod& rod)
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
                       val.pop_back(n);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
@@ -4067,7 +4107,8 @@ solidify(AVM_Rod& rod)
                       V_real& val = lhs.open_real();
                       val = ::std::fma(val, mid.as_real(), rhs.as_real());
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "`__fma` not applicable (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
 
                     ctx.stack().pop(2);
@@ -5184,7 +5225,8 @@ solidify(AVM_Rod& rod)
                       V_real& val = lhs.open_real();
                       val += static_cast<V_real>(irhs);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Addition not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5223,7 +5265,8 @@ solidify(AVM_Rod& rod)
                       V_real& val = lhs.open_real();
                       val -= static_cast<V_real>(irhs);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Subtraction not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5272,7 +5315,8 @@ solidify(AVM_Rod& rod)
                       V_array& val = lhs.open_array();
                       val = do_duplicate_sequence(val, irhs);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Multiplication not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5312,7 +5356,8 @@ solidify(AVM_Rod& rod)
                       V_real& val = lhs.open_real();
                       val /= static_cast<V_real>(irhs);;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Division not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5352,7 +5397,8 @@ solidify(AVM_Rod& rod)
                       V_real& val = lhs.open_real();
                       val = ::std::fmod(val, static_cast<V_real>(irhs));
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Modulo not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5381,7 +5427,8 @@ solidify(AVM_Rod& rod)
                       V_integer& val = lhs.open_integer();
                       val &= irhs;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Bitwise AND not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5410,7 +5457,8 @@ solidify(AVM_Rod& rod)
                       V_integer& val = lhs.open_integer();
                       val |= irhs;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Bitwise OR not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5439,7 +5487,8 @@ solidify(AVM_Rod& rod)
                       V_integer& val = lhs.open_integer();
                       val ^= irhs;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5469,7 +5518,8 @@ solidify(AVM_Rod& rod)
                       V_integer result = ::rocket::addm(val, irhs);
                       val = result;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Modular addition not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5499,7 +5549,8 @@ solidify(AVM_Rod& rod)
                       V_integer result = ::rocket::subm(val, irhs);
                       val = result;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Modular subtraction not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5529,7 +5580,8 @@ solidify(AVM_Rod& rod)
                       V_integer result = ::rocket::mulm(val, irhs);
                       val = result;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Modular multiplication not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5562,7 +5614,8 @@ solidify(AVM_Rod& rod)
                         result = (val >> 63) ^ INT64_MAX;
                       val = result;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Saturating addition not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5595,7 +5648,8 @@ solidify(AVM_Rod& rod)
                         result = (val >> 63) ^ INT64_MAX;
                       val = result;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Saturating subtraction not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5628,7 +5682,8 @@ solidify(AVM_Rod& rod)
                         result = (val >> 63) ^ (irhs >> 63) ^ INT64_MAX;
                       val = result;
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Saturating multiplication not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5677,7 +5732,8 @@ solidify(AVM_Rod& rod)
                       val.erase(0, n);
                       val.append(n);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Logical left shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5726,7 +5782,8 @@ solidify(AVM_Rod& rod)
                       val.pop_back(n);
                       val.insert(0, n);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Logical right shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5775,7 +5832,8 @@ solidify(AVM_Rod& rod)
                       size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, PTRDIFF_MAX);
                       val.append(n);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
@@ -5821,7 +5879,8 @@ solidify(AVM_Rod& rod)
                       size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, val.ssize());
                       val.pop_back(n);
                     }
-                    else throw Runtime_Error(xtc_format,
+                    else
+                      throw Runtime_Error(xtc_format,
                             "Arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
