@@ -3340,11 +3340,6 @@ solidify(AVM_Rod& rod)
                       V_real& val = lhs.open_real();
                       val -= rhs.as_real();
                     }
-                    else if(lhs.is_boolean() && rhs.is_boolean()) {
-                      // boolean - boolean ; same as ^
-                      V_boolean& val = lhs.open_boolean();
-                      val ^= rhs.as_boolean();
-                    }
                     else
                       throw Runtime_Error(xtc_format,
                          "Subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
