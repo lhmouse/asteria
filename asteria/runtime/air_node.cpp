@@ -2131,7 +2131,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Increment not applicable (operand was `$1`)", rhs);
+                         "Increment not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2175,7 +2175,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Decrement not applicable (operand was `$1`)", rhs);
+                         "Decrement not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2339,7 +2339,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Subscript value not valid (operand was `$1`)", rhs);
+                         "Subscript value not valid (operand was `$1`)", rhs);
 
                     ctx.stack().pop();
                   }
@@ -2403,7 +2403,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Arithmetic negation not applicable (operand was `$1`)", rhs);
+                         "Arithmetic negation not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2443,7 +2443,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Bitwise NOT not applicable (operand was `$1`)", rhs);
+                         "Bitwise NOT not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2502,7 +2502,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "`countof` not applicable (operand was `$1`)", rhs);
+                         "`countof` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2553,7 +2553,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "`__sqrt` not applicable (operand was `$1`)", rhs);
+                         "`__sqrt` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2585,7 +2585,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "`__isnan` not applicable (operand was `$1`)", rhs);
+                         "`__isnan` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2617,7 +2617,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "`__isinf` not applicable (operand was `$1`)", rhs);
+                         "`__isinf` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2656,7 +2656,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "`__abs` not applicable (operand was `$1`)", rhs);
+                         "`__abs` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2688,7 +2688,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "`__sign` not applicable (operand was `$1`)", rhs);
+                         "`__sign` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2720,7 +2720,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "`__round` not applicable (operand was `$1`)", rhs);
+                         "`__round` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2752,7 +2752,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "`__floor` not applicable (operand was `$1`)", rhs);
+                         "`__floor` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2784,7 +2784,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "`__ceil` not applicable (operand was `$1`)", rhs);
+                         "`__ceil` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2816,7 +2816,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "`__trunc` not applicable (operand was `$1`)", rhs);
+                         "`__trunc` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2848,7 +2848,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "`__iround` not applicable (operand was `$1`)", rhs);
+                         "`__iround` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2880,7 +2880,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                             "`__ifloor` not applicable (operand was `$1`)", rhs);
+                          "`__ifloor` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2912,7 +2912,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "`__iceil` not applicable (operand was `$1`)", rhs);
+                         "`__iceil` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2944,7 +2944,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "`__itrunc` not applicable (operand was `$1`)", rhs);
+                         "`__itrunc` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -2973,7 +2973,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "`__lzcnt` not applicable (operand was `$1`)", rhs);
+                         "`__lzcnt` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -3002,7 +3002,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                             "`__tzcnt` not applicable (operand was `$1`)", rhs);
+                         "`__tzcnt` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -3031,7 +3031,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                             "`__popcnt` not applicable (operand was `$1`)", rhs);
+                         "`__popcnt` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -3300,7 +3300,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -3347,7 +3347,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -3414,7 +3414,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -3463,7 +3463,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Division not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Division not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -3506,7 +3506,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Modulo not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Modulo not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -3553,7 +3553,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Bitwise AND not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Bitwise AND not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -3600,7 +3600,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Bitwise OR not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Bitwise OR not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -3647,7 +3647,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -3680,7 +3680,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Modular addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Modular addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -3713,7 +3713,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Modular subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Modular subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -3746,7 +3746,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Modular multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Modular multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -3782,7 +3782,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Saturating addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Saturating addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -3818,7 +3818,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Saturating subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Saturating subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -3854,7 +3854,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Saturating multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Saturating multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -3910,7 +3910,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Logical left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Logical left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -3966,7 +3966,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Logical right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Logical right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -4022,7 +4022,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -4075,7 +4075,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+                         "Arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
                     ctx.stack().pop();
                   }
@@ -4109,7 +4109,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "`__fma` not applicable (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
+                         "`__fma` not applicable (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
 
                     ctx.stack().pop(2);
                   }
@@ -4360,11 +4360,11 @@ solidify(AVM_Rod& rod)
 
                   if(temp_value.type() != type_integer)
                     throw Runtime_Error(xtc_format,
-                             "Invalid number of variadic arguments (value `$1`)", temp_value);
+                       "Invalid number of variadic arguments (value `$1`)", temp_value);
 
                   if((temp_value.as_integer() < 0) || (temp_value.as_integer() > INT_MAX))
                     throw Runtime_Error(xtc_format,
-                             "Invalid number of variadic arguments (value `$1`)", temp_value);
+                       "Invalid number of variadic arguments (value `$1`)", temp_value);
 
                   uint32_t nargs = static_cast<uint32_t>(temp_value.as_integer());
                   if(nargs == 0) {
@@ -5227,7 +5227,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Addition not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Addition not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5267,7 +5267,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Subtraction not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Subtraction not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5317,7 +5317,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Multiplication not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Multiplication not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5358,7 +5358,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Division not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Division not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5399,7 +5399,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Modulo not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Modulo not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5429,7 +5429,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Bitwise AND not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Bitwise AND not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5459,7 +5459,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Bitwise OR not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Bitwise OR not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5489,7 +5489,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5520,7 +5520,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Modular addition not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Modular addition not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5551,7 +5551,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Modular subtraction not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Modular subtraction not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5582,7 +5582,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Modular multiplication not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Modular multiplication not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5616,7 +5616,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Saturating addition not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Saturating addition not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5650,7 +5650,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Saturating subtraction not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Saturating subtraction not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5684,7 +5684,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Saturating multiplication not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Saturating multiplication not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5734,7 +5734,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Logical left shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Logical left shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5784,7 +5784,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Logical right shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Logical right shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5834,7 +5834,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
@@ -5881,7 +5881,7 @@ solidify(AVM_Rod& rod)
                     }
                     else
                       throw Runtime_Error(xtc_format,
-                            "Arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
+                         "Arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
