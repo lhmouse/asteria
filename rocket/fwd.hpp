@@ -756,7 +756,7 @@ struct storage_for
   {
     static constexpr size_t size = noadl::max(1UL, sizeof(altsT)...);
     static constexpr size_t align = noadl::max(1UL, alignof(altsT)...);
-    char bytes[size] alignas(align);
+    alignas(align) char bytes[size];
   };
 
 template<typename elementT, typename... paramsT>
