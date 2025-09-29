@@ -81,11 +81,14 @@ using ::std::is_move_assignable;
 using ::std::is_const;
 using ::std::add_const;
 using ::std::remove_const;
+using ::std::is_volatile;
 using ::std::add_volatile;
 using ::std::remove_volatile;
 using ::std::add_cv;
 using ::std::remove_cv;
 using ::std::is_pointer;
+using ::std::add_pointer;
+using ::std::remove_pointer;
 using ::std::is_reference;
 using ::std::is_lvalue_reference;
 using ::std::is_rvalue_reference;
@@ -308,20 +311,16 @@ struct disjunction<firstT, restT...>
   : conditional<bool(firstT::value), firstT, disjunction<restT...>>::type  { };
 
 template<typename targetT, typename sourceT>
+struct copy_const
+  : conditional<is_const<sourceT>::value, add_const<targetT>, remove_const<targetT>>::type  { };
+
+template<typename targetT, typename sourceT>
+struct copy_volatile
+  : conditional<is_volatile<sourceT>::value, add_volatile<targetT>, remove_volatile<targetT>>::type  { };
+
+template<typename targetT, typename sourceT>
 struct copy_cv
-  { using type = targetT;  };
-
-template<typename targetT, typename sourceT>
-struct copy_cv<targetT, const sourceT>
-  { using type = const targetT;  };
-
-template<typename targetT, typename sourceT>
-struct copy_cv<targetT, volatile sourceT>
-  { using type = volatile targetT;  };
-
-template<typename targetT, typename sourceT>
-struct copy_cv<targetT, const volatile sourceT>
-  { using type = const volatile targetT;  };
+  : copy_const<typename copy_volatile<targetT, sourceT>::type, sourceT>  { };
 
 template<typename containerT>
 constexpr
