@@ -30,7 +30,7 @@ class Reference
 
 #define ASTERIA_EINUD0SU_(U)  U##_bad, U##_void, U##_temp, U##_var, U##_ptc
     using variant_type = ::rocket::variant<ASTERIA_EINUD0SU_(St)>;
-    using bytes_type = ::std::aligned_storage<sizeof(variant_type), 16>::type;
+    using bytes_type = ::rocket::array<char, sizeof(variant_type)>;
 
     union {
       bytes_type m_bytes;

@@ -33,7 +33,7 @@ class variant
       : details_variant::type_getter<indexT, altsT...> { };
 
   private:
-    using my_storage = typename aligned_union<0, altsT...>::type;
+    using my_storage = typename provide_storage<altsT...>::type;
     static constexpr size_t my_align = alignof(my_storage);
 
     union {
@@ -151,7 +151,7 @@ class variant
         }
         else {
           // Make a backup.
-          typename aligned_union<0, altsT...>::type backup[1];
+          my_storage backup;
           details_variant::dispatch_move_then_destroy<altsT...>(
                     index_old, backup, this->m_stor);
           try {
@@ -218,7 +218,7 @@ class variant
         }
         else {
           // Make a backup.
-          typename aligned_union<0, altsT...>::type backup[1];
+          my_storage backup;
           details_variant::dispatch_move_then_destroy<altsT...>(
                     index_old, backup, this->m_stor);
           try {
@@ -285,7 +285,7 @@ class variant
         }
         else {
           // Swap active alternatives using an indeterminate buffer.
-          typename aligned_union<0, altsT...>::type backup[1];
+          my_storage backup;
           details_variant::dispatch_move_then_destroy<altsT...>(
                     index_old, backup, this->m_stor);
 
@@ -466,7 +466,7 @@ class variant
         }
         else {
           // Make a backup.
-          typename aligned_union<0, altsT...>::type backup[1];
+          my_storage backup;
           details_variant::dispatch_move_then_destroy<altsT...>(
                     index_old, backup, this->m_stor);
           try {

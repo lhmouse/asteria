@@ -17,6 +17,9 @@
 #define _GLIBCXX_ISTREAM  1
 #define _GLIBCXX_OSTREAM  1
 #define _GLIBCXX_IOSTREAM  1
+#define _GLIBCXX_CHRONO_IO_H  1
+#define _GLIBCXX_SSTREAM  1
+#include <iosfwd>
 
 #include "../rocket/cow_string.hpp"
 #include "../rocket/tinyfmt_str.hpp"

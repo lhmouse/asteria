@@ -111,8 +111,6 @@ using ::std::is_trivially_copyable;
 using ::std::underlying_type;
 using ::std::is_array;
 using ::std::is_base_of;
-using ::std::aligned_storage;
-using ::std::aligned_union;
 using ::std::is_signed;
 using ::std::make_signed;
 using ::std::is_unsigned;
@@ -321,6 +319,13 @@ struct copy_volatile
 template<typename targetT, typename sourceT>
 struct copy_cv
   : copy_const<typename copy_volatile<targetT, sourceT>::type, sourceT>  { };
+
+template<typename... altsT>
+struct provide_storage
+  {
+    using type = char [::std::max<size_t>({ 1, sizeof(altsT)... })]
+                      alignas(::std::max<size_t>({ 1, alignof(altsT)... }));
+  };
 
 template<typename containerT>
 constexpr

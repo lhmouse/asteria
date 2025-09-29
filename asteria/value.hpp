@@ -19,7 +19,7 @@ class Value
             typename ::rocket::remove_cvref<xValue>::type>;
 
     using variant_type = ::rocket::variant<ASTERIA_TYPES_AIXE9XIG_(V)>;
-    using bytes_type = ::std::aligned_storage<sizeof(variant_type), 16>::type;
+    using bytes_type = ::rocket::array<char, sizeof(variant_type)>;
 
     union {
       bytes_type m_bytes;

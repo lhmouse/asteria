@@ -43,7 +43,8 @@ class atomic
     do_order_acquire()
       noexcept
       {
-        switch(static_cast<unsigned>(memorderT)) {
+        switch(memorderT)
+          {
           case memory_order_consume:
             return memory_order_consume;
 
@@ -52,9 +53,13 @@ class atomic
           case memory_order_acq_rel:
             return memory_order_acquire;
 
-          default:  // relaxed || seq_cst
+          case memory_order_relaxed:
+          case memory_order_seq_cst:
             return memorderT;
-        }
+
+          default:
+            ROCKET_ASSERT(false);
+          }
       }
 
     static constexpr
@@ -62,16 +67,21 @@ class atomic
     do_order_release()
       noexcept
       {
-        switch(static_cast<unsigned>(memorderT)) {
+        switch(memorderT)
+          {
           case memory_order_consume:
           case memory_order_acquire:
           case memory_order_release:
           case memory_order_acq_rel:
             return memory_order_release;
 
-          default:  // relaxed || seq_cst
+          case memory_order_relaxed:
+          case memory_order_seq_cst:
             return memorderT;
-        }
+
+          default:
+            ROCKET_ASSERT(false);
+          }
       }
 
     static constexpr
@@ -79,16 +89,21 @@ class atomic
     do_order_acq_rel()
       noexcept
       {
-        switch(static_cast<unsigned>(memorderT)) {
+        switch(memorderT)
+          {
           case memory_order_consume:
           case memory_order_acquire:
           case memory_order_release:
           case memory_order_acq_rel:
             return memory_order_acq_rel;
 
-          default:  // relaxed || seq_cst
+          case memory_order_relaxed:
+          case memory_order_seq_cst:
             return memorderT;
-        }
+
+          default:
+            ROCKET_ASSERT(false);
+          }
       }
 
   public:
