@@ -320,13 +320,6 @@ template<typename targetT, typename sourceT>
 struct copy_cv
   : copy_const<typename copy_volatile<targetT, sourceT>::type, sourceT>  { };
 
-template<typename... altsT>
-struct provide_storage
-  {
-    using type = char [::std::max<size_t>({ 1, sizeof(altsT)... })]
-                      alignas(::std::max<size_t>({ 1, alignof(altsT)... }));
-  };
-
 template<typename containerT>
 constexpr
 decltype(declval<const containerT&>().size())
@@ -757,6 +750,13 @@ estimate_distance(iteratorT first, iteratorT last)
              typename iterator_traits<iteratorT>::iterator_category(),
              move(first), move(last));
   }
+
+template<typename... altsT>
+struct provide_storage
+  {
+    using type = char [noadl::max(sizeof(altsT)...)]
+                      alignas(noadl::max(1, alignof(altsT)...));
+  };
 
 template<typename elementT, typename... paramsT>
 ROCKET_ALWAYS_INLINE
