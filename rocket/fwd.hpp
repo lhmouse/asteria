@@ -752,10 +752,11 @@ estimate_distance(iteratorT first, iteratorT last)
   }
 
 template<typename... altsT>
-struct provide_storage
+struct storage_for
   {
-    using type = char [noadl::max(sizeof(altsT)...)]
-                      alignas(noadl::max(1, alignof(altsT)...));
+    static constexpr size_t size = noadl::max(1UL, sizeof(altsT)...);
+    static constexpr size_t align = noadl::max(1UL, alignof(altsT)...);
+    char bytes[size] alignas(align);
   };
 
 template<typename elementT, typename... paramsT>

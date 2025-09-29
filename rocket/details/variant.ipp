@@ -360,10 +360,9 @@ dispatch_xswap(size_t k, void* dptr, void* sptr)
     if((max_size > nbytes_eager_copy) || ROCKET_UNEXPECT(!trivial[k]))
       nt_funcs(k, dptr, sptr);
     else
-      wrapped_xswap<typename provide_storage<
+      wrapped_xswap<storage_for<
           typename conditional<is_trivially_move_assignable<altsT>::value,
-                               altsT, char>::type...>
-                               ::type>(dptr, sptr);
+                               altsT, char>::type...>>(dptr, sptr);
   }
 
 }  // namespace details_variant
