@@ -1032,6 +1032,7 @@ std_system_load_conf(V_string path)
     // Break deep recursion with a handwritten stack.
     struct xFrame
       {
+        int ln, col;
         V_array* psa;
         V_object* pso;
       };
@@ -1086,11 +1087,10 @@ std_system_load_conf(V_string path)
       if(token[0] != ']') {
         // open
         auto& frm = stack.emplace_back();
-        frm.psa = psa;
-        frm.pso = pso;
-
-        psa = &(pstor->open_array());
-        pso = nullptr;
+        frm.ln = tok_ln;
+        frm.col = tok_col;
+        frm.psa = ::std::exchange(psa, &(pstor->open_array()));
+        frm.pso = ::std::exchange(pso, nullptr);
         goto do_pack_value_loop_;
       }
 
@@ -1106,11 +1106,10 @@ std_system_load_conf(V_string path)
       if(token[0] != '}') {
         // open
         auto& frm = stack.emplace_back();
-        frm.psa = psa;
-        frm.pso = pso;
-
-        psa = nullptr;
-        pso = &(pstor->open_object());
+        frm.ln = tok_ln;
+        frm.col = tok_col;
+        frm.psa = ::std::exchange(psa, nullptr);
+        frm.pso = ::std::exchange(pso, &(pstor->open_object()));
         goto do_pack_value_loop_;
       }
 
@@ -1149,36 +1148,41 @@ std_system_load_conf(V_string path)
     else
       ASTERIA_THROW(("Invalid token at '$1:$2:$3'"), path, tok_ln, tok_col);
 
-    for(;;) {
+    do_token();
+    if((token[0] == ',') || (token[0] == ';'))
       do_token();
-      if((token[0] == ',') || (token[0] == ';'))
-        do_token();
 
-      if(pso && token.empty() && stack.empty())
-        break;
-
+    while(!token.empty()) {
+      // still in array or object
       if(psa) {
-        // in array
-        if(token.empty())
-          ASTERIA_THROW(("Array not terminated properly at '$1:$2:$3'"), path, tok_ln, tok_col);
-
         if(token[0] != ']')
           goto do_pack_value_loop_;
       }
       else {
-        // in object
-        if(token.empty())
-          ASTERIA_THROW(("Object not terminated properly at '$1:$2:$3'"), path, tok_ln, tok_col);
-
         if(token[0] != '}')
           goto do_pack_value_loop_;
       }
+
+      if(stack.empty())
+        ASTERIA_THROW(("Dangling `$4` at '$1:$2:$3'"), path, tok_ln, tok_col, token);
 
       // close
       psa = stack.back().psa;
       pso = stack.back().pso;
       stack.pop_back();
+
+      do_token();
+      if((token[0] == ',') || (token[0] == ';'))
+        do_token();
     }
+
+    if(psa)
+      ASTERIA_THROW(("Array not terminated properly at '$1:$2:$3'"),
+                    path, stack.back().ln, stack.back().col);
+
+    if(!stack.empty())
+      ASTERIA_THROW(("Object not terminated properly at '$1:$2:$3'"),
+                    path, stack.back().ln, stack.back().col);
 
     return root;
   }
