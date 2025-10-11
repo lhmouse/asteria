@@ -15,9 +15,10 @@ class Token_Stream
     Compiler_Options m_opts;
     Recursion_Sentry m_sentry;
     cow_vector<Token> m_rtoks;  // stored in reverse order
+    Source_Location m_terminus;
 
   public:
-    explicit constexpr
+    explicit
     Token_Stream(const Compiler_Options& opts)
       noexcept
       :
@@ -87,14 +88,15 @@ class Token_Stream
       noexcept
       { this->m_rtoks.clear();  }
 
-    Source_Location
+    const cow_string&
+    file()
+      noexcept
+      { return this->m_terminus.file();  }
+
+    const Source_Location&
     next_sloc()
       const noexcept
-      {
-        return this->m_rtoks.empty()
-                 ? Source_Location(&"[end]", -1, -1)
-                 : this->m_rtoks.back().sloc();
-      }
+      { return this->m_rtoks.empty() ? m_terminus : this->m_rtoks.back().sloc();  }
 
     // This function parses characters from the input stream and fills
     // tokens into `*this`. The contents of `*this` are destroyed

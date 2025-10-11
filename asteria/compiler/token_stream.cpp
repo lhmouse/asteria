@@ -770,6 +770,7 @@ reload(const cow_string& file, int start_line, tinyfmt&& cbuf)
     cow_vector<Token> tokens;
     tokens.swap(this->m_rtoks);
     tokens.clear();
+    this->m_terminus = Source_Location(file, start_line, 1);
 
     // Save the position of an unterminated block comment.
     opt<Source_Location> bcomm;
@@ -855,6 +856,7 @@ reload(const cow_string& file, int start_line, tinyfmt&& cbuf)
     // Reverse the token sequence and accept it.
     ::std::reverse(tokens.mut_begin(), tokens.mut_end());
     this->m_rtoks = move(tokens);
+    this->m_terminus = Source_Location(file, reader.line() + 1, 1);
   }
 
 }  // namespace asteria
