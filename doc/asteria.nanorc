@@ -17,7 +17,7 @@ color yellow "\<(null|true|false|nan|NaN|infinity|Infinity|this)\>"
 color yellow "\<__(file|line|func|varg|this|backtrace)\>"
 
 # Operators
-color cyan "[].+*/%=&|!^~?:,;(){}<>$[-]"
+color cyan "[].+*/%=&|!^~?:,;(){}<>$#@[-]"
 color brightgreen "\<(unset|(count|type)of|and|or|not|import)\>"
 color brightgreen "\<__(sqrt|is(nan|inf|void)|abs|sign|(add|sub|mul)[ms]|fma)\>"
 color brightgreen "\<__(i?(round|floor|ceil|trunc)|vcall|(lz|tz|pop)cnt)\>"
