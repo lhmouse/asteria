@@ -196,10 +196,10 @@ endif
 #===========================================================
 # Rules for headers
 #===========================================================
-configure_file(input: 'asteria/version.h.in',
-               configuration: ver,
+configure_file(configuration: ver,
                output: 'version.h',
-               install: false)
+               install: false,
+               input: 'asteria/version.h.in')
 
 install_headers(rocket_include, preserve_path: true)
 install_headers(asteria_include, preserve_path: true)
