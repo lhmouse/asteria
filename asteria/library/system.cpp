@@ -484,6 +484,8 @@ std_system_load_conf(V_string path)
     int ch = -1;
     int tok_ln = 1, tok_col = 1;
     cow_string token;
+    array<bool, 256> valid_digits;
+    int exp_ch = 0;
 
     auto do_load_next = [&]
       {
@@ -636,146 +638,45 @@ std_system_load_conf(V_string path)
             if((ch < '0') || (ch > '9'))
               ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
 
-            if(ch == '0') {  // fallthrough
-          case '0':
-              token.push_back(static_cast<char>(ch));
+            // fallthrough
+          case '0' ... '9':
+            token.push_back(static_cast<char>(ch));
+            do_load_next();
+            if(ch == '`')
               do_load_next();
-              if(ch == '`') {
-                // decimal; skip separator
-                do_load_next();
-              }
-              else if((ch == 'b') || (ch == 'B')) {
-                // binary
-                auto is_valid_digit = [&]
-                  {
-                    return (ch == '0') || (ch == '1');
-                  };
 
-                token.push_back(static_cast<char>(ch));
-                do_load_next();
+            valid_digits.fill(false);
+            if((token.back() == '0') && ((ch | 0x20) == 'b')) {
+              // binary
+              token.push_back('b');
+              do_load_next();
 
-                if(!is_valid_digit())
-                  ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
+              for(uint32_t digit = '0';  digit <= '1';  ++ digit)
+                valid_digits.mut(digit) = true;
+              exp_ch = 'p';
+            }
+            else if((token.back() == '0') && ((ch | 0x20) == 'x')) {
+              // hexadecimal
+              token.push_back('x');
+              do_load_next();
 
-                do {
-                  token.push_back(static_cast<char>(ch));
-                  do_load_next();
-                  if(ch == '`')
-                    do_load_next();
-                }
-                while(is_valid_digit());
-
-                if(ch == '.') {
-                  token.push_back(static_cast<char>(ch));
-                  do_load_next();
-
-                  if(!is_valid_digit())
-                    ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
-
-                  do {
-                    token.push_back(static_cast<char>(ch));
-                    do_load_next();
-                    if(ch == '`')
-                      do_load_next();
-                  }
-                  while(is_valid_digit());
-                }
-
-                if((ch == 'p') || (ch == 'P')) {
-                  token.push_back(static_cast<char>(ch));
-                  do_load_next();
-
-                  if((ch == '+') || (ch == '-')) {
-                    token.push_back(static_cast<char>(ch));
-                    do_load_next();
-                  }
-
-                  if((ch < '0') || (ch > '9'))
-                    ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
-
-                  do {
-                    token.push_back(static_cast<char>(ch));
-                    do_load_next();
-                    if(ch == '`')
-                      do_load_next();
-                  }
-                  while((ch >= '0') && (ch <= '9'));
-                }
-
-                // A binary number has been accepted.
-                ROCKET_ASSERT(token.size() != 0);
-                break;
-              }
-              else if((ch == 'x') || (ch == 'X')) {
-                // hexadecimal
-                auto is_valid_digit = [&]
-                  {
-                    return ((ch >= '0') && (ch <= '9'))
-                           || ((ch >= 'a') && (ch <= 'f'))
-                           || ((ch >= 'A') && (ch <= 'F'));
-                  };
-
-                token.push_back(static_cast<char>(ch));
-                do_load_next();
-
-                if(!is_valid_digit())
-                  ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
-
-                do {
-                  token.push_back(static_cast<char>(ch));
-                  do_load_next();
-                  if(ch == '`')
-                    do_load_next();
-                }
-                while(is_valid_digit());
-
-                if(ch == '.') {
-                  token.push_back(static_cast<char>(ch));
-                  do_load_next();
-
-                  if(!is_valid_digit())
-                    ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
-
-                  do {
-                    token.push_back(static_cast<char>(ch));
-                    do_load_next();
-                    if(ch == '`')
-                      do_load_next();
-                  }
-                  while(is_valid_digit());
-                }
-
-                if((ch == 'p') || (ch == 'P')) {
-                  token.push_back(static_cast<char>(ch));
-                  do_load_next();
-
-                  if((ch == '+') || (ch == '-')) {
-                    token.push_back(static_cast<char>(ch));
-                    do_load_next();
-                  }
-
-                  if((ch < '0') || (ch > '9'))
-                    ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
-
-                  do {
-                    token.push_back(static_cast<char>(ch));
-                    do_load_next();
-                    if(ch == '`')
-                      do_load_next();
-                  }
-                  while((ch >= '0') && (ch <= '9'));
-                }
-
-                // A hexadecimal number has been accepted.
-                ROCKET_ASSERT(token.size() != 0);
-                break;
-              }
+              for(uint32_t digit = '0';  digit <= '9';  ++ digit)
+                valid_digits.mut(digit) = true;
+              for(uint32_t digit = 'a';  digit <= 'f';  ++ digit)
+                valid_digits.mut(digit) = true;
+              for(uint32_t digit = 'A';  digit <= 'F';  ++ digit)
+                valid_digits.mut(digit) = true;
+              exp_ch = 'p';
+            }
+            else {
+              // decimal
+              for(uint32_t digit = '0';  digit <= '9';  ++ digit)
+                valid_digits.mut(digit) = true;
+              exp_ch = 'e';
             }
 
-            // decimal
-            while((ch >= '0') && (ch <= '9')) {
-              // fallthrough
-          case '1' ... '9':
+            while(valid_digits[static_cast<uint32_t>(ch)]) {
+              // collect digits
               token.push_back(static_cast<char>(ch));
               do_load_next();
               if(ch == '`')
@@ -786,7 +687,7 @@ std_system_load_conf(V_string path)
               token.push_back(static_cast<char>(ch));
               do_load_next();
 
-              if((ch < '0') || (ch > '9'))
+              if(!valid_digits[static_cast<uint32_t>(ch)])
                 ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
 
               do {
@@ -795,10 +696,10 @@ std_system_load_conf(V_string path)
                 if(ch == '`')
                   do_load_next();
               }
-              while((ch >= '0') && (ch <= '9'));
+              while(valid_digits[static_cast<uint32_t>(ch)]);
             }
 
-            if((ch == 'e') || (ch == 'E')) {
+            if((ch | 0x20) == exp_ch) {
               token.push_back(static_cast<char>(ch));
               do_load_next();
 
@@ -819,7 +720,7 @@ std_system_load_conf(V_string path)
               while((ch >= '0') && (ch <= '9'));
             }
 
-            // A decimal number has been accepted.
+            // A number has been accepted.
             ROCKET_ASSERT(token.size() != 0);
             break;
 
