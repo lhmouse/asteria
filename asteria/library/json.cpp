@@ -342,8 +342,9 @@ do_token(cow_string& token, Parser_Context& ctx, const Unified_Source& usrc)
         if(!is_within(ctx.c, '0', '9'))
           return do_err(ctx, "Invalid number");
 
-        do {  // fallthrough
+        // fallthrough
       case '0' ... '9':
+        do {
           token.push_back(static_cast<char>(ctx.c));
           do_load_next(ctx, usrc);
         }
