@@ -1891,7 +1891,8 @@ class basic_cow_string
     equals(const value_type* s, size_type n)
       const noexcept
       {
-        return (this->size() == n) && noadl::xmemeq(this->data(), s, n);
+        return (this->size() == n)
+               && ((this->data() == s) || (noadl::xmemcmp(this->data(), s, n) == 0));
       }
 
     constexpr
@@ -1931,7 +1932,8 @@ class basic_cow_string
     substr_equals(size_type tpos, size_type tn, const value_type* s, size_type n)
       const
       {
-        return (this->do_clamp_substr(tpos, tn) == n) && noadl::xmemeq(this->data() + tpos, s, n);
+        return (this->do_clamp_substr(tpos, tn) == n)
+               && (noadl::xmemcmp(this->data() + tpos, s, n) == 0);
       }
 
     constexpr
@@ -2052,7 +2054,8 @@ class basic_cow_string
     starts_with(const value_type* s, size_type n)
       const noexcept
       {
-        return (this->size() >= n) && noadl::xmemeq(this->data(), s, n);
+        return (this->size() >= n)
+               && (noadl::xmemcmp(this->data(), s, n) == 0);
       }
 
     constexpr
@@ -2084,7 +2087,8 @@ class basic_cow_string
     ends_with(const value_type* s, size_type n)
       const noexcept
       {
-        return (this->size() >= n) && noadl::xmemeq(this->data() + this->size() - n, s, n);
+        return (this->size() >= n)
+               && (noadl::xmemcmp(this->data() + this->size() - n, s, n) == 0);
       }
   };
 
