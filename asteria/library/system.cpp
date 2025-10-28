@@ -640,8 +640,11 @@ std_system_load_conf(V_string path)
           case '0':
               token.push_back(static_cast<char>(ch));
               do_load_next();
-
-              if((ch == 'b') || (ch == 'B')) {
+              if(ch == '`') {
+                // decimal; skip separator
+                do_load_next();
+              }
+              else if((ch == 'b') || (ch == 'B')) {
                 // binary
                 auto is_valid_digit = [&]
                   {
@@ -770,20 +773,14 @@ std_system_load_conf(V_string path)
             }
 
             // decimal
-            token.push_back(static_cast<char>(ch));
-            do_load_next();
-
-            if((ch < '0') || (ch > '9'))
-              ASTERIA_THROW(("Invalid number at '$1:$2:$3'"), path, tok_ln, tok_col);
-
-            do {  // fallthrough
+            while((ch >= '0') && (ch <= '9')) {
+              // fallthrough
           case '1' ... '9':
               token.push_back(static_cast<char>(ch));
               do_load_next();
               if(ch == '`')
                 do_load_next();
             }
-            while((ch >= '0') && (ch <= '9'));
 
             if(ch == '.') {
               token.push_back(static_cast<char>(ch));
