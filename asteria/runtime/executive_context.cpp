@@ -48,9 +48,8 @@ Executive_Context(Uxtc_function, Global_Context& xglobal, AIR_Status& xstatus,
                  "Too many arguments passed to `$1`", this->m_func->func());
 
       this->m_lazy_args.reserve(nargs);
-      do
+      while(nargs != 0)
         this->m_lazy_args.emplace_back(move(this->m_stack->mut_top(--nargs)));
-      while(nargs != 0);
     }
   }
 
