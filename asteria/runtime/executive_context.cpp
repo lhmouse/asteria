@@ -36,21 +36,17 @@ Executive_Context(Uxtc_function, Global_Context& xglobal, AIR_Status& xstatus,
     for(const auto& name : this->m_func->params())
       if(name == "...")
         has_ellipsis = true;
-      else {
-        // Try popping an argument and assign it.
-        auto& param = this->do_mut_named_reference(nullptr, name);
-        if(nargs == 0)
-          param.set_temporary(nullopt);
-        else
-          param = move(this->m_stack->mut_top(--nargs));
-      }
+      else if(nargs == 0)
+        this->do_mut_named_reference(nullptr, name).set_temporary(nullopt);
+      else
+        this->do_mut_named_reference(nullptr, name).swap(this->m_stack->mut_top(--nargs));
 
     if(nargs != 0) {
+      // Move all arguments into the variadic argument getter.
       if(!has_ellipsis)
         throw Runtime_Error(xtc_format,
                  "Too many arguments passed to `$1`", this->m_func->func());
 
-      // Move all arguments into the variadic argument getter.
       this->m_lazy_args.reserve(nargs);
       do
         this->m_lazy_args.emplace_back(move(this->m_stack->mut_top(--nargs)));
