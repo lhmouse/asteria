@@ -155,12 +155,12 @@ add_project_arguments(
     '-Wmissing-declarations', '-Wmissing-field-initializers', '-Wshadow',
     '-Wswitch-enum', '-Wunused-function', '-Wunused-label', '-Wunused-local-typedefs',
     '-Wunused-but-set-variable', '-Wunused-but-set-parameter', '-Wno-redundant-move',
-    '-Wno-missing-braces', '-Wno-unqualified-std-cast-call', '-Wno-string-plus-int',
-    '-Wno-bitwise-instead-of-logical',
+    '-Wno-missing-braces',
     cxx.get_supported_arguments(
       '-masm=intel', '-msse4.1', '-fno-ident', '-fno-devirtualize-speculatively',
       '-Wsuggest-attribute=noreturn', '-Wno-option-ignored',
-      '-Wno-unused-command-line-argument'),
+      '-Wno-unused-command-line-argument', '-Wno-unqualified-std-cast-call',
+      '-Wno-string-plus-int', '-Wno-bitwise-instead-of-logical'),
     language: 'cpp')
 
 if get_option('enable-avx2') and (cxx_is_i386 or cxx_is_amd64)
