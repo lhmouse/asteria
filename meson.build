@@ -158,7 +158,7 @@ add_project_arguments(
     '-Wno-missing-braces',
     cxx.get_supported_arguments(
       '-masm=intel', '-msse4.1', '-fno-ident', '-fno-devirtualize-speculatively',
-      '-Wsuggest-attribute=noreturn', '-Wno-option-ignored',
+      '-fimplicit-constexpr', '-Wsuggest-attribute=noreturn', '-Wno-option-ignored',
       '-Wno-unused-command-line-argument', '-Wno-unqualified-std-cast-call',
       '-Wno-string-plus-int', '-Wno-bitwise-instead-of-logical'),
     language: 'cpp')
