@@ -163,13 +163,6 @@ class BMH_Searcher
   };
 
 template<typename xIter>
-BMH_Searcher<xIter>
-do_create_searcher_for_pattern(xIter pbegin, xIter pend)
-  {
-    return BMH_Searcher<xIter>(pbegin, pend);
-  }
-
-template<typename xIter>
 opt<xIter>
 do_find_opt(xIter tbegin, xIter tend, xIter pbegin, xIter pend)
   {
@@ -183,7 +176,7 @@ do_find_opt(xIter tbegin, xIter tend, xIter pbegin, xIter pend)
       return nullopt;
 
     // This is the slow path.
-    const auto srch = do_create_searcher_for_pattern(pbegin, pend);
+    const BMH_Searcher<xIter> srch(pbegin, pend);
     return srch.search_opt(tbegin, tend);
   }
 
@@ -840,7 +833,7 @@ std_string_replace(V_string text, optV_integer from, optV_integer length, V_stri
     }
     else {
       // Search for `pattern` in `text`.
-      const auto srch = do_create_searcher_for_pattern(pattern.begin(), pattern.end());
+      const BMH_Searcher<V_string::const_iterator> srch(pattern.begin(), pattern.end());
       while(auto qbrk = srch.search_opt(range.first, range.second)) {
         res.append(range.first, *qbrk);
         res.append(replacement);
@@ -1084,7 +1077,7 @@ std_string_explode(V_string text, optV_string delim, optV_integer limit)
     else {
       // Search for `*delim` in the `text`.
       opt<cow_string::const_iterator> qbrk;
-      const auto srch = do_create_searcher_for_pattern(delim->begin(), delim->end());
+      const BMH_Searcher<V_string::const_iterator> srch(delim->begin(), delim->end());
       while((segments.size() + 1 < rlimit) && !!(qbrk = srch.search_opt(tcur, text.end()))) {
         // Push this segment and move `tcur` past it.
         segments.emplace_back(V_string(tcur, *qbrk));
