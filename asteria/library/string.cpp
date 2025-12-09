@@ -149,6 +149,9 @@ class BMH_Searcher
           while(tcur[tml] == this->m_pbegin[tml])
             if(--tml < 0)
               return tcur;  // found
+            else
+              bcr_offset = ::rocket::max(bcr_offset,
+                    this->m_bcr_offsets[uint8_t(tcur[tml])] - (plen - 1 - tml));
 
           // Shift the read pointer by the proposed offset.
           tcur += bcr_offset;
