@@ -144,12 +144,11 @@ class BMH_Searcher
         while(tfinalcand - tcur >= 0) {
           // Compare candidate intervals from right to left.
           ptrdiff_t tml = plen - 1;
-          auto tcand = tcur;
-          ptrdiff_t bcr_offset = this->m_bcr_offsets[uint8_t(tcand[tml])];
+          ptrdiff_t bcr_offset = this->m_bcr_offsets[uint8_t(tcur[tml])];
 
-          while(tcand[tml] == this->m_pbegin[tml])
+          while(tcur[tml] == this->m_pbegin[tml])
             if(--tml < 0)
-              return tcand;  // found
+              return tcur;  // found
 
           // Shift the read pointer by the proposed offset.
           tcur += bcr_offset;
