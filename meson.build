@@ -22,6 +22,7 @@ project('asteria',
 #===========================================================
 # List of files
 #===========================================================
+
 rocket_include = [
   'rocket/details/fwd.ipp', 'rocket/details/xstring.ipp', 'rocket/details/variant.ipp',
   'rocket/details/xallocator.ipp', 'rocket/details/unique_handle.ipp',
@@ -132,6 +133,7 @@ test_src = [
 #===========================================================
 # Global configuration
 #===========================================================
+
 ver = configuration_data()
 ver.set('abi_major', meson.project_version().split('.')[0])
 ver.set('abi_minor', meson.project_version().split('.')[1])
@@ -178,6 +180,7 @@ endif
 #===========================================================
 # Dependencies
 #===========================================================
+
 dep_zlib = dependency('zlib', version: '>= 1.2.9')
 dep_pcre2 = dependency('libpcre2-8')
 dep_openssl = dependency('openssl')
@@ -193,6 +196,7 @@ endif
 #===========================================================
 # Rules for headers
 #===========================================================
+
 configure_file(configuration: ver,
                output: 'version.h',
                install: false,
@@ -205,6 +209,7 @@ install_headers(meson.current_build_dir() / 'version.h', subdir: 'asteria')
 #===========================================================
 # Rules for 'lib/libasteria.so'
 #===========================================================
+
 lib_asteria = library('asteria',
       cpp_pch: 'asteria/xprecompiled.hpp',
       sources: [ rocket_src, asteria_src ],
@@ -222,6 +227,7 @@ import('pkgconfig').generate(lib_asteria,
 #===========================================================
 # Rules for 'bin/asteria'
 #===========================================================
+
 executable('asteria',
       cpp_pch: 'asteria/xprecompiled.hpp',
       sources: [ repl_src ],
@@ -232,6 +238,7 @@ executable('asteria',
 #===========================================================
 # Rules for tests
 #===========================================================
+
 foreach src : test_src
   test_exe = executable(src.underscorify(), src,
       link_with: lib_asteria,
