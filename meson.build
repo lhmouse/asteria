@@ -215,7 +215,7 @@ lib_asteria = library('asteria',
       sources: [ rocket_src, asteria_src ],
       dependencies: [ dep_zlib, dep_pcre2, dep_openssl, dep_iconv ],
       soversion: ver.get('abi_major'),
-      version: '.'.join([ ver.get('abi_major'), ver.get('abi_minor'), '0' ]),
+      version: '.'.join(ver.get('abi_major'), ver.get('abi_minor'), '0'),
       install: true)
 
 import('pkgconfig').generate(lib_asteria,
