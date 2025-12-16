@@ -111,7 +111,7 @@ repl_src = [
 
 test_src = [
   'test/xstring.cpp', 'test/ascii_numget.cpp', 'test/ascii_numget_float.cpp',
-  'test/ascii_numget_double.cpp', 'test/ascii_numput_float.cpp',
+  'test/ascii_numget_double.cpp', 'test/ascii_numput.cpp', 'test/ascii_numput_float.cpp',
   'test/ascii_numput_double.cpp', 'test/utils.cpp', 'test/value.cpp', 'test/variable.cpp',
   'test/reference.cpp', 'test/token_stream.cpp', 'test/statement_sequence.cpp',
   'test/simple_script.cpp', 'test/gc.cpp', 'test/gc2.cpp', 'test/gc_loop.cpp',
