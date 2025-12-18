@@ -287,7 +287,7 @@ do_write_digits_backwards(char*& wptr, uint64_t value, uint32_t base, uint32_t p
     while(len < precision) {
       // Prepend zeroes up to `precision`.
       wptr --;
-      *wptr = '0';
+      *(volatile char*) wptr = '0';
       len ++;
     }
 
@@ -1364,7 +1364,7 @@ do_write_exp(char*& wptr, int exp)
 
     while(ndigits != 0) {
       // Copy a significant digit, in normal order.
-      *wptr = *digits;
+      *(volatile char*) wptr = *digits;
       digits ++;
       ndigits --;
       wptr ++;
