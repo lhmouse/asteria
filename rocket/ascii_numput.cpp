@@ -1307,7 +1307,7 @@ do_write_zeroes(char*& wptr, uint32_t len)
   {
     for(uint32_t k = len;  k != 0;  --k) {
       // Prevent optimization...
-      (volatile char&) *wptr = '0';
+      *(volatile char*) wptr = '0';
       wptr ++;
     }
   }
