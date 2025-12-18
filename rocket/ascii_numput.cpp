@@ -1140,7 +1140,7 @@ do_frexp10_8(float value)
     // will not become a subnormal double; no need to check that.
     uint64_t xbits = (uint64_t) ((uint32_t) frx.exp + 896) << 52 | frx.mant << 29;
     uint32_t mlo = 1;
-    uint32_t mhi = ::std::size(s_decimal_multipliers);
+    uint32_t mhi = 633;
 
     while(mlo != mhi) {
       // book moves...
@@ -1224,7 +1224,7 @@ do_frexp10_17(double value)
     // Get the multiplier for this value, using binary search.
     bits &= 0x7FFFFFFFFFFFFFFFULL;
     uint32_t mlo = 1;
-    uint32_t mhi = ::std::size(s_decimal_multipliers);
+    uint32_t mhi = 633;
 
     while(mlo != mhi) {
       // book moves...
