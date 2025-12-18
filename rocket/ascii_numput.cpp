@@ -1335,7 +1335,7 @@ do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, c
     while(rdxpp_opt && (wptr < rdxpp_opt)) {
       // Append zeroes up to `rdxp_opt`. The string will end there so
       // don't write a radix point.
-      *wptr = '0';
+      *(volatile char*) wptr = '0';
       wptr ++;
     }
   }
