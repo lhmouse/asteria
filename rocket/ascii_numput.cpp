@@ -1353,11 +1353,11 @@ do_write_exp(char*& wptr, int exp)
     wptr ++;
 
     // Get the static string.
-    if(abs_exp < 100U) {
+    if(abs_exp < 100) {
       // Ensure at least two significant digits, like POSIX.
-      do_get_small_decimal(digits, ndigits, 100U + abs_exp);
+      do_get_small_decimal(digits, ndigits, 100 + abs_exp);
       digits ++;
-      ndigits --;
+      ndigits = 2;
     }
     else
       do_get_small_decimal(digits, ndigits, abs_exp);
