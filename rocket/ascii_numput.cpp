@@ -1172,9 +1172,7 @@ do_frexp10_8(float value)
     while((mant_next >= mant_min) && (mant_next <= mant_max)) {
       // Shift one digit from `next_digits` to `next_mult`.
       bits = mant_next;
-      uint32_t carry = (4U - next_digits % 10U) >> 31;
-      next_digits /= 10U;
-      next_digits += carry;
+      next_digits = next_digits / 10U + ((4U - next_digits % 10U) >> 31);
       next_mult *= 10U;
       mant_next = next_digits * next_mult;
     }
@@ -1255,9 +1253,7 @@ do_frexp10_17(double value)
     while((mant_next >= mant_min) && (mant_next <= mant_max)) {
       // Shift one digit from `next_digits` to `next_mult`.
       bits = mant_next;
-      uint64_t carry = (4ULL - next_digits % 10U) >> 63;
-      next_digits /= 10U;
-      next_digits += carry;
+      next_digits = next_digits / 10U + ((4ULL - next_digits % 10U) >> 63);
       next_mult *= 10U;
       mant_next = next_digits * next_mult;
     }
