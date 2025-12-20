@@ -45,8 +45,8 @@ do_xfgetn_common(::FILE* fp, xmbrtowcT&& xmbrtowc, ::mbstate_t& mbst, xwcharT* w
 
       // Decode one multi-byte character.
       int mblen = static_cast<int>(xmbrtowc(wptr, &mbc, 1U, &mbst));
-
-      switch(mblen) {
+      switch(mblen)
+        {
         case -3:
           // trailing surrogate written; no input consumed
           wants_more_input = ::mbsinit(&mbst);
@@ -77,7 +77,7 @@ do_xfgetn_common(::FILE* fp, xmbrtowcT&& xmbrtowc, ::mbstate_t& mbst, xwcharT* w
           wants_more_input = 1;
           wptr ++;
           break;
-      }
+        }
     }
     return static_cast<size_t>(wptr - ws);
   }
@@ -95,8 +95,8 @@ do_xfputn_common(::FILE* fp, xwcrtombT&& xwcrtomb, ::mbstate_t& mbst, const xwch
       // Encode one multi-byte character.
       char mbcs[MB_LEN_MAX];
       int mblen = static_cast<int>(xwcrtomb(mbcs, *wptr, &mbst));
-
-      switch(mblen) {
+      switch(mblen)
+        {
         case -1:
           // input invalid
           mbst = { };
@@ -121,7 +121,7 @@ do_xfputn_common(::FILE* fp, xwcrtombT&& xwcrtomb, ::mbstate_t& mbst, const xwch
           nbytes += static_cast<unsigned>(mblen);
           wptr ++;
           break;
-      }
+        }
     }
     return nbytes;
   }

@@ -1276,7 +1276,8 @@ inline
 bool
 do_is_special_class(const char*& str_out, uint32_t& len_out, const frexp& frx)
   {
-    switch(static_cast<uint32_t>(frx.cls)) {
+    switch(static_cast<uint32_t>(frx.cls))
+      {
       case floating_point_class_infinity:
         str_out = "-infinity" + (1U - frx.sign);
         len_out = 8U + frx.sign;
@@ -1294,7 +1295,7 @@ do_is_special_class(const char*& str_out, uint32_t& len_out, const frexp& frx)
 
       default:
         return false;
-    }
+      }
   }
 
 inline
