@@ -1341,7 +1341,7 @@ do_write_exp(char*& wptr, int exp)
     uint32_t ndigits;
 
     // The exponent always has a sign symbol.
-    *wptr = (exp == (int) abs_exp) ? '+' : '-';
+    *wptr = (exp >= 0) ? '+' : '-';
     wptr ++;
 
     if(abs_exp < 100) {
