@@ -268,12 +268,11 @@ do_get_small_decimal(const char*& str_out, uint32_t& len_out, uint32_t value)
   }
 
 inline
-uint32_t
+void
 do_write_digits_backwards(char*& wptr, uint64_t value, uint32_t base, uint32_t precision)
   {
+    char* fill_begin = wptr - precision;
     uint64_t reg = value;
-    uint32_t len = 0;
-
     while(reg != 0) {
       // Shift a digit from `reg` and write it.
       uint64_t digit = reg % base;
@@ -281,17 +280,13 @@ do_write_digits_backwards(char*& wptr, uint64_t value, uint32_t base, uint32_t p
 
       wptr --;
       *wptr = (char) ('0' + digit + ((9U - digit) >> 61));
-      len ++;
     }
 
-    while(len < precision) {
+    while(fill_begin < wptr) {
       // Prepend zeroes up to `precision`.
       wptr --;
       *(volatile char*) wptr = '0';
-      len ++;
     }
-
-    return len;
   }
 
 #if 0
@@ -1279,17 +1274,17 @@ do_is_special_class(const char*& str_out, uint32_t& len_out, const frexp& frx)
     switch(static_cast<uint32_t>(frx.cls))
       {
       case floating_point_class_infinity:
-        str_out = "-infinity" + (1U - frx.sign);
+        str_out = "-infinity" + (1 - frx.sign);
         len_out = 8U + frx.sign;
         return true;
 
       case floating_point_class_nan:
-        str_out = "-nan" + (1U - frx.sign);
+        str_out = "-nan" + (1 - frx.sign);
         len_out = 3U + frx.sign;
         return true;
 
       case floating_point_class_zero:
-        str_out = s_small_decimals[0] + (1U - frx.sign);
+        str_out = s_small_decimals[0] + (1 - frx.sign);
         len_out = 1U + frx.sign;
         return true;
 
@@ -1387,13 +1382,12 @@ put_XP(const volatile void* value)
     char* wptr = ::std::end(this->m_stor);
     *--wptr = 0;
 
-    uint32_t ntotal = do_write_digits_backwards(wptr, (uintptr_t) value, 16, 1);
+    do_write_digits_backwards(wptr, (uintptr_t) value, 16, 1);
     wptr -= 2;
     ::memcpy(wptr, "0x", 2);
-    ntotal += 2;
 
     this->m_data = wptr;
-    this->m_size = ntotal;
+    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr);
   }
 
 void
@@ -1404,13 +1398,12 @@ put_BU(uint64_t value, uint32_t precision)
     char* wptr = ::std::end(this->m_stor);
     *--wptr = 0;
 
-    uint32_t ntotal = do_write_digits_backwards(wptr, value, 2, precision);
+    do_write_digits_backwards(wptr, value, 2, precision);
     wptr -= 2;
     ::memcpy(wptr, "0b", 2);
-    ntotal += 2;
 
     this->m_data = wptr;
-    this->m_size = ntotal;
+    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr);
   }
 
 void
@@ -1421,13 +1414,12 @@ put_XU(uint64_t value, uint32_t precision)
     char* wptr = ::std::end(this->m_stor);
     *--wptr = 0;
 
-    uint32_t ntotal = do_write_digits_backwards(wptr, value, 16, precision);
+    do_write_digits_backwards(wptr, value, 16, precision);
     wptr -= 2;
     ::memcpy(wptr, "0x", 2);
-    ntotal += 2;
 
     this->m_data = wptr;
-    this->m_size = ntotal;
+    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr);
   }
 
 void
@@ -1444,10 +1436,10 @@ put_DU(uint64_t value, uint32_t precision)
     char* wptr = ::std::end(this->m_stor);
     *--wptr = 0;
 
-    uint32_t ntotal = do_write_digits_backwards(wptr, value, 10, precision);
+    do_write_digits_backwards(wptr, value, 10, precision);
 
     this->m_data = wptr;
-    this->m_size = ntotal;
+    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr);
   }
 
 void
@@ -1461,13 +1453,12 @@ put_BI(int64_t value, uint32_t precision)
     char* wptr = ::std::end(this->m_stor);
     *--wptr = 0;
 
-    uint32_t ntotal = do_write_digits_backwards(wptr, -(uint64_t) value, 2, precision);
+    do_write_digits_backwards(wptr, -(uint64_t) value, 2, precision);
     wptr -= 3;
     ::memcpy(wptr, "-0b", 3);
-    ntotal += 3;
 
     this->m_data = wptr;
-    this->m_size = ntotal;
+    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr);
   }
 
 void
@@ -1481,13 +1472,12 @@ put_XI(int64_t value, uint32_t precision)
     char* wptr = ::std::end(this->m_stor);
     *--wptr = 0;
 
-    uint32_t ntotal = do_write_digits_backwards(wptr, -(uint64_t) value, 16, precision);
+    do_write_digits_backwards(wptr, -(uint64_t) value, 16, precision);
     wptr -= 3;
     ::memcpy(wptr, "-0x", 3);
-    ntotal += 3;
 
     this->m_data = wptr;
-    this->m_size = ntotal;
+    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr);
   }
 
 void
@@ -1509,13 +1499,12 @@ put_DI(int64_t value, uint32_t precision)
     char* wptr = ::std::end(this->m_stor);
     *--wptr = 0;
 
-    uint32_t ntotal = do_write_digits_backwards(wptr, -(uint64_t) value, 10, precision);
+    do_write_digits_backwards(wptr, -(uint64_t) value, 10, precision);
     wptr -= 1;
     wptr[0] = '-';
-    ntotal += 1;
 
     this->m_data = wptr;
-    this->m_size = ntotal;
+    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr);
   }
 
 void
@@ -1559,7 +1548,7 @@ put_BF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1588,7 +1577,7 @@ put_BEF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1635,7 +1624,7 @@ put_XF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1666,7 +1655,7 @@ put_XEF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1711,7 +1700,7 @@ put_DF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1740,7 +1729,7 @@ put_DEF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1785,7 +1774,7 @@ put_BD(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1814,7 +1803,7 @@ put_BED(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1861,7 +1850,7 @@ put_XD(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1892,7 +1881,7 @@ put_XED(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1937,7 +1926,7 @@ put_DD(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1966,7 +1955,7 @@ put_DED(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
