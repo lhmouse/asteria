@@ -1344,7 +1344,6 @@ do_write_exp(char*& wptr, int exp)
     *wptr = (exp == (int) abs_exp) ? '+' : '-';
     wptr ++;
 
-    // Get the static string.
     if(abs_exp < 100) {
       // Ensure at least two significant digits, like POSIX.
       do_get_small_decimal(digits, ndigits, 100 + abs_exp);
@@ -1491,8 +1490,8 @@ put_DI(int64_t value, uint32_t precision)
     if((precision == 1) && (-(uint64_t) value < ::std::size(s_small_decimals))) {
       // Get the static string.
       do_get_small_decimal(this->m_data, this->m_size, -(uint32_t) value);
-      this->m_data -= 1;
-      this->m_size += 1;
+      this->m_data --;
+      this->m_size ++;
       return;
     }
 
