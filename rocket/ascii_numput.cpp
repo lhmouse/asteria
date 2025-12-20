@@ -1306,7 +1306,7 @@ do_write_zeroes(char*& wptr, uint32_t len)
 
 inline
 void
-do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, const char* rdxpp_opt)
+do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, char* rdxpp_opt)
   {
     uint64_t reg = mant;
     while(reg != 0) {
@@ -1334,7 +1334,7 @@ do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, c
 
 inline
 void
-do_write_exp(char*& wptr, int exp)
+do_write_exponent(char*& wptr, int exp)
   {
     uint32_t abs_exp = (uint32_t) ::std::abs(exp);
     const char* digits;
@@ -1541,7 +1541,7 @@ put_BF(float value)
       do_write_mantissa(wptr, frx.mant, 0x1p23, 2, rdxpp);
       *wptr = 'p';
       wptr += 1;
-      do_write_exp(wptr, frx.exp);
+      do_write_exponent(wptr, frx.exp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1571,7 +1571,7 @@ put_BEF(float value)
     do_write_mantissa(wptr, frx.mant, 0x1p23, 2, rdxpp);
     *wptr = 'p';
     wptr += 1;
-    do_write_exp(wptr, frx.exp);
+    do_write_exponent(wptr, frx.exp);
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
@@ -1617,7 +1617,7 @@ put_XF(float value)
       do_write_mantissa(wptr, frx.mant, 0x1p23, 16, rdxpp);
       *wptr = 'p';
       wptr += 1;
-      do_write_exp(wptr, frx.exp * 4);
+      do_write_exponent(wptr, frx.exp * 4);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1649,7 +1649,7 @@ put_XEF(float value)
     do_write_mantissa(wptr, frx.mant, 0x1p23, 16, rdxpp);
     *wptr = 'p';
     wptr += 1;
-    do_write_exp(wptr, frx.exp * 4);
+    do_write_exponent(wptr, frx.exp * 4);
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
@@ -1693,7 +1693,7 @@ put_DF(float value)
       do_write_mantissa(wptr, frx.mant, 1e8, 10, rdxpp);
       *wptr = 'e';
       wptr += 1;
-      do_write_exp(wptr, frx.exp);
+      do_write_exponent(wptr, frx.exp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1723,7 +1723,7 @@ put_DEF(float value)
     do_write_mantissa(wptr, frx.mant, 1e8, 10, rdxpp);
     *wptr = 'e';
     wptr += 1;
-    do_write_exp(wptr, frx.exp);
+    do_write_exponent(wptr, frx.exp);
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
@@ -1767,7 +1767,7 @@ put_BD(double value)
       do_write_mantissa(wptr, frx.mant, 0x1p52, 2, rdxpp);
       *wptr = 'p';
       wptr += 1;
-      do_write_exp(wptr, frx.exp);
+      do_write_exponent(wptr, frx.exp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1797,7 +1797,7 @@ put_BED(double value)
     do_write_mantissa(wptr, frx.mant, 0x1p52, 2, rdxpp);
     *wptr = 'p';
     wptr += 1;
-    do_write_exp(wptr, frx.exp);
+    do_write_exponent(wptr, frx.exp);
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
@@ -1843,7 +1843,7 @@ put_XD(double value)
       do_write_mantissa(wptr, frx.mant, 0x1p52, 16, rdxpp);
       *wptr = 'p';
       wptr += 1;
-      do_write_exp(wptr, frx.exp * 4);
+      do_write_exponent(wptr, frx.exp * 4);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1875,7 +1875,7 @@ put_XED(double value)
     do_write_mantissa(wptr, frx.mant, 0x1p52, 16, rdxpp);
     *wptr = 'p';
     wptr += 1;
-    do_write_exp(wptr, frx.exp * 4);
+    do_write_exponent(wptr, frx.exp * 4);
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
@@ -1919,7 +1919,7 @@ put_DD(double value)
       do_write_mantissa(wptr, frx.mant, 1e17, 10, rdxpp);
       *wptr = 'e';
       wptr += 1;
-      do_write_exp(wptr, frx.exp);
+      do_write_exponent(wptr, frx.exp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1949,7 +1949,7 @@ put_DED(double value)
     do_write_mantissa(wptr, frx.mant, 1e17, 10, rdxpp);
     *wptr = 'e';
     wptr += 1;
-    do_write_exp(wptr, frx.exp);
+    do_write_exponent(wptr, frx.exp);
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
