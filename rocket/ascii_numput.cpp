@@ -1274,17 +1274,17 @@ do_is_special_class(const char*& str_out, uint32_t& len_out, const frexp& frx)
     switch(static_cast<uint32_t>(frx.cls))
       {
       case floating_point_class_infinity:
-        str_out = "-infinity" + (1 - frx.sign);
+        str_out = "-infinity" + (1U - frx.sign);
         len_out = 8U + frx.sign;
         return true;
 
       case floating_point_class_nan:
-        str_out = "-nan" + (1 - frx.sign);
+        str_out = "-nan" + (1U - frx.sign);
         len_out = 3U + frx.sign;
         return true;
 
       case floating_point_class_zero:
-        str_out = s_small_decimals[0] + (1 - frx.sign);
+        str_out = s_small_decimals[0] + (1U - frx.sign);
         len_out = 1U + frx.sign;
         return true;
 
@@ -1547,7 +1547,7 @@ put_BF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1576,7 +1576,7 @@ put_BEF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1623,7 +1623,7 @@ put_XF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1654,7 +1654,7 @@ put_XEF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1699,7 +1699,7 @@ put_DF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1728,7 +1728,7 @@ put_DEF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1773,7 +1773,7 @@ put_BD(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1802,7 +1802,7 @@ put_BED(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1849,7 +1849,7 @@ put_XD(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1880,7 +1880,7 @@ put_XED(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1925,7 +1925,7 @@ put_DD(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1954,7 +1954,7 @@ put_DED(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1 - frx.sign);
+    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
