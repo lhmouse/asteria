@@ -1539,8 +1539,7 @@ put_BF(float value)
       char* rdxpp = wptr + 1;
       *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 0x1p23, 2, rdxpp);
-      *wptr = 'p';
-      wptr += 1;
+      *(wptr ++) = 'p';
       do_write_exponent(wptr, frx.exp);
     }
 
@@ -1569,8 +1568,7 @@ put_BEF(float value)
     char* rdxpp = wptr + 1;
     *rdxpp = this->m_rdxp;
     do_write_mantissa(wptr, frx.mant, 0x1p23, 2, rdxpp);
-    *wptr = 'p';
-    wptr += 1;
+    *(wptr ++) = 'p';
     do_write_exponent(wptr, frx.exp);
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1615,8 +1613,7 @@ put_XF(float value)
       char* rdxpp = wptr + 1;
       *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 0x1p23, 16, rdxpp);
-      *wptr = 'p';
-      wptr += 1;
+      *(wptr ++) = 'p';
       do_write_exponent(wptr, frx.exp * 4);
     }
 
@@ -1647,8 +1644,7 @@ put_XEF(float value)
     char* rdxpp = wptr + 1;
     *rdxpp = this->m_rdxp;
     do_write_mantissa(wptr, frx.mant, 0x1p23, 16, rdxpp);
-    *wptr = 'p';
-    wptr += 1;
+    *(wptr ++) = 'p';
     do_write_exponent(wptr, frx.exp * 4);
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1691,8 +1687,7 @@ put_DF(float value)
       char* rdxpp = wptr + 1;
       *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 1e8, 10, rdxpp);
-      *wptr = 'e';
-      wptr += 1;
+      *(wptr ++) = 'e';
       do_write_exponent(wptr, frx.exp);
     }
 
@@ -1721,8 +1716,7 @@ put_DEF(float value)
     char* rdxpp = wptr + 1;
     *rdxpp = this->m_rdxp;
     do_write_mantissa(wptr, frx.mant, 1e8, 10, rdxpp);
-    *wptr = 'e';
-    wptr += 1;
+    *(wptr ++) = 'e';
     do_write_exponent(wptr, frx.exp);
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1765,8 +1759,7 @@ put_BD(double value)
       char* rdxpp = wptr + 1;
       *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 0x1p52, 2, rdxpp);
-      *wptr = 'p';
-      wptr += 1;
+      *(wptr ++) = 'p';
       do_write_exponent(wptr, frx.exp);
     }
 
@@ -1795,8 +1788,7 @@ put_BED(double value)
     char* rdxpp = wptr + 1;
     *rdxpp = this->m_rdxp;
     do_write_mantissa(wptr, frx.mant, 0x1p52, 2, rdxpp);
-    *wptr = 'p';
-    wptr += 1;
+    *(wptr ++) = 'p';
     do_write_exponent(wptr, frx.exp);
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1841,8 +1833,7 @@ put_XD(double value)
       char* rdxpp = wptr + 1;
       *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 0x1p52, 16, rdxpp);
-      *wptr = 'p';
-      wptr += 1;
+      *(wptr ++) = 'p';
       do_write_exponent(wptr, frx.exp * 4);
     }
 
@@ -1873,8 +1864,7 @@ put_XED(double value)
     char* rdxpp = wptr + 1;
     *rdxpp = this->m_rdxp;
     do_write_mantissa(wptr, frx.mant, 0x1p52, 16, rdxpp);
-    *wptr = 'p';
-    wptr += 1;
+    *(wptr ++) = 'p';
     do_write_exponent(wptr, frx.exp * 4);
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1917,8 +1907,7 @@ put_DD(double value)
       char* rdxpp = wptr + 1;
       *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 1e17, 10, rdxpp);
-      *wptr = 'e';
-      wptr += 1;
+      *(wptr ++) = 'e';
       do_write_exponent(wptr, frx.exp);
     }
 
@@ -1947,8 +1936,7 @@ put_DED(double value)
     char* rdxpp = wptr + 1;
     *rdxpp = this->m_rdxp;
     do_write_mantissa(wptr, frx.mant, 1e17, 10, rdxpp);
-    *wptr = 'e';
-    wptr += 1;
+    *(wptr ++) = 'e';
     do_write_exponent(wptr, frx.exp);
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
