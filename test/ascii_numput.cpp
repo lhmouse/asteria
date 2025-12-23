@@ -34,4 +34,13 @@ int main()
       ::printf("--------------->   got: %s\n", nump.data());
       ASTERIA_TEST_CHECK(::strcmp(nump.data(), r.expected) == 0);
     }
+
+    ascii_numput np1;
+    np1.set_radix_point('^');
+    np1.put_DD(123456789012345678.9);
+    ASTERIA_TEST_CHECK(::strcmp(np1.data(), "1^2345678901234568e+17") == 0);
+    np1.put_DD(0.1234567890123456789);
+    ASTERIA_TEST_CHECK(::strcmp(np1.data(), "0^12345678901234568") == 0);
+    np1.put_DD(0.00000000000000000001234567890123456789);
+    ASTERIA_TEST_CHECK(::strcmp(np1.data(), "1^2345678901234569e-20") == 0);
   }
