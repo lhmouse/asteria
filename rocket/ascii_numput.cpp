@@ -1271,8 +1271,13 @@ inline
 bool
 do_is_special_class(const char*& str_out, uint32_t& len_out, const frexp& frx)
   {
-    switch(static_cast<uint32_t>(frx.cls))
+    switch(frx.cls)
       {
+      case fpclass_zero:
+        str_out = s_small_decimals[0] + (1U - frx.sign);
+        len_out = 1U + frx.sign;
+        return true;
+
       case fpclass_infinity:
         str_out = "-infinity" + (1U - frx.sign);
         len_out = 8U + frx.sign;
@@ -1283,13 +1288,12 @@ do_is_special_class(const char*& str_out, uint32_t& len_out, const frexp& frx)
         len_out = 3U + frx.sign;
         return true;
 
-      case fpclass_zero:
-        str_out = s_small_decimals[0] + (1U - frx.sign);
-        len_out = 1U + frx.sign;
-        return true;
+      case fpclass_subnormal:
+      case fpclass_normal:
+        return false;
 
       default:
-        return false;
+        ROCKET_ASSERT(false);
       }
   }
 
