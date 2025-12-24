@@ -1352,13 +1352,9 @@ do_write_exponent(char*& wptr, int exp)
     else
       do_get_small_decimal(digits, ndigits, abs_exp);
 
-    while(ndigits != 0) {
-      // Copy a significant digit, in normal order.
-      *(volatile char*) wptr = *digits;
-      digits ++;
-      ndigits --;
-      wptr ++;
-    }
+    // This won't overrun the source static string.
+    ::memcpy(wptr, digits, 4);
+    wptr += ndigits;
   }
 
 }  // namespace
