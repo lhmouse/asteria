@@ -275,11 +275,11 @@ do_write_digits_backwards(char*& wptr, uint64_t value, uint32_t base, uint32_t p
     uint64_t reg = value;
     while(reg != 0) {
       // Shift a digit from `reg` and write it.
-      uint64_t digit = reg % base;
+      uint32_t digit = (uint32_t) (reg % base);
       reg /= base;
 
       wptr --;
-      *wptr = (char) ('0' + digit + ((9U - digit) >> 61));
+      *wptr = (char) ('0' + digit + ((9U - digit) >> 29));
     }
 
     while(fill_begin < wptr) {
@@ -1311,7 +1311,7 @@ do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, c
     uint64_t reg = mant;
     while(reg != 0) {
       // Pop a digit from `reg` and write it.
-      uint64_t digit = reg / divisor;
+      uint32_t digit = (uint32_t) (reg / divisor);
       reg %= divisor;
       reg *= base;
 
@@ -1320,7 +1320,7 @@ do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, c
         wptr ++;
       }
 
-      *wptr = (char) ('0' + digit + ((9U - digit) >> 61));
+      *wptr = (char) ('0' + digit + ((9U - digit) >> 29));
       wptr ++;
     }
 
