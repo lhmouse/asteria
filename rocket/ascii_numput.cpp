@@ -1016,18 +1016,18 @@ constexpr s_decimal_multipliers[] =
 // `exp10 = ROUND((exp2 - 57) * LOG2)` where `LOG2 = 0.30103`
 constexpr int s_decimal_exp_min = ((s_decimal_multipliers[0].exp2 - 57) * 30103LL + 50000LL) / 100000LL;
 
-enum floating_point_class : uint8_t
+enum fpclass : uint8_t
   {
-    floating_point_class_zero       = 0,
-    floating_point_class_subnormal  = 1,
-    floating_point_class_infinity   = 2,
-    floating_point_class_nan        = 3,
-    floating_point_class_normal     = 4,
+    fpclass_zero       = 0,
+    fpclass_subnormal  = 1,
+    fpclass_infinity   = 2,
+    fpclass_nan        = 3,
+    fpclass_normal     = 4,
   };
 
 struct frexp
   {
-    floating_point_class cls;
+    fpclass cls;
     bool sign;
     int exp;
     uint64_t mant;
@@ -1043,15 +1043,15 @@ do_frexp2_23(float value)
     ::memcpy(&bits, &value, sizeof(bits));
 
     frexp frx;
-    frx.cls = floating_point_class_normal;
+    frx.cls = fpclass_normal;
     frx.sign = (int32_t) bits < 0;
     frx.exp = (int) (bits >> 23) & 0xFF;
     frx.mant = bits & 0x7FFFFFULL;
 
     if(((frx.exp + 1) & 0xFF) <= 1) {
       // The biased exponent is 00 or FF, so this value is not normal.
-      frx.cls = (floating_point_class) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
-      if(frx.cls != floating_point_class_subnormal)
+      frx.cls = (fpclass) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
+      if(frx.cls != fpclass_subnormal)
         return frx;
 
       // Normalize the subnormal value.
@@ -1078,15 +1078,15 @@ do_frexp2_52(double value)
     ::memcpy(&bits, &value, sizeof(bits));
 
     frexp frx;
-    frx.cls = floating_point_class_normal;
+    frx.cls = fpclass_normal;
     frx.sign = (int64_t) bits < 0;
     frx.exp = (int) (bits >> 52) & 0x7FF;
     frx.mant = bits & 0xFFFFFFFFFFFFFULL;
 
     if(((frx.exp + 1) & 0x7FF) <= 1) {
       // The biased exponent is 000 or 7FF, so this value is not normal.
-      frx.cls = (floating_point_class) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
-      if(frx.cls != floating_point_class_subnormal)
+      frx.cls = (fpclass) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
+      if(frx.cls != fpclass_subnormal)
         return frx;
 
       // Normalize the subnormal value.
@@ -1113,15 +1113,15 @@ do_frexp10_8(float value)
     ::memcpy(&bits, &value, sizeof(bits));
 
     frexp frx;
-    frx.cls = floating_point_class_normal;
+    frx.cls = fpclass_normal;
     frx.sign = (int32_t) bits < 0;
     frx.exp = (int) (bits >> 23) & 0xFF;
     frx.mant = bits & 0x7FFFFFULL;
 
     if(((frx.exp + 1) & 0xFF) <= 1) {
       // The biased exponent is 00 or FF, so this value is not normal.
-      frx.cls = (floating_point_class) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
-      if(frx.cls != floating_point_class_subnormal)
+      frx.cls = (fpclass) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
+      if(frx.cls != fpclass_subnormal)
         return frx;
 
       // Normalize the subnormal value and remove the hidden bit.
@@ -1196,15 +1196,15 @@ do_frexp10_17(double value)
     ::memcpy(&bits, &value, sizeof(bits));
 
     frexp frx;
-    frx.cls = floating_point_class_normal;
+    frx.cls = fpclass_normal;
     frx.sign = (int64_t) bits < 0;
     frx.exp = (int) (bits >> 52) & 0x7FF;
     frx.mant = bits & 0xFFFFFFFFFFFFFULL;
 
     if(((frx.exp + 1) & 0x7FF) <= 1) {
       // The biased exponent is 000 or 7FF, so this value is not normal.
-      frx.cls = (floating_point_class) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
-      if(frx.cls != floating_point_class_subnormal)
+      frx.cls = (fpclass) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
+      if(frx.cls != fpclass_subnormal)
         return frx;
 
       // Normalize the subnormal value and remove the hidden bit.
@@ -1273,17 +1273,17 @@ do_is_special_class(const char*& str_out, uint32_t& len_out, const frexp& frx)
   {
     switch(static_cast<uint32_t>(frx.cls))
       {
-      case floating_point_class_infinity:
+      case fpclass_infinity:
         str_out = "-infinity" + (1U - frx.sign);
         len_out = 8U + frx.sign;
         return true;
 
-      case floating_point_class_nan:
+      case fpclass_nan:
         str_out = "-nan" + (1U - frx.sign);
         len_out = 3U + frx.sign;
         return true;
 
-      case floating_point_class_zero:
+      case fpclass_zero:
         str_out = s_small_decimals[0] + (1U - frx.sign);
         len_out = 1U + frx.sign;
         return true;
