@@ -1299,17 +1299,6 @@ do_is_special_class(const char*& str_out, uint32_t& len_out, const frexp& frx)
 
 inline
 void
-do_write_zeroes(char*& wptr, uint32_t len)
-  {
-    for(uint32_t k = len;  k != 0;  --k) {
-      // Prevent optimization...
-      *(volatile char*) wptr = '0';
-      wptr ++;
-    }
-  }
-
-inline
-void
 do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, char* rdxpp)
   {
     uint64_t reg = mant;
@@ -1522,7 +1511,7 @@ put_BF(float value)
     if((frx.exp >= 0) && (frx.exp < 24)) {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
-      char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
+      char* rdxpp = wptr + frx.exp + 1;
       do_write_mantissa(wptr, frx.mant, 0x1p23, 2, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1531,7 +1520,7 @@ put_BF(float value)
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
       wptr += 2;
-      do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
+      do_write_mantissa(wptr, 0, 1, 1, wptr - frx.exp - 1);
       do_write_mantissa(wptr, frx.mant, 0x1p23, 2, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1598,7 +1587,7 @@ put_XF(float value)
     if((frx.exp >= 0) && (frx.exp < 6)) {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
-      char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
+      char* rdxpp = wptr + frx.exp + 1;
       do_write_mantissa(wptr, frx.mant, 0x1p23, 16, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1607,7 +1596,7 @@ put_XF(float value)
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
       wptr += 2;
-      do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
+      do_write_mantissa(wptr, 0, 1, 1, wptr - frx.exp - 1);
       do_write_mantissa(wptr, frx.mant, 0x1p23, 16, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1674,7 +1663,7 @@ put_DF(float value)
     if((frx.exp >= 0) && (frx.exp < 6)) {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
-      char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
+      char* rdxpp = wptr + frx.exp + 1;
       do_write_mantissa(wptr, frx.mant, 1e8, 10, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1683,7 +1672,7 @@ put_DF(float value)
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
       wptr += 2;
-      do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
+      do_write_mantissa(wptr, 0, 1, 1, wptr - frx.exp - 1);
       do_write_mantissa(wptr, frx.mant, 1e8, 10, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1748,7 +1737,7 @@ put_BD(double value)
     if((frx.exp >= 0) && (frx.exp < 53)) {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
-      char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
+      char* rdxpp = wptr + frx.exp + 1;
       do_write_mantissa(wptr, frx.mant, 0x1p52, 2, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1757,7 +1746,7 @@ put_BD(double value)
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
       wptr += 2;
-      do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
+      do_write_mantissa(wptr, 0, 1, 1, wptr - frx.exp - 1);
       do_write_mantissa(wptr, frx.mant, 0x1p52, 2, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1824,7 +1813,7 @@ put_XD(double value)
     if((frx.exp >= 0) && (frx.exp < 14)) {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
-      char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
+      char* rdxpp = wptr + frx.exp + 1;
       do_write_mantissa(wptr, frx.mant, 0x1p52, 16, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1833,7 +1822,7 @@ put_XD(double value)
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
       wptr += 2;
-      do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
+      do_write_mantissa(wptr, 0, 1, 1, wptr - frx.exp - 1);
       do_write_mantissa(wptr, frx.mant, 0x1p52, 16, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1900,7 +1889,7 @@ put_DD(double value)
     if((frx.exp >= 0) && (frx.exp < 15)) {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
-      char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
+      char* rdxpp = wptr + frx.exp + 1;
       do_write_mantissa(wptr, frx.mant, 1e17, 10, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1909,7 +1898,7 @@ put_DD(double value)
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
       wptr += 2;
-      do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
+      do_write_mantissa(wptr, 0, 1, 1, wptr - frx.exp - 1);
       do_write_mantissa(wptr, frx.mant, 1e17, 10, rdxpp);
       *rdxpp = this->m_rdxp;
     }
