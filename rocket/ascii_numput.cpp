@@ -1523,23 +1523,23 @@ put_BF(float value)
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
       char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
-      *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 0x1p23, 2, rdxpp);
+      *rdxpp = this->m_rdxp;
     }
     else if((frx.exp >= -4) && (frx.exp < 0)) {
       // Write the number in plain format. The number starts with
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
-      *rdxpp = this->m_rdxp;
       wptr += 2;
       do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
       do_write_mantissa(wptr, frx.mant, 0x1p23, 2, rdxpp);
+      *rdxpp = this->m_rdxp;
     }
     else {
       // Write the number in scientific notation.
       char* rdxpp = wptr + 1;
-      *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 0x1p23, 2, rdxpp);
+      *rdxpp = this->m_rdxp;
       *(wptr ++) = 'p';
       do_write_exponent(wptr, frx.exp);
     }
@@ -1567,8 +1567,8 @@ put_BEF(float value)
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
-    *rdxpp = this->m_rdxp;
     do_write_mantissa(wptr, frx.mant, 0x1p23, 2, rdxpp);
+    *rdxpp = this->m_rdxp;
     *(wptr ++) = 'p';
     do_write_exponent(wptr, frx.exp);
 
@@ -1599,23 +1599,23 @@ put_XF(float value)
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
       char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
-      *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 0x1p23, 16, rdxpp);
+      *rdxpp = this->m_rdxp;
     }
     else if((frx.exp >= -4) && (frx.exp < 0)) {
       // Write the number in plain format. The number starts with
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
-      *rdxpp = this->m_rdxp;
       wptr += 2;
       do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
       do_write_mantissa(wptr, frx.mant, 0x1p23, 16, rdxpp);
+      *rdxpp = this->m_rdxp;
     }
     else {
       // Write the number in scientific notation.
       char* rdxpp = wptr + 1;
-      *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 0x1p23, 16, rdxpp);
+      *rdxpp = this->m_rdxp;
       *(wptr ++) = 'p';
       do_write_exponent(wptr, frx.exp * 4);
     }
@@ -1645,8 +1645,8 @@ put_XEF(float value)
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
-    *rdxpp = this->m_rdxp;
     do_write_mantissa(wptr, frx.mant, 0x1p23, 16, rdxpp);
+    *rdxpp = this->m_rdxp;
     *(wptr ++) = 'p';
     do_write_exponent(wptr, frx.exp * 4);
 
@@ -1675,23 +1675,23 @@ put_DF(float value)
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
       char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
-      *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 1e8, 10, rdxpp);
+      *rdxpp = this->m_rdxp;
     }
     else if((frx.exp >= -4) && (frx.exp < 0)) {
       // Write the number in plain format. The number starts with
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
-      *rdxpp = this->m_rdxp;
       wptr += 2;
       do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
       do_write_mantissa(wptr, frx.mant, 1e8, 10, rdxpp);
+      *rdxpp = this->m_rdxp;
     }
     else {
       // Write the number in scientific notation.
       char* rdxpp = wptr + 1;
-      *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 1e8, 10, rdxpp);
+      *rdxpp = this->m_rdxp;
       *(wptr ++) = 'e';
       do_write_exponent(wptr, frx.exp);
     }
@@ -1719,8 +1719,8 @@ put_DEF(float value)
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
-    *rdxpp = this->m_rdxp;
     do_write_mantissa(wptr, frx.mant, 1e8, 10, rdxpp);
+    *rdxpp = this->m_rdxp;
     *(wptr ++) = 'e';
     do_write_exponent(wptr, frx.exp);
 
@@ -1749,23 +1749,23 @@ put_BD(double value)
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
       char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
-      *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 0x1p52, 2, rdxpp);
+      *rdxpp = this->m_rdxp;
     }
     else if((frx.exp >= -4) && (frx.exp < 0)) {
       // Write the number in plain format. The number starts with
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
-      *rdxpp = this->m_rdxp;
       wptr += 2;
       do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
       do_write_mantissa(wptr, frx.mant, 0x1p52, 2, rdxpp);
+      *rdxpp = this->m_rdxp;
     }
     else {
       // Write the number in scientific notation.
       char* rdxpp = wptr + 1;
-      *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 0x1p52, 2, rdxpp);
+      *rdxpp = this->m_rdxp;
       *(wptr ++) = 'p';
       do_write_exponent(wptr, frx.exp);
     }
@@ -1793,8 +1793,8 @@ put_BED(double value)
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
-    *rdxpp = this->m_rdxp;
     do_write_mantissa(wptr, frx.mant, 0x1p52, 2, rdxpp);
+    *rdxpp = this->m_rdxp;
     *(wptr ++) = 'p';
     do_write_exponent(wptr, frx.exp);
 
@@ -1825,23 +1825,23 @@ put_XD(double value)
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
       char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
-      *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 0x1p52, 16, rdxpp);
+      *rdxpp = this->m_rdxp;
     }
     else if((frx.exp >= -4) && (frx.exp < 0)) {
       // Write the number in plain format. The number starts with
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
-      *rdxpp = this->m_rdxp;
       wptr += 2;
       do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
       do_write_mantissa(wptr, frx.mant, 0x1p52, 16, rdxpp);
+      *rdxpp = this->m_rdxp;
     }
     else {
       // Write the number in scientific notation.
       char* rdxpp = wptr + 1;
-      *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 0x1p52, 16, rdxpp);
+      *rdxpp = this->m_rdxp;
       *(wptr ++) = 'p';
       do_write_exponent(wptr, frx.exp * 4);
     }
@@ -1871,8 +1871,8 @@ put_XED(double value)
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
-    *rdxpp = this->m_rdxp;
     do_write_mantissa(wptr, frx.mant, 0x1p52, 16, rdxpp);
+    *rdxpp = this->m_rdxp;
     *(wptr ++) = 'p';
     do_write_exponent(wptr, frx.exp * 4);
 
@@ -1901,23 +1901,23 @@ put_DD(double value)
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
       char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
-      *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 1e17, 10, rdxpp);
+      *rdxpp = this->m_rdxp;
     }
     else if((frx.exp >= -4) && (frx.exp < 0)) {
       // Write the number in plain format. The number starts with
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
-      *rdxpp = this->m_rdxp;
       wptr += 2;
       do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
       do_write_mantissa(wptr, frx.mant, 1e17, 10, rdxpp);
+      *rdxpp = this->m_rdxp;
     }
     else {
       // Write the number in scientific notation.
       char* rdxpp = wptr + 1;
-      *rdxpp = this->m_rdxp;
       do_write_mantissa(wptr, frx.mant, 1e17, 10, rdxpp);
+      *rdxpp = this->m_rdxp;
       *(wptr ++) = 'e';
       do_write_exponent(wptr, frx.exp);
     }
@@ -1945,8 +1945,8 @@ put_DED(double value)
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
-    *rdxpp = this->m_rdxp;
     do_write_mantissa(wptr, frx.mant, 1e17, 10, rdxpp);
+    *rdxpp = this->m_rdxp;
     *(wptr ++) = 'e';
     do_write_exponent(wptr, frx.exp);
 
