@@ -257,11 +257,10 @@ do_get_small_decimal(const char*& str_out, uint32_t& len_out, uint32_t value)
   {
     // Get the string for a non-negative value.
     str_out = s_small_decimals[value] + 1;
-    uint32_t bytes = load_le<uint32_t>(str_out);
 
-    // Now see whether `bytes` contains a zero byte. The condition
-    // is that there shall be a byte whose MSB becomes one after the
-    // subtraction below, but was zero before it.
+    // Calculate the length of the string. There shall be a byte whose MSB
+    // becomes one after the subtraction below, but was zero before it.
+    uint32_t bytes = load_le<uint32_t>(str_out);
     constexpr uint32_t bmask = UINT32_MAX / 0xFFU;
     bytes = (bytes - bmask) & (bytes ^ (bmask << 7)) & (bmask << 7);
     len_out = tzcnt32(bytes) / 8U;
