@@ -282,10 +282,13 @@ do_write_digits_backwards(char*& wptr, uint64_t value, uint32_t base, uint32_t p
       *wptr = (char) ('0' + digit + ((9U - digit) >> 29));
     }
 
-    while(fill_begin < wptr) {
+    if(wptr > fill_begin) {
       // Prepend zeroes up to `precision`.
-      wptr --;
-      *(volatile char*) wptr = '0';
+      do {
+        wptr -= sizeof(intptr_t);
+        ::memset(wptr, '0', sizeof(intptr_t));
+      } while(wptr > fill_begin);
+      wptr = fill_begin;
     }
   }
 
@@ -1317,10 +1320,13 @@ do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, c
       wptr ++;
     }
 
-    while(wptr < rdxpp) {
+    if(wptr < rdxpp) {
       // Append zeroes up to `rdxpp`, where the string will end.
-      *(volatile char*) wptr = '0';
-      wptr ++;
+      do {
+        ::memset(wptr, '0', sizeof(intptr_t));
+        wptr += sizeof(intptr_t);
+      } while(wptr < rdxpp);
+      wptr = rdxpp;
     }
   }
 
