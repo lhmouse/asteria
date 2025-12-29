@@ -277,7 +277,6 @@ do_write_digits_backwards(char*& wptr, uint64_t value, uint32_t base, uint32_t p
       // Shift a digit from `reg` and write it.
       uint32_t digit = (uint32_t) (reg % base);
       reg /= base;
-
       wptr --;
       *wptr = (char) ('0' + digit + ((9U - digit) >> 29));
     }
@@ -1310,12 +1309,7 @@ do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, c
       uint32_t digit = (uint32_t) (reg / divisor);
       reg %= divisor;
       reg *= base;
-
-      if(wptr == rdxpp) {
-        // Skip the radix point which is set by the caller.
-        wptr ++;
-      }
-
+      wptr += wptr == rdxpp;
       *wptr = (char) ('0' + digit + ((9U - digit) >> 29));
       wptr ++;
     }
