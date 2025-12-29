@@ -2475,8 +2475,7 @@ do_accept_infix_element(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
              do_accept_postfix_function_call(units, tstrm) ||
              do_accept_postfix_subscript(units, tstrm) ||
              do_accept_postfix_member_access(units, tstrm);
-    }
-    while(succ);
+    } while(succ);
 
     // Append prefixes in reverse order.
     // N.B. Prefix operators have lower precedence than postfix ones.

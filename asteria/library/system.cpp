@@ -695,8 +695,7 @@ std_system_load_conf(V_string path)
                 do_load_next();
                 if(ch == '`')
                   do_load_next();
-              }
-              while(valid_digits[static_cast<uint32_t>(ch)]);
+              } while(valid_digits[static_cast<uint32_t>(ch)]);
             }
 
             if((ch | 0x20) == exp_ch) {
@@ -716,8 +715,7 @@ std_system_load_conf(V_string path)
                 do_load_next();
                 if(ch == '`')
                   do_load_next();
-              }
-              while((ch >= '0') && (ch <= '9'));
+              } while((ch >= '0') && (ch <= '9'));
             }
 
             // A number has been accepted.

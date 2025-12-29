@@ -1368,8 +1368,7 @@ cast_U(uint64_t& value, uint64_t min, uint64_t max)
             exp --;
             value = mulm(value, this->m_base, &ovfl);
             this->m_ovfl |= ovfl;
-          }
-          while((exp != 0) && !ovfl);
+          } while((exp != 0) && !ovfl);
 
           if(ovfl) {
             value = UINT64_MAX;
@@ -1382,8 +1381,7 @@ cast_U(uint64_t& value, uint64_t min, uint64_t max)
             exp ++;
             this->m_inxct |= (value % this->m_base) != 0;
             value /= this->m_base;
-          }
-          while((exp != 0) && (value != 0));
+          } while((exp != 0) && (value != 0));
 
           if(value == 0) {
             this->m_udfl = true;
@@ -1470,8 +1468,7 @@ cast_I(int64_t& value, int64_t min, int64_t max)
             exp --;
             bits = mulm(bits, this->m_base, &ovfl);
             this->m_ovfl |= ovfl;
-          }
-          while((exp != 0) && !ovfl);
+          } while((exp != 0) && !ovfl);
 
           if(ovfl) {
             value = (int64_t) umax;
@@ -1484,8 +1481,7 @@ cast_I(int64_t& value, int64_t min, int64_t max)
             exp ++;
             this->m_inxct |= (bits % this->m_base) != 0;
             bits /= this->m_base;
-          }
-          while((exp != 0) && (bits != 0));
+          } while((exp != 0) && (bits != 0));
 
           if(bits == 0) {
             this->m_udfl = true;

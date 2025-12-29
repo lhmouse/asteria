@@ -214,8 +214,7 @@ do_merge_blocks(V_array& output, bool unique, V_array& input, xComparator&& comp
         tb = cmp == compare_greater;
         bpos[tb] += 1;
         output_element(bpos[tb][-1]);
-      }
-      while(bpos[tb] != epos[tb]);
+      } while(bpos[tb] != epos[tb]);
 
       // The `tb` block has been exhausted. Move elements from the other block.
       tb ^= 1;
@@ -224,8 +223,7 @@ do_merge_blocks(V_array& output, bool unique, V_array& input, xComparator&& comp
       do {
         bpos[tb] += 1;
         output_element(bpos[tb][-1]);
-      }
-      while(bpos[tb] != epos[tb]);
+      } while(bpos[tb] != epos[tb]);
     }
 
     // Move all remaining elements.

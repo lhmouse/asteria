@@ -526,8 +526,7 @@ do_boyer_moore_horspool_search(textT tbegin, textT tend, pattT pbegin, pattT pen
       tcur += pend - pbegin;
       uint32_t hash = static_cast<uint32_t>(noadl::int_from(tcur[-1])) % NT;
       tcur -= static_cast<ptrdiff_t>(offsets[hash]);
-    }
-    while(tend - tcur >= pend - pbegin);
+    } while(tend - tcur >= pend - pbegin);
 
     // If there is no match, return a custom not-a-position.
     return npos;

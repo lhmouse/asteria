@@ -48,8 +48,7 @@ int main()
         else if(count == 7)
           break;
         sum += count;
-      }
-      while(count != 10);
+      } while(count != 10);
       assert count == 7;
       assert sum == 1 + 3 + 5;
 
@@ -59,8 +58,7 @@ int main()
         count ++;
         sum += count;
         continue;
-      }
-      while(count != 10);
+      } while(count != 10);
       assert count == 10;
       assert sum == 55;
 

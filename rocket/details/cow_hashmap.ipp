@@ -937,8 +937,7 @@ class iterator
         do {
           ROCKET_ASSERT_MSG(res.m_cur != this->m_end, "past-the-end iterator not incrementable");
           res.m_cur++;
-        }
-        while((res.m_cur != this->m_end) && !*(res.m_cur));
+        } while((res.m_cur != this->m_end) && !*(res.m_cur));
         return res;
       }
 
@@ -951,8 +950,7 @@ class iterator
         do {
           ROCKET_ASSERT_MSG(res.m_cur != this->m_begin, "beginning iterator not decrementable");
           res.m_cur--;
-        }
-        while(!*(res.m_cur));
+        } while(!*(res.m_cur));
         return res;
       }
 
