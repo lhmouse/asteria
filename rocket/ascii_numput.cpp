@@ -1365,7 +1365,8 @@ ascii_numput::
 put_XP(const volatile void* value)
   noexcept
   {
-    char* wptr = ::std::end(this->m_stor) - 1;
+    char* end_of_string = ::std::end(this->m_stor) - 1;
+    char* wptr = end_of_string;
     *wptr = 0;
 
     do_write_digits_backwards(wptr, (uintptr_t) value, 16, 1);
@@ -1373,7 +1374,7 @@ put_XP(const volatile void* value)
     ::memcpy(wptr - 2, "..0x", 4);
 
     this->m_data = wptr;
-    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr);
+    this->m_size = (uint32_t) (end_of_string - wptr);
   }
 
 void
@@ -1381,7 +1382,8 @@ ascii_numput::
 put_BU(uint64_t value, uint32_t precision)
   noexcept
   {
-    char* wptr = ::std::end(this->m_stor) - 1;
+    char* end_of_string = ::std::end(this->m_stor) - 1;
+    char* wptr = end_of_string;
     *wptr = 0;
 
     do_write_digits_backwards(wptr, value, 2, ::rocket::min(precision, 64U));
@@ -1389,7 +1391,7 @@ put_BU(uint64_t value, uint32_t precision)
     ::memcpy(wptr - 2, "..0b", 4);
 
     this->m_data = wptr;
-    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr);
+    this->m_size = (uint32_t) (end_of_string - wptr);
   }
 
 void
@@ -1397,7 +1399,8 @@ ascii_numput::
 put_XU(uint64_t value, uint32_t precision)
   noexcept
   {
-    char* wptr = ::std::end(this->m_stor) - 1;
+    char* end_of_string = ::std::end(this->m_stor) - 1;
+    char* wptr = end_of_string;
     *wptr = 0;
 
     do_write_digits_backwards(wptr, value, 16, ::rocket::min(precision, 16U));
@@ -1405,7 +1408,7 @@ put_XU(uint64_t value, uint32_t precision)
     ::memcpy(wptr - 2, "..0x", 4);
 
     this->m_data = wptr;
-    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr);
+    this->m_size = (uint32_t) (end_of_string - wptr);
   }
 
 void
@@ -1419,13 +1422,14 @@ put_DU(uint64_t value, uint32_t precision)
       return;
     }
 
-    char* wptr = ::std::end(this->m_stor) - 1;
+    char* end_of_string = ::std::end(this->m_stor) - 1;
+    char* wptr = end_of_string;
     *wptr = 0;
 
     do_write_digits_backwards(wptr, value, 10, ::rocket::min(precision, 20U));
 
     this->m_data = wptr;
-    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr);
+    this->m_size = (uint32_t) (end_of_string - wptr);
   }
 
 void
@@ -1436,7 +1440,8 @@ put_BI(int64_t value, uint32_t precision)
     bool sign = value < 0;
     uint64_t abs_value = ::rocket::min(-(uint64_t) value, (uint64_t) value);
 
-    char* wptr = ::std::end(this->m_stor) - 1;
+    char* end_of_string = ::std::end(this->m_stor) - 1;
+    char* wptr = end_of_string;
     *wptr = 0;
 
     do_write_digits_backwards(wptr, abs_value, 2, ::rocket::min(precision, 64U));
@@ -1444,7 +1449,7 @@ put_BI(int64_t value, uint32_t precision)
     ::memcpy(wptr - 1, ".-0b", 4);
 
     this->m_data = wptr + (1U - sign);
-    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr) - (1U - sign);
+    this->m_size = (uint32_t) (end_of_string - wptr) - (1U - sign);
   }
 
 void
@@ -1455,7 +1460,8 @@ put_XI(int64_t value, uint32_t precision)
     bool sign = value < 0;
     uint64_t abs_value = ::rocket::min(-(uint64_t) value, (uint64_t) value);
 
-    char* wptr = ::std::end(this->m_stor) - 1;
+    char* end_of_string = ::std::end(this->m_stor) - 1;
+    char* wptr = end_of_string;
     *wptr = 0;
 
     do_write_digits_backwards(wptr, abs_value, 16, ::rocket::min(precision, 16U));
@@ -1463,7 +1469,7 @@ put_XI(int64_t value, uint32_t precision)
     ::memcpy(wptr - 1, ".-0x", 4);
 
     this->m_data = wptr + (1U - sign);
-    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr) - (1U - sign);
+    this->m_size = (uint32_t) (end_of_string - wptr) - (1U - sign);
   }
 
 void
@@ -1482,7 +1488,8 @@ put_DI(int64_t value, uint32_t precision)
       return;
     }
 
-    char* wptr = ::std::end(this->m_stor) - 1;
+    char* end_of_string = ::std::end(this->m_stor) - 1;
+    char* wptr = end_of_string;
     *wptr = 0;
 
     do_write_digits_backwards(wptr, abs_value, 10, ::rocket::min(precision, 20U));
@@ -1490,7 +1497,7 @@ put_DI(int64_t value, uint32_t precision)
     wptr[0] = '-';
 
     this->m_data = wptr + (1U - sign);
-    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr) - (1U - sign);
+    this->m_size = (uint32_t) (end_of_string - wptr) - (1U - sign);
   }
 
 void
