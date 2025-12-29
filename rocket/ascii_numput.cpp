@@ -1153,19 +1153,19 @@ do_frexp10_8(float value)
     // Raise the value to (0,0x1p24) and convert it to an integer. This
     // produces 9 significant digits.
     xbits = (0x800000ULL | frx.mant) << (frx.exp + mult.exp2 - 182);
+    uint64_t xmult = (mult.mant + UINT32_MAX) >> 32;
     uint64_t half_ulp = 1ULL << (frx.exp + mult.exp2 - 183);
-    uint64_t ceiled_mult_mant = (mult.mant + UINT32_MAX) >> 32;
-    uint32_t mant_min = (uint32_t) ((xbits - half_ulp) *  ceiled_mult_mant  / 1000000000ULL + 1ULL);
-    uint32_t mant_max = (uint32_t) ((xbits + half_ulp) * (ceiled_mult_mant - 1ULL) / 1000000000ULL);
+    uint32_t mant_min = (uint32_t) ((xbits - half_ulp) *  xmult  / 1000000000ULL + 1ULL);
+    uint32_t mant_diff = (uint32_t) ((xbits + half_ulp) * (xmult - 1ULL) / 1000000000ULL) - mant_min;
 
     // Round the mantissa to shortest. This is done by removing trailing
     // digits one by one, until the result would be out of range.
-    bits = mant_min + (mant_max - mant_min) / 2;
+    bits = mant_min + mant_diff / 2;
     uint32_t mant_next = bits;
     uint32_t next_digits = bits;
     uint32_t next_mult = 1U;
 
-    while((mant_next >= mant_min) && (mant_next <= mant_max)) {
+    while(mant_next - mant_min <= mant_diff) {
       // Shift one digit from `next_digits` to `next_mult`.
       bits = mant_next;
       next_digits = (next_digits + 5U) / 10U;
@@ -1237,16 +1237,16 @@ do_frexp10_17(double value)
     bits = (0x10000000000000ULL | frx.mant) << (frx.exp + mult.exp2 - 1075);
     uint64_t half_ulp = 1ULL << (frx.exp + mult.exp2 - 1076);
     uint64_t mant_min = mulh128(bits - half_ulp, mult.mant) + 1ULL;
-    uint64_t mant_max = mulh128(bits + half_ulp, mult.mant - 1ULL);
+    uint64_t mant_diff = mulh128(bits + half_ulp, mult.mant - 1ULL) - mant_min;
 
     // Round the mantissa to shortest. This is done by removing trailing
     // digits one by one, until the result would be out of range.
-    bits = mant_min + (mant_max - mant_min) / 2;
+    bits = mant_min + mant_diff / 2;
     uint64_t mant_next = bits;
     uint64_t next_digits = bits;
     uint64_t next_mult = 1U;
 
-    while((mant_next >= mant_min) && (mant_next <= mant_max)) {
+    while(mant_next - mant_min <= mant_diff) {
       // Shift one digit from `next_digits` to `next_mult`.
       bits = mant_next;
       next_digits = (next_digits + 5U) / 10U;
