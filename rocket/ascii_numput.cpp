@@ -1449,7 +1449,7 @@ put_BI(int64_t value, uint32_t precision)
     ::memcpy(wptr - 1, ".-0b", 4);
 
     this->m_data = wptr + (1U - sign);
-    this->m_size = (uint32_t) (end_of_string - wptr) - (1U - sign);
+    this->m_size = (uint32_t) (end_of_string - this->m_data);
   }
 
 void
@@ -1469,7 +1469,7 @@ put_XI(int64_t value, uint32_t precision)
     ::memcpy(wptr - 1, ".-0x", 4);
 
     this->m_data = wptr + (1U - sign);
-    this->m_size = (uint32_t) (end_of_string - wptr) - (1U - sign);
+    this->m_size = (uint32_t) (end_of_string - this->m_data);
   }
 
 void
@@ -1497,7 +1497,7 @@ put_DI(int64_t value, uint32_t precision)
     wptr[0] = '-';
 
     this->m_data = wptr + (1U - sign);
-    this->m_size = (uint32_t) (end_of_string - wptr) - (1U - sign);
+    this->m_size = (uint32_t) (end_of_string - this->m_data);
   }
 
 void
