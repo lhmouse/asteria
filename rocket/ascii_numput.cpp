@@ -1512,7 +1512,7 @@ put_BF(float value)
     frx.exp += 23;
 
     ::memcpy(this->m_stor, "-0b0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3U;
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
     if((frx.exp >= 0) && (frx.exp < 24)) {
       // Write the number in plain format. A decimal point will be
@@ -1558,7 +1558,7 @@ put_BEF(float value)
     frx.exp += 23;
 
     ::memcpy(this->m_stor, "-0b0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3U;
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1588,7 +1588,7 @@ put_XF(float value)
     frx.exp >>= 2;
 
     ::memcpy(this->m_stor, "-0x0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3U;
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
     if((frx.exp >= 0) && (frx.exp < 6)) {
       // Write the number in plain format. A decimal point will be
@@ -1636,7 +1636,7 @@ put_XEF(float value)
     frx.exp >>= 2;
 
     ::memcpy(this->m_stor, "-0x0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3U;
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1664,7 +1664,7 @@ put_DF(float value)
     frx.exp += 8;
 
     ::memcpy(this->m_stor, "..-0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3U;
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
     if((frx.exp >= 0) && (frx.exp < 6)) {
       // Write the number in plain format. A decimal point will be
@@ -1710,7 +1710,7 @@ put_DEF(float value)
     frx.exp += 8;
 
     ::memcpy(this->m_stor, "..-0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3U;
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1738,7 +1738,7 @@ put_BD(double value)
     frx.exp += 52;
 
     ::memcpy(this->m_stor, "-0b0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3U;
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
     if((frx.exp >= 0) && (frx.exp < 53)) {
       // Write the number in plain format. A decimal point will be
@@ -1784,7 +1784,7 @@ put_BED(double value)
     frx.exp += 52;
 
     ::memcpy(this->m_stor, "-0b0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3U;
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1814,7 +1814,7 @@ put_XD(double value)
     frx.exp >>= 2;
 
     ::memcpy(this->m_stor, "-0x0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3U;
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
     if((frx.exp >= 0) && (frx.exp < 14)) {
       // Write the number in plain format. A decimal point will be
@@ -1862,7 +1862,7 @@ put_XED(double value)
     frx.exp >>= 2;
 
     ::memcpy(this->m_stor, "-0x0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3U;
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1890,7 +1890,7 @@ put_DD(double value)
     frx.exp += 17;
 
     ::memcpy(this->m_stor, "..-0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3U;
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
     if((frx.exp >= 0) && (frx.exp < 15)) {
       // Write the number in plain format. A decimal point will be
@@ -1936,7 +1936,7 @@ put_DED(double value)
     frx.exp += 17;
 
     ::memcpy(this->m_stor, "..-0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3U;
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
