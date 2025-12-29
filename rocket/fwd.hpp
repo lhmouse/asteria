@@ -1274,7 +1274,7 @@ mulh128(uint64_t x, uint64_t y, uint64_t* lo = nullptr)
 #ifdef __SIZEOF_INT128__
     __extension__ using my_uint128_t = unsigned __int128;
     my_uint128_t r = (my_uint128_t) x * y;
-    lo && (*lo = (uint64_t) r);
+    if(lo) *lo = (uint64_t) r;
     return (uint64_t) (r >> 64);
 #else
     // https://github.com/catid/fp61/blob/master/fp61.h
@@ -1282,7 +1282,7 @@ mulh128(uint64_t x, uint64_t y, uint64_t* lo = nullptr)
     uint64_t xl = x % M32, xh = x / M32;
     uint64_t yl = y % M32, yh = y / M32;
     uint64_t xlyl = xl * yl, xhyl = xh * yl, xlyh = xl * yh, xhyh = xh * yh;
-    lo && (*lo = xlyl + xhyl / M32 + xlyh / M32);
+    if(lo) *lo = xlyl + xhyl / M32 + xlyh / M32;
     return (xlyl / M32 + xhyl + xlyh % M32) / M32 + xlyh / M32 + xhyh;
 #endif
   }
