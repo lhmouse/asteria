@@ -1366,8 +1366,8 @@ ascii_numput::
 put_XP(const volatile void* value)
   noexcept
   {
-    char* wptr = ::std::end(this->m_stor);
-    *--wptr = 0;
+    char* wptr = ::std::end(this->m_stor) - 1;
+    *wptr = 0;
 
     do_write_digits_backwards(wptr, (uintptr_t) value, 16, 1);
     wptr -= 2;
@@ -1382,10 +1382,10 @@ ascii_numput::
 put_BU(uint64_t value, uint32_t precision)
   noexcept
   {
-    char* wptr = ::std::end(this->m_stor);
-    *--wptr = 0;
+    char* wptr = ::std::end(this->m_stor) - 1;
+    *wptr = 0;
 
-    do_write_digits_backwards(wptr, value, 2, precision);
+    do_write_digits_backwards(wptr, value, 2, ::rocket::min(precision, 64U));
     wptr -= 2;
     ::memcpy(wptr - 2, "..0b", 4);
 
@@ -1398,10 +1398,10 @@ ascii_numput::
 put_XU(uint64_t value, uint32_t precision)
   noexcept
   {
-    char* wptr = ::std::end(this->m_stor);
-    *--wptr = 0;
+    char* wptr = ::std::end(this->m_stor) - 1;
+    *wptr = 0;
 
-    do_write_digits_backwards(wptr, value, 16, precision);
+    do_write_digits_backwards(wptr, value, 16, ::rocket::min(precision, 16U));
     wptr -= 2;
     ::memcpy(wptr - 2, "..0x", 4);
 
@@ -1420,10 +1420,10 @@ put_DU(uint64_t value, uint32_t precision)
       return;
     }
 
-    char* wptr = ::std::end(this->m_stor);
-    *--wptr = 0;
+    char* wptr = ::std::end(this->m_stor) - 1;
+    *wptr = 0;
 
-    do_write_digits_backwards(wptr, value, 10, precision);
+    do_write_digits_backwards(wptr, value, 10, ::rocket::min(precision, 20U));
 
     this->m_data = wptr;
     this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr);
@@ -1434,18 +1434,18 @@ ascii_numput::
 put_BI(int64_t value, uint32_t precision)
   noexcept
   {
-    if(value >= 0)
-      return this->put_BU((uint64_t) value, precision);
+    bool sign = value < 0;
+    uint64_t abs_value = ::rocket::min(-(uint64_t) value, (uint64_t) value);
 
-    char* wptr = ::std::end(this->m_stor);
-    *--wptr = 0;
+    char* wptr = ::std::end(this->m_stor) - 1;
+    *wptr = 0;
 
-    do_write_digits_backwards(wptr, -(uint64_t) value, 2, precision);
+    do_write_digits_backwards(wptr, abs_value, 2, ::rocket::min(precision, 64U));
     wptr -= 3;
     ::memcpy(wptr - 1, ".-0b", 4);
 
-    this->m_data = wptr;
-    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr);
+    this->m_data = wptr + (1U - sign);
+    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr) - (1U - sign);
   }
 
 void
@@ -1453,18 +1453,18 @@ ascii_numput::
 put_XI(int64_t value, uint32_t precision)
   noexcept
   {
-    if(value >= 0)
-      return this->put_XU((uint64_t) value, precision);
+    bool sign = value < 0;
+    uint64_t abs_value = ::rocket::min(-(uint64_t) value, (uint64_t) value);
 
-    char* wptr = ::std::end(this->m_stor);
-    *--wptr = 0;
+    char* wptr = ::std::end(this->m_stor) - 1;
+    *wptr = 0;
 
-    do_write_digits_backwards(wptr, -(uint64_t) value, 16, precision);
+    do_write_digits_backwards(wptr, abs_value, 16, ::rocket::min(precision, 16U));
     wptr -= 3;
     ::memcpy(wptr - 1, ".-0x", 4);
 
-    this->m_data = wptr;
-    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr);
+    this->m_data = wptr + (1U - sign);
+    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr) - (1U - sign);
   }
 
 void
@@ -1472,26 +1472,26 @@ ascii_numput::
 put_DI(int64_t value, uint32_t precision)
   noexcept
   {
-    if(value >= 0)
-      return this->put_DU((uint64_t) value, precision);
+    bool sign = value < 0;
+    uint64_t abs_value = ::rocket::min(-(uint64_t) value, (uint64_t) value);
 
-    if((precision == 1) && (-(uint64_t) value < ::std::size(s_small_decimals))) {
+    if((precision == 1) && (abs_value < ::std::size(s_small_decimals))) {
       // Get the static string.
-      do_get_small_decimal(this->m_data, this->m_size, -(uint32_t) value);
-      this->m_data --;
-      this->m_size ++;
+      do_get_small_decimal(this->m_data, this->m_size, (uint32_t) abs_value);
+      this->m_data -= sign;
+      this->m_size += sign;
       return;
     }
 
-    char* wptr = ::std::end(this->m_stor);
-    *--wptr = 0;
+    char* wptr = ::std::end(this->m_stor) - 1;
+    *wptr = 0;
 
-    do_write_digits_backwards(wptr, -(uint64_t) value, 10, precision);
+    do_write_digits_backwards(wptr, abs_value, 10, ::rocket::min(precision, 20U));
     wptr -= 1;
     wptr[0] = '-';
 
-    this->m_data = wptr;
-    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr);
+    this->m_data = wptr + (1U - sign);
+    this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - wptr) - (1U - sign);
   }
 
 void
@@ -1506,7 +1506,7 @@ put_BF(float value)
     frx.exp += 23;
 
     ::memcpy(this->m_stor, "-0b0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3;
+    char* wptr = this->m_stor + 3;
 
     if((frx.exp >= 0) && (frx.exp < 24)) {
       // Write the number in plain format. A decimal point will be
@@ -1536,7 +1536,7 @@ put_BF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
+    this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1552,7 +1552,7 @@ put_BEF(float value)
     frx.exp += 23;
 
     ::memcpy(this->m_stor, "-0b0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3;
+    char* wptr = this->m_stor + 3;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1564,7 +1564,7 @@ put_BEF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
+    this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1582,7 +1582,7 @@ put_XF(float value)
     frx.exp >>= 2;
 
     ::memcpy(this->m_stor, "-0x0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3;
+    char* wptr = this->m_stor + 3;
 
     if((frx.exp >= 0) && (frx.exp < 6)) {
       // Write the number in plain format. A decimal point will be
@@ -1612,7 +1612,7 @@ put_XF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
+    this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1630,7 +1630,7 @@ put_XEF(float value)
     frx.exp >>= 2;
 
     ::memcpy(this->m_stor, "-0x0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3;
+    char* wptr = this->m_stor + 3;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1642,7 +1642,7 @@ put_XEF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
+    this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1658,7 +1658,7 @@ put_DF(float value)
     frx.exp += 8;
 
     ::memcpy(this->m_stor, "..-0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3;
+    char* wptr = this->m_stor + 3;
 
     if((frx.exp >= 0) && (frx.exp < 6)) {
       // Write the number in plain format. A decimal point will be
@@ -1688,7 +1688,7 @@ put_DF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (3U - frx.sign);
+    this->m_data = this->m_stor + (3U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1704,7 +1704,7 @@ put_DEF(float value)
     frx.exp += 8;
 
     ::memcpy(this->m_stor, "..-0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3;
+    char* wptr = this->m_stor + 3;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1716,7 +1716,7 @@ put_DEF(float value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (3U - frx.sign);
+    this->m_data = this->m_stor + (3U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1732,7 +1732,7 @@ put_BD(double value)
     frx.exp += 52;
 
     ::memcpy(this->m_stor, "-0b0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3;
+    char* wptr = this->m_stor + 3;
 
     if((frx.exp >= 0) && (frx.exp < 53)) {
       // Write the number in plain format. A decimal point will be
@@ -1762,7 +1762,7 @@ put_BD(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
+    this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1778,7 +1778,7 @@ put_BED(double value)
     frx.exp += 52;
 
     ::memcpy(this->m_stor, "-0b0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3;
+    char* wptr = this->m_stor + 3;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1790,7 +1790,7 @@ put_BED(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
+    this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1808,7 +1808,7 @@ put_XD(double value)
     frx.exp >>= 2;
 
     ::memcpy(this->m_stor, "-0x0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3;
+    char* wptr = this->m_stor + 3;
 
     if((frx.exp >= 0) && (frx.exp < 14)) {
       // Write the number in plain format. A decimal point will be
@@ -1838,7 +1838,7 @@ put_XD(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
+    this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1856,7 +1856,7 @@ put_XED(double value)
     frx.exp >>= 2;
 
     ::memcpy(this->m_stor, "-0x0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3;
+    char* wptr = this->m_stor + 3;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1868,7 +1868,7 @@ put_XED(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (1U - frx.sign);
+    this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1884,7 +1884,7 @@ put_DD(double value)
     frx.exp += 17;
 
     ::memcpy(this->m_stor, "..-0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3;
+    char* wptr = this->m_stor + 3;
 
     if((frx.exp >= 0) && (frx.exp < 15)) {
       // Write the number in plain format. A decimal point will be
@@ -1914,7 +1914,7 @@ put_DD(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (3U - frx.sign);
+    this->m_data = this->m_stor + (3U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
@@ -1930,7 +1930,7 @@ put_DED(double value)
     frx.exp += 17;
 
     ::memcpy(this->m_stor, "..-0", 4);
-    char* wptr = ::std::begin(this->m_stor) + 3;
+    char* wptr = this->m_stor + 3;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1942,7 +1942,7 @@ put_DED(double value)
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
     *wptr = 0;
 
-    this->m_data = ::std::begin(this->m_stor) + (3U - frx.sign);
+    this->m_data = this->m_stor + (3U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
   }
 
