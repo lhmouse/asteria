@@ -1502,10 +1502,11 @@ put_BF(float value)
     if(do_is_special_class(this->m_data, this->m_size, frx))
       return;
 
-    frx.exp += 23;
-
     ::memcpy(this->m_stor, "-0b0", 4);
     char* wptr = this->m_stor + 3;
+
+    // Place the radix point right after the first bit.
+    frx.exp += 23;
 
     if((frx.exp >= 0) && (frx.exp < 24)) {
       // Write the number in plain format. A decimal point will be
@@ -1548,10 +1549,11 @@ put_BEF(float value)
     if(do_is_special_class(this->m_data, this->m_size, frx))
       return;
 
-    frx.exp += 23;
-
     ::memcpy(this->m_stor, "-0b0", 4);
     char* wptr = this->m_stor + 3;
+
+    // Place the radix point right after the first bit.
+    frx.exp += 23;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1576,12 +1578,13 @@ put_XF(float value)
     if(do_is_special_class(this->m_data, this->m_size, frx))
       return;
 
+    ::memcpy(this->m_stor, "-0x0", 4);
+    char* wptr = this->m_stor + 3;
+
+    // Place the radix point right after the first hexadecimal digit.
     frx.exp += 23;
     frx.mant <<= frx.exp & 3;
     frx.exp >>= 2;
-
-    ::memcpy(this->m_stor, "-0x0", 4);
-    char* wptr = this->m_stor + 3;
 
     if((frx.exp >= 0) && (frx.exp < 6)) {
       // Write the number in plain format. A decimal point will be
@@ -1624,12 +1627,13 @@ put_XEF(float value)
     if(do_is_special_class(this->m_data, this->m_size, frx))
       return;
 
+    ::memcpy(this->m_stor, "-0x0", 4);
+    char* wptr = this->m_stor + 3;
+
+    // Place the radix point right after the first hexadecimal digit.
     frx.exp += 23;
     frx.mant <<= frx.exp & 3;
     frx.exp >>= 2;
-
-    ::memcpy(this->m_stor, "-0x0", 4);
-    char* wptr = this->m_stor + 3;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1654,10 +1658,11 @@ put_DF(float value)
     if(do_is_special_class(this->m_data, this->m_size, frx))
       return;
 
-    frx.exp += 8;
-
     ::memcpy(this->m_stor, "..-0", 4);
     char* wptr = this->m_stor + 3;
+
+    // Place the radix point right after the first digit.
+    frx.exp += 8;
 
     if((frx.exp >= 0) && (frx.exp < 6)) {
       // Write the number in plain format. A decimal point will be
@@ -1700,10 +1705,11 @@ put_DEF(float value)
     if(do_is_special_class(this->m_data, this->m_size, frx))
       return;
 
-    frx.exp += 8;
-
     ::memcpy(this->m_stor, "..-0", 4);
     char* wptr = this->m_stor + 3;
+
+    // Place the radix point right after the first digit.
+    frx.exp += 8;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1728,10 +1734,11 @@ put_BD(double value)
     if(do_is_special_class(this->m_data, this->m_size, frx))
       return;
 
-    frx.exp += 52;
-
     ::memcpy(this->m_stor, "-0b0", 4);
     char* wptr = this->m_stor + 3;
+
+    // Place the radix point right after the first bit.
+    frx.exp += 52;
 
     if((frx.exp >= 0) && (frx.exp < 53)) {
       // Write the number in plain format. A decimal point will be
@@ -1774,10 +1781,11 @@ put_BED(double value)
     if(do_is_special_class(this->m_data, this->m_size, frx))
       return;
 
-    frx.exp += 52;
-
     ::memcpy(this->m_stor, "-0b0", 4);
     char* wptr = this->m_stor + 3;
+
+    // Place the radix point right after the first bit.
+    frx.exp += 52;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1802,12 +1810,13 @@ put_XD(double value)
     if(do_is_special_class(this->m_data, this->m_size, frx))
       return;
 
+    ::memcpy(this->m_stor, "-0x0", 4);
+    char* wptr = this->m_stor + 3;
+
+    // Place the radix point right after the first hexadecimal digit.
     frx.exp += 52;
     frx.mant <<= frx.exp & 3;
     frx.exp >>= 2;
-
-    ::memcpy(this->m_stor, "-0x0", 4);
-    char* wptr = this->m_stor + 3;
 
     if((frx.exp >= 0) && (frx.exp < 14)) {
       // Write the number in plain format. A decimal point will be
@@ -1850,12 +1859,13 @@ put_XED(double value)
     if(do_is_special_class(this->m_data, this->m_size, frx))
       return;
 
+    ::memcpy(this->m_stor, "-0x0", 4);
+    char* wptr = this->m_stor + 3;
+
+    // Place the radix point right after the first hexadecimal digit.
     frx.exp += 52;
     frx.mant <<= frx.exp & 3;
     frx.exp >>= 2;
-
-    ::memcpy(this->m_stor, "-0x0", 4);
-    char* wptr = this->m_stor + 3;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
@@ -1880,10 +1890,11 @@ put_DD(double value)
     if(do_is_special_class(this->m_data, this->m_size, frx))
       return;
 
-    frx.exp += 17;
-
     ::memcpy(this->m_stor, "..-0", 4);
     char* wptr = this->m_stor + 3;
+
+    // Place the radix point right after the first digit.
+    frx.exp += 17;
 
     if((frx.exp >= 0) && (frx.exp < 15)) {
       // Write the number in plain format. A decimal point will be
@@ -1926,10 +1937,11 @@ put_DED(double value)
     if(do_is_special_class(this->m_data, this->m_size, frx))
       return;
 
-    frx.exp += 17;
-
     ::memcpy(this->m_stor, "..-0", 4);
     char* wptr = this->m_stor + 3;
+
+    // Place the radix point right after the first digit.
+    frx.exp += 17;
 
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
