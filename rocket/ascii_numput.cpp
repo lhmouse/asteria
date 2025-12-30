@@ -1338,15 +1338,15 @@ do_write_exponent(char*& wptr, int exp)
     if(abs_exp < 100) {
       // Ensure at least two significant digits, like POSIX.
       do_get_small_decimal(digits, ndigits, 100 + abs_exp);
-      digits ++;
-      ndigits = 2;
+      ::memcpy(wptr, digits + 1, 4);
+      wptr += 2;
     }
-    else
+    else {
+      // Copy 4 digits, which won't overrun the source static string.
       do_get_small_decimal(digits, ndigits, abs_exp);
-
-    // This won't overrun the source static string.
-    ::memcpy(wptr, digits, 4);
-    wptr += ndigits;
+      ::memcpy(wptr, digits, 4);
+      wptr += ndigits;
+    }
   }
 
 }  // namespace
