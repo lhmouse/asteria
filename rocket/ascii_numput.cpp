@@ -1014,9 +1014,6 @@ constexpr s_decimal_multipliers[] =
     { 0x7FE1CCF385EBC8A0,  0x9FAACF3DF73609B2,  -966 },  // 1.0e+308
   };
 
-// `exp10 = ROUND((exp2 - 57) * LOG2)` where `LOG2 = 0.30103`
-constexpr int s_decimal_exp_min = ((s_decimal_multipliers[0].exp2 - 57) * 30103LL + 50000LL) / 100000LL;
-
 enum fpclass : uint8_t
   {
     fpclass_zero       = 0,
@@ -1182,7 +1179,7 @@ do_frexp10_8(float value)
     // Convert the exponent and mantissa back. The number will be
     // interpreted as `sign mant E exp` in scientific floating-point
     // notation.
-    frx.exp = (int) mlo - s_decimal_exp_min - 8;
+    frx.exp = (int) mlo - 332;
     frx.mant = bits;
     return frx;
   }
@@ -1263,7 +1260,7 @@ do_frexp10_17(double value)
     // Convert the exponent and mantissa back. The number will be
     // interpreted as `sign mant E exp` in scientific floating-point
     // notation.
-    frx.exp = (int) mlo - s_decimal_exp_min - 17;
+    frx.exp = (int) mlo - 341;
     frx.mant = bits;
     return frx;
   }
