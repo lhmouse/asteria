@@ -898,9 +898,6 @@ constexpr s_decimal_multipliers[] =
     { 0x8E679C2F5E44FF90, +1024 },  // 1.0e+308
   };
 
-// `exp10 = FLOOR(exp2 * LOG2)` where `LOG2 = 0.30102999`
-constexpr int s_decimal_exp_min = s_decimal_multipliers[0].exp2 * 30102999LL / 100000000LL - 1;
-
 template<typename valueT>
 inline
 bool
@@ -1574,22 +1571,25 @@ cast_F(float& value, float min, float max)
 
         if(this->m_base == 10) {
           // Convert the base-10 exponent to a base-2 exponent.
-          if(exp < s_decimal_exp_min) {
+          if(exp < -343) {
             this->m_udfl = true;
             this->m_inxct = true;
             ::memcpy(&value, ss_zero + this->m_sign, sizeof(float));
             break;
           }
-          else if(exp >= s_decimal_exp_min + (int) size(s_decimal_multipliers)) {
+          else if(exp > 308) {
             this->m_ovfl = true;
             ::memcpy(&value, ss_inf + this->m_sign, sizeof(float));
             break;
           }
 
-          const auto& mult = s_decimal_multipliers[(uint32_t) (exp - s_decimal_exp_min)];
+          uint32_t lo = (uint32_t) (343 + exp);
+          ROCKET_ASSERT(lo < ::std::size(s_decimal_multipliers));
+
+          const auto& mult = s_decimal_multipliers[lo];
           exp = mult.exp2;
-          uint64_t ceiled_mult_mant = (mult.mant + UINT32_MAX) >> 32;
-          bits = (uint32_t) (bits * ceiled_mult_mant >> 32);
+          uint64_t xmult = (mult.mant + UINT32_MAX) >> 32;
+          bits = (uint32_t) (bits * xmult >> 32);
           ROCKET_ASSERT(bits != 0);
 
           // Re-align the mantissa, so its MSB is non-zero.
@@ -1756,19 +1756,22 @@ cast_D(double& value, double min, double max)
         if(this->m_base == 10) {
           // Convert the base-10 exponent to a base-2 exponent.
           //   `exp10 = TRUNC((exp2 - 1) * LOG2)` where `LOG2 = 0.30103`
-          if(exp < s_decimal_exp_min) {
+          if(exp < -343) {
             this->m_udfl = true;
             this->m_inxct = true;
             ::memcpy(&value, sd_zero + this->m_sign, sizeof(double));
             break;
           }
-          else if(exp >= s_decimal_exp_min + (int) size(s_decimal_multipliers)) {
+          else if(exp > 308) {
             this->m_ovfl = true;
             ::memcpy(&value, sd_inf + this->m_sign, sizeof(double));
             break;
           }
 
-          const auto& mult = s_decimal_multipliers[(uint32_t) (exp - s_decimal_exp_min)];
+          uint32_t lo = (uint32_t) (343 + exp);
+          ROCKET_ASSERT(lo < ::std::size(s_decimal_multipliers));
+
+          const auto& mult = s_decimal_multipliers[lo];
           exp = mult.exp2;
           bits = mulh128(bits, mult.mant);
           ROCKET_ASSERT(bits != 0);
