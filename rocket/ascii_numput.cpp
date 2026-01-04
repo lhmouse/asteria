@@ -1152,7 +1152,7 @@ do_frexp10_8(float value)
     xbits = (0x800000ULL | frx.mant) << (frx.exp + mult.exp2 - 182);
     uint64_t xmult = (mult.mant + UINT32_MAX) >> 32;
     uint64_t half_ulp = 1ULL << (frx.exp + mult.exp2 - 183);
-    uint32_t mant_min = (uint32_t) ((xbits - half_ulp) *  xmult  / 1000000000ULL + 1ULL);
+    uint32_t mant_min = (uint32_t) ((xbits - half_ulp) * xmult / 1000000000ULL + 1ULL);
     uint32_t mant_diff = (uint32_t) ((xbits + half_ulp) * (xmult - 1ULL) / 1000000000ULL) - mant_min;
 
     // Round the mantissa to shortest. This is done by removing trailing
