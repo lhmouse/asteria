@@ -277,6 +277,7 @@ do_write_digits_backwards(char*& wptr, uint64_t value, uint32_t base, uint32_t p
       uint32_t digit = (uint32_t) (reg % base);
       reg /= base;
       wptr --;
+      ROCKET_ASSERT(digit < base);
       *wptr = (char) ('0' + digit + ((9U - digit) >> 29));
     }
 
@@ -1306,6 +1307,7 @@ do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, c
       reg %= divisor;
       reg *= base;
       wptr += wptr == rdxpp;
+      ROCKET_ASSERT(digit < base);
       *wptr = (char) ('0' + digit + ((9U - digit) >> 29));
       wptr ++;
     }
