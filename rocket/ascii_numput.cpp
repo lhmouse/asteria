@@ -1517,7 +1517,7 @@ put_BF(float value)
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
       wptr += 2;
-      do_write_mantissa(wptr, 0, 1, 1, wptr - frx.exp - 1);
+      do_write_mantissa(wptr, 0, 1, 1, rdxpp - frx.exp);
       do_write_mantissa(wptr, frx.mant, 0x1p23, 2, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1595,7 +1595,7 @@ put_XF(float value)
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
       wptr += 2;
-      do_write_mantissa(wptr, 0, 1, 1, wptr - frx.exp - 1);
+      do_write_mantissa(wptr, 0, 1, 1, rdxpp - frx.exp);
       do_write_mantissa(wptr, frx.mant, 0x1p23, 16, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1673,7 +1673,7 @@ put_DF(float value)
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
       wptr += 2;
-      do_write_mantissa(wptr, 0, 1, 1, wptr - frx.exp - 1);
+      do_write_mantissa(wptr, 0, 1, 1, rdxpp - frx.exp);
       do_write_mantissa(wptr, frx.mant, 1e8, 10, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1749,7 +1749,7 @@ put_BD(double value)
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
       wptr += 2;
-      do_write_mantissa(wptr, 0, 1, 1, wptr - frx.exp - 1);
+      do_write_mantissa(wptr, 0, 1, 1, rdxpp - frx.exp);
       do_write_mantissa(wptr, frx.mant, 0x1p52, 2, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1827,7 +1827,7 @@ put_XD(double value)
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
       wptr += 2;
-      do_write_mantissa(wptr, 0, 1, 1, wptr - frx.exp - 1);
+      do_write_mantissa(wptr, 0, 1, 1, rdxpp - frx.exp);
       do_write_mantissa(wptr, frx.mant, 0x1p52, 16, rdxpp);
       *rdxpp = this->m_rdxp;
     }
@@ -1905,7 +1905,7 @@ put_DD(double value)
       // `0.` and zeroes are filled as necessary.
       char* rdxpp = wptr + 1;
       wptr += 2;
-      do_write_mantissa(wptr, 0, 1, 1, wptr - frx.exp - 1);
+      do_write_mantissa(wptr, 0, 1, 1, rdxpp - frx.exp);
       do_write_mantissa(wptr, frx.mant, 1e17, 10, rdxpp);
       *rdxpp = this->m_rdxp;
     }
