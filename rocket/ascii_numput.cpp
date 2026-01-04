@@ -1046,8 +1046,8 @@ do_frexp2_23(float value)
     frx.exp = (int) (bits >> 23) & 0xFF;
     frx.mant = bits & 0x7FFFFFULL;
 
-    if(((frx.exp + 1) & 0xFF) <= 1) {
-      // The biased exponent is 00 or FF, so this value is not normal.
+    if((frx.exp <= 0) || (frx.exp >= 0xFF)) {
+      // The value is not normal.
       frx.cls = (fpclass) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
       if(frx.cls != fpclass_subnormal)
         return frx;
@@ -1081,8 +1081,8 @@ do_frexp2_52(double value)
     frx.exp = (int) (bits >> 52) & 0x7FF;
     frx.mant = bits & 0xFFFFFFFFFFFFFULL;
 
-    if(((frx.exp + 1) & 0x7FF) <= 1) {
-      // The biased exponent is 000 or 7FF, so this value is not normal.
+    if((frx.exp <= 0) || (frx.exp >= 0x7FF)) {
+      // The value is not normal.
       frx.cls = (fpclass) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
       if(frx.cls != fpclass_subnormal)
         return frx;
@@ -1116,8 +1116,8 @@ do_frexp10_8(float value)
     frx.exp = (int) (bits >> 23) & 0xFF;
     frx.mant = bits & 0x7FFFFFULL;
 
-    if(((frx.exp + 1) & 0xFF) <= 1) {
-      // The biased exponent is 00 or FF, so this value is not normal.
+    if((frx.exp <= 0) || (frx.exp >= 0xFF)) {
+      // The value is not normal.
       frx.cls = (fpclass) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
       if(frx.cls != fpclass_subnormal)
         return frx;
@@ -1199,8 +1199,8 @@ do_frexp10_17(double value)
     frx.exp = (int) (bits >> 52) & 0x7FF;
     frx.mant = bits & 0xFFFFFFFFFFFFFULL;
 
-    if(((frx.exp + 1) & 0x7FF) <= 1) {
-      // The biased exponent is 000 or 7FF, so this value is not normal.
+    if((frx.exp <= 0) || (frx.exp >= 0x7FF)) {
+      // The value is not normal.
       frx.cls = (fpclass) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
       if(frx.cls != fpclass_subnormal)
         return frx;
