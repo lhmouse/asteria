@@ -35,6 +35,14 @@ int main()
       ASTERIA_TEST_CHECK(::strcmp(nump.data(), r.expected) == 0);
     }
 
+    for(int i = -9999; i <= 9999; ++i) {
+      char expected[32];
+      ::sprintf(expected, "%d", i);
+      ascii_numput nump;
+      nump.put_DI(i);
+      ASTERIA_TEST_CHECK(::strcmp(nump.data(), expected) == 0);
+    }
+
     ascii_numput np1;
     np1.set_radix_point('^');
     np1.put_DD(123456789012345678.9);
