@@ -1159,9 +1159,9 @@ do_frexp10_8(float value)
     // Round the mantissa to shortest. This is done by removing trailing
     // digits one by one, until the result would be out of range.
     bits = mant_min + mant_diff / 2;
-    uint32_t mant_next = bits;
-    uint32_t next_digits = bits;
-    uint32_t next_mult = 1U;
+    uint32_t next_digits = (bits + 5U) / 10U;
+    uint32_t next_mult = 10U;
+    uint32_t mant_next = next_digits * next_mult;
 
     while(mant_next - mant_min <= mant_diff) {
       // Shift one digit from `next_digits` to `next_mult`.
@@ -1240,9 +1240,9 @@ do_frexp10_17(double value)
     // Round the mantissa to shortest. This is done by removing trailing
     // digits one by one, until the result would be out of range.
     bits = mant_min + mant_diff / 2;
-    uint64_t mant_next = bits;
-    uint64_t next_digits = bits;
-    uint64_t next_mult = 1U;
+    uint64_t next_digits = (bits + 5U) / 10U;
+    uint64_t next_mult = 10U;
+    uint64_t mant_next = next_digits * next_mult;
 
     while(mant_next - mant_min <= mant_diff) {
       // Shift one digit from `next_digits` to `next_mult`.
