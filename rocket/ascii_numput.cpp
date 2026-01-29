@@ -1159,16 +1159,10 @@ do_frexp10_8(float value)
     // Round the mantissa to shortest. This is done by removing trailing
     // digits one by one, until the result would be out of range.
     bits = mant_min + mant_diff / 2;
-    uint32_t next_digits = (bits + 5U) / 10U;
-    uint32_t next_mult = 10U;
-    uint32_t mant_next = next_digits * next_mult;
-
-    while(mant_next - mant_min <= mant_diff) {
-      // Shift one digit from `next_digits` to `next_mult`.
-      bits = mant_next;
-      next_digits = (next_digits + 5U) / 10U;
-      next_mult *= 10U;
-      mant_next = next_digits * next_mult;
+    for(uint32_t div : { 10000U, 100U, 10U, 10U }) {  // 8 digits
+      uint32_t bits_next = (bits + div / 2) / div * div;
+      if(bits_next - mant_min <= mant_diff)
+        bits = bits_next;
     }
 
     if(bits >= 1000000000U) {
@@ -1240,16 +1234,10 @@ do_frexp10_17(double value)
     // Round the mantissa to shortest. This is done by removing trailing
     // digits one by one, until the result would be out of range.
     bits = mant_min + mant_diff / 2;
-    uint64_t next_digits = (bits + 5U) / 10U;
-    uint64_t next_mult = 10U;
-    uint64_t mant_next = next_digits * next_mult;
-
-    while(mant_next - mant_min <= mant_diff) {
-      // Shift one digit from `next_digits` to `next_mult`.
-      bits = mant_next;
-      next_digits = (next_digits + 5U) / 10U;
-      next_mult *= 10U;
-      mant_next = next_digits * next_mult;
+    for(uint32_t div : { 100000000U, 10000U, 100U, 100U, 10U }) {  // 17 digits
+      uint64_t bits_next = (bits + div / 2) / div * div;
+      if(bits_next - mant_min <= mant_diff)
+        bits = bits_next;
     }
 
     if(bits >= 1000000000000000000ULL) {
