@@ -268,9 +268,8 @@ do_get_small_decimal(const char*& str_out, uint32_t& len_out, uint32_t value)
 
 inline
 void
-do_write_digits_backwards(char*& wptr, uint64_t value, uint32_t base, uint32_t precision)
+do_write_digits_backwards(char* start, char*& wptr, uint64_t value, uint32_t base)
   {
-    char* fill_begin = wptr - precision;
     uint64_t reg = value;
     while(reg != 0) {
       // Shift a digit from `reg` and write it.
@@ -281,13 +280,13 @@ do_write_digits_backwards(char*& wptr, uint64_t value, uint32_t base, uint32_t p
       *wptr = (char) ('0' + digit + ((9U - digit) >> 29));
     }
 
-    if(wptr > fill_begin) {
+    if(wptr > start) {
       // Prepend zeroes up to `precision`.
       do {
         wptr -= sizeof(intptr_t);
         ::memset(wptr, '0', sizeof(intptr_t));
-      } while(wptr > fill_begin);
-      wptr = fill_begin;
+      } while(wptr > start);
+      wptr = start;
     }
   }
 
@@ -1355,7 +1354,7 @@ put_XP(const volatile void* value)
     char* wptr = ::std::end(this->m_stor) - 1;
     *wptr = 0;
 
-    do_write_digits_backwards(wptr, (uintptr_t) value, 16, 1);
+    do_write_digits_backwards(wptr - 1, wptr, (uintptr_t) value, 16);
     ::memcpy(wptr - 4, "..0x", 4);
     wptr -= 2;
 
@@ -1371,7 +1370,7 @@ put_BU(uint64_t value, uint32_t precision)
     char* wptr = ::std::end(this->m_stor) - 1;
     *wptr = 0;
 
-    do_write_digits_backwards(wptr, value, 2, ::rocket::min(precision, 64U));
+    do_write_digits_backwards(wptr - ::rocket::min(precision, 64U), wptr, value, 2);
     ::memcpy(wptr - 4, "..0b", 4);
     wptr -= 2;
 
@@ -1387,7 +1386,7 @@ put_XU(uint64_t value, uint32_t precision)
     char* wptr = ::std::end(this->m_stor) - 1;
     *wptr = 0;
 
-    do_write_digits_backwards(wptr, value, 16, ::rocket::min(precision, 16U));
+    do_write_digits_backwards(wptr - ::rocket::min(precision, 16U), wptr, value, 16);
     ::memcpy(wptr - 4, "..0x", 4);
     wptr -= 2;
 
@@ -1409,7 +1408,7 @@ put_DU(uint64_t value, uint32_t precision)
     char* wptr = ::std::end(this->m_stor) - 1;
     *wptr = 0;
 
-    do_write_digits_backwards(wptr, value, 10, ::rocket::min(precision, 20U));
+    do_write_digits_backwards(wptr - ::rocket::min(precision, 20U), wptr, value, 10);
 
     this->m_data = wptr;
     this->m_size = (uint32_t) (::std::end(this->m_stor) - 1 - this->m_data);
@@ -1426,7 +1425,7 @@ put_BI(int64_t value, uint32_t precision)
     char* wptr = ::std::end(this->m_stor) - 1;
     *wptr = 0;
 
-    do_write_digits_backwards(wptr, abs_value, 2, ::rocket::min(precision, 64U));
+    do_write_digits_backwards(wptr - ::rocket::min(precision, 64U), wptr, abs_value, 2);
     ::memcpy(wptr - 4, ".-0b", 4);
     wptr -= 3;
 
@@ -1445,7 +1444,7 @@ put_XI(int64_t value, uint32_t precision)
     char* wptr = ::std::end(this->m_stor) - 1;
     *wptr = 0;
 
-    do_write_digits_backwards(wptr, abs_value, 16, ::rocket::min(precision, 16U));
+    do_write_digits_backwards(wptr - ::rocket::min(precision, 16U), wptr, abs_value, 16);
     ::memcpy(wptr - 4, ".-0x", 4);
     wptr -= 3;
 
@@ -1472,7 +1471,7 @@ put_DI(int64_t value, uint32_t precision)
     char* wptr = ::std::end(this->m_stor) - 1;
     *wptr = 0;
 
-    do_write_digits_backwards(wptr, abs_value, 10, ::rocket::min(precision, 20U));
+    do_write_digits_backwards(wptr - ::rocket::min(precision, 20U), wptr, abs_value, 10);
     wptr[-1] = '-';
     wptr -= 1;
 
