@@ -85,7 +85,7 @@ jobs:
         run: >-
              pacman -Sy ;
              pacman -S --noconfirm gcc meson python pkgconf libedit-devel
-             pcre2-devel openssl-devel zlib-devel libiconv-devel
+             pcre2-devel openssl-devel zlib-devel libiconv libiconv-devel
 
       - name: Configure
         run: >-
