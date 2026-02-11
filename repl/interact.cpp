@@ -18,9 +18,7 @@ read_execute_print_single()
     repl_source.clear();
     repl_file.clear();
     repl_args.clear();
-
-    cow_string heredoc;
-    heredoc.swap(repl_heredoc);
+    cow_string heredoc = exchange(repl_heredoc);
 
     bool iscmd = false, more = false;
     long linenum = 1;
@@ -44,8 +42,7 @@ read_execute_print_single()
       }
 
       if(heredoc.empty()) {
-        // Check for commands. A command is not allowed to straddle multiple
-        // lines.
+        // Check for commands. A command is not allowed to straddle multiple lines.
         if(repl_source.empty())
           break;
 
@@ -53,8 +50,7 @@ read_execute_print_single()
         if(iscmd && (repl_source.back() == '\\'))
           return repl_printf("! dangling \\ at end of command");
 
-        // Check for multi-line inputs. Backslashes that join lines are
-        // removed, unlike in heredoc mode.
+        // Check for multi-line inputs. Backslashes that join lines are removed.
         if(repl_source.back() != '\\')
           break;
 
@@ -115,8 +111,8 @@ read_execute_print_single()
     if(pos == cow_string::npos)
       return;
 
-    // Add the snippet into history if it is from the user, i.e. if it is
-    // not composited by a command.
+    // Add the snippet into history if it is from the user, i.e. if it is not
+    // composited by a command.
     if(!iscmd)
       libedit_add_history(repl_source);
 
