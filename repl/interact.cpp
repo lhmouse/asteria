@@ -34,14 +34,13 @@ read_execute_print_single()
       linestr.pop_back(more);
       repl_source.append(linestr);
 
-      // In heredoc mode, a line matching the user-defined terminator ends
-      // the current snippet, which is not part of the snippet.
-      if(!heredoc.empty() && repl_source.ends_with(heredoc)) {
-        repl_source.pop_back(heredoc.size());
-        break;
+      if(!heredoc.empty()) {
+        // In heredoc mode, a line matching the user-defined terminator ends the
+        // current snippet, which is not part of the snippet.
+        if(repl_source.ends_with(heredoc))
+          break;
       }
-
-      if(heredoc.empty()) {
+      else {
         // Check for commands. A command is not allowed to straddle multiple lines.
         if(repl_source.empty())
           break;
@@ -71,8 +70,15 @@ read_execute_print_single()
     // Discard this snippet if Ctrl-C was received.
     if(repl_signal.xchg(0) != 0) {
       libedit_reset();
-      repl_printf("\n! interrupted (type `:exit` to quit)");
-      return;
+      return repl_printf("\n! interrupted (type `:exit` to quit)");
+    }
+
+    // Remove the heredoc marker.
+    if(!heredoc.empty()) {
+      if(!repl_source.ends_with(heredoc))
+        return repl_printf("\n! heredoc not terminated properly");
+
+      repl_source.pop_back(heredoc.size());
     }
 
     // Remove leading and trailing blank lines.
