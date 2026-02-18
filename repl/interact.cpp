@@ -182,7 +182,7 @@ read_execute_print_single()
     else {
       const auto& val = ref.dereference_readonly();
       fmt.clear_string();
-      val.dump(fmt);
+      val.dump(fmt, 2, 2);
     }
 
     repl_printf("* result #%.3lu: %s", repl_index, fmt.c_str());
