@@ -133,7 +133,7 @@ std_system_random_uuid()
     *(wptr ++) = y(quads[0], 13);
     *(wptr ++) = y(quads[0], 14);
     *(wptr ++) =   '-';
-    *(wptr ++) = y((quads[1] & ~UINT64_C(0xC)) | UINT64_C(0x8), 0);
+    *(wptr ++) = y(8 | (quads[1] & 3), 0);
     *(wptr ++) = y(quads[1],  1);
     *(wptr ++) = y(quads[1],  2);
     *(wptr ++) = y(quads[1],  3);
