@@ -60,6 +60,12 @@ int main()
         assert o.hexadecimal_float == 0x1.23p-62;
         assert o.binary_float == 0b100.0110p3;
 
+        // Verify that `random_uuid()` generates valid RFC 4122 version-4 UUIDs.
+        // The format is `xxxxxxxx-xxxx-4xxx-Vxxx-xxxxxxxxxxxx` where V must be
+        // one of 8, 9, a, or b (the RFC 4122 variant field, bits `10xx`).
+        var uuid = std.system.random_uuid();
+        assert std.string.pcre_find(uuid, "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$") != null;
+
 ///////////////////////////////////////////////////////////////////////////////
       )__");
     code.execute();
