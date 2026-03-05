@@ -542,6 +542,8 @@ class cow_function
     swap(cow_function& other)
       noexcept
       {
+        ::std::swap(this->m_desc, other.m_desc);
+        ::std::swap(this->m_fptr, other.m_fptr);
         this->m_sptr.swap(other.m_sptr);
         return *this;
       }
