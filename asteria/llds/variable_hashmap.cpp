@@ -51,7 +51,7 @@ do_reallocate(uint32_t nbkt)
       ::rocket::xmeminfo rinfo;
       rinfo.element_size = sizeof(Bucket);
       rinfo.data = this->m_bptr;
-      rinfo.count = this->m_nbkt;
+      rinfo.count = this->m_nbkt + 1;
       ::rocket::xmemfree(rinfo);
     }
 
