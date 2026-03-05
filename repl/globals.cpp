@@ -39,7 +39,7 @@ struct Verbose_Hooks
     on_trap(const Source_Location& sloc, Executive_Context& /*ctx*/) override
       {
         int sig = repl_signal.xchg(0);
-        if(rocket::is_any_of(sig, { 0, SIGURG, SIGCHLD, SIGWINCH }))
+        if(rocket::is_any_of(sig, { 0, SIGURG, SIGCHLD, SIGWINCH, SIGCONT }))
           return;
 
         char sigdesc[128];
