@@ -120,17 +120,17 @@ push_function(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ct
     head->nheaders = (uint8_t) (nheaders_p1 - 1);
     head->uparam._xb1[1] = 0;
 
+    if(ctor_opt)
+      (*ctor_opt) (head, ctor_arg);  // may throw
+    else if(sparam_size != 0)
+      ::memset(head->sparam, 0, sparam_size);
+
     if(!meta)
       head->pv_exec = exec;
     else {
       head->has_pv_meta = 1;
       head->pv_meta = meta.release();
     }
-
-    if(ctor_opt)
-      (*ctor_opt) (head, ctor_arg);
-    else if(sparam_size != 0)
-      ::memset(head->sparam, 0, sparam_size);
 
     this->m_einit += nheaders_p1;
     return head;
