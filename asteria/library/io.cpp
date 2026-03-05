@@ -242,7 +242,7 @@ std_io_putfln(V_string templ, cow_vector<Value> values)
           "Error writing standard output",
           "[`fputwc()` failed: ${errno:full}]"));
 
-    return (int64_t) ncps;
+    return (int64_t) ncps + 1;
   }
 
 optV_string
