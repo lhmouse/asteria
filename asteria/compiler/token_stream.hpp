@@ -90,7 +90,7 @@ class Token_Stream
 
     const cow_string&
     file()
-      noexcept
+      const noexcept
       { return this->m_terminus.file();  }
 
     const Source_Location&
