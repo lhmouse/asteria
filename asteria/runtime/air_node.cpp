@@ -3885,7 +3885,7 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer()) {
                       // integer <<< ; bitwise, fixed-width
                       V_integer& val = lhs.open_integer();
-                      int64_t n = rhs.as_integer();
+                      int64_t n = ::rocket::min(rhs.as_integer(), 63);
                       reinterpret_cast<uint64_t&>(val) <<= n;
                       reinterpret_cast<uint64_t&>(val) <<= n != rhs.as_integer();
                     }
@@ -5709,7 +5709,7 @@ solidify(AVM_Rod& rod)
                     if(lhs.is_integer()) {
                       // integer <<< ; bitwise, fixed-width
                       V_integer& val = lhs.open_integer();
-                      int64_t n = irhs;
+                      int64_t n = ::rocket::min(irhs, 63);
                       reinterpret_cast<uint64_t&>(val) <<= n;
                       reinterpret_cast<uint64_t&>(val) <<= n != irhs;
                     }
