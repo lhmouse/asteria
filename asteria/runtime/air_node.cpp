@@ -3216,7 +3216,7 @@ solidify(AVM_Rod& rod)
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // < ; not >=
+                    // >= ; not <
                     Compare cmp = lhs.compare_total(rhs);
                     lhs = cmp != compare_less;
 
