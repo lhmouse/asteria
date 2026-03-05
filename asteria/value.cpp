@@ -64,7 +64,7 @@ do_destroy_variant_slow()
 
     char stupid[1000] = { };
     s_stupid_begin = stupid;
-    s_stupid_end = stupid + sizeof(s_stupid_end);
+    s_stupid_end = stupid + sizeof(stupid);
 
     s_stupid_begin[0] = 1;
     s_stupid_end[-1] = 2;
