@@ -254,7 +254,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
         status_if_unmatched = compiler_status_closing_bracket_or_identifier_expected;
       }
 
-      if(names.size() < 1)
+      if(names.size() < 2)
         throw Compiler_Error(xtc_status,
                   compiler_status_identifier_expected, tstrm.next_sloc());
 
@@ -296,7 +296,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
         status_if_unmatched = compiler_status_closing_brace_or_identifier_expected;
       }
 
-      if(names.size() < 1)
+      if(names.size() < 2)
         throw Compiler_Error(xtc_status,
                   compiler_status_identifier_expected, tstrm.next_sloc());
 
