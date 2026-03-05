@@ -594,8 +594,7 @@ class basic_cow_string
     front()
       const noexcept
       {
-        ROCKET_ASSERT(!this->empty());
-        return this->data()[0];
+        return this->c_str()[0];
       }
 
     constexpr
