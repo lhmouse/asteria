@@ -407,7 +407,7 @@ std_filesystem_remove_directory(V_string path)
       return 0;
 
     ASTERIA_THROW((
-        "Could remove directory '$1'",
+        "Could not remove directory '$1'",
         "[`rmdir()` failed: ${errno:full}]"),
         path);
   }
