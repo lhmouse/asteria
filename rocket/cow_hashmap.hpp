@@ -709,7 +709,6 @@ class cow_hashmap
     template<typename ykeyT, typename ydefaultT>
     typename select_type<mapped_type&&, ydefaultT&&>::type
     move_or(const ykeyT& ykey, ydefaultT&& ydef)
-      const
       {
         size_type tpos;
         if(!this->m_sth.find(tpos, ykey))
