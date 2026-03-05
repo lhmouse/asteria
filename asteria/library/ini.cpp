@@ -183,6 +183,9 @@ do_parse_from(V_object& root, tinyfmt& fmt)
       // Otherwise, it shall be a property.
       size_t eqpos = line.find('=');
       if(eqpos != cow_string::npos) {
+        if(eqpos == 0)
+          ASTERIA_THROW(("Empty property name on line $1"), nlines);
+
         pos = line.rfind_not_of(eqpos - 1, s_space);
         if(pos == cow_string::npos)
           ASTERIA_THROW(("Empty property name on line $1"), nlines);
