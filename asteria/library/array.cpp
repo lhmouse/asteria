@@ -264,7 +264,7 @@ std_array_replace_slice(V_array data, optV_integer from, optV_integer length, V_
     auto rep_offset = ::std::distance(replacement.begin(), rep_range.first);
     auto rep_dist = ::std::distance(rep_range.first, rep_range.second);
 
-    if(dist >= replacement.ssize()) {
+    if(dist >= rep_dist) {
       // Overwrite the subrange in place.
       auto insp = ::std::move(replacement.mut_begin() + rep_offset,
                               replacement.mut_begin() + rep_offset + rep_dist,
