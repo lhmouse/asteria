@@ -18,9 +18,9 @@ sprintf_and_throw(const char* fmt, ...)
     va_end(ap);
 
     // Remove trailing line breaks.
-    auto eptr = strbuf + clamp_cast<uint32_t>(ret, 0, (int) sizeof strbuf - 1);
-    while((eptr != strbuf) && (*eptr == '\n'))
-      *(eptr --) = 0;
+    auto eptr = strbuf + clamp_cast<uint32_t>(ret, 0, (int) sizeof(strbuf) - 1);
+    while((eptr != strbuf) && (eptr[-1] == '\n'))
+      *--eptr = 0;
 
     // Throw an exception with a copy of the formatted message...
     // Can we make use of the reference-counting string in standard
