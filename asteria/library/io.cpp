@@ -264,7 +264,7 @@ std_io_read(optV_integer limit)
       if((nread != nbatch) && ::ferror(sentry))
         ASTERIA_THROW((
             "Error reading standard input",
-            "[`fgetwc()` failed: ${errno:full}]"));
+            "[`fread()` failed: ${errno:full}]"));
 
       if(nread != nbatch) {
         data.erase(batch_pos + (ptrdiff_t) nread, data.end());
