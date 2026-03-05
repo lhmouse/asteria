@@ -139,11 +139,10 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
           auto qblock = &altr;
           while((qblock->stmts.size() == 1) && (qblock->stmts.at(0).m_stor.index() == index_block))
             qblock = &(qblock->stmts.at(0).m_stor.as<S_block>());
-
           if(qblock->stmts.empty())
             return;
 
-          if(::rocket::all_of(altr.stmts, [](const Statement& st) { return st.is_scopeless();  })) {
+          if(::rocket::all_of(qblock->stmts, [](const Statement& st) { return st.is_scopeless();  })) {
             do_generate_statement_list(code, ctx, nullptr, global, opts, ptc, qblock->stmts);
             return;
           }
