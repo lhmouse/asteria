@@ -768,7 +768,7 @@ class stringified_key
     // Hacks...
     stringified_key(bool val)
       noexcept
-      { ::std::memcpy(this->m_temp, "false\0__true\0__" + val * 8U, 4U);  }
+      { ::std::memcpy(this->m_temp, "false\0__true\0__" + val * 8U, 8U);  }
 
     stringified_key(signed char val)
       noexcept
