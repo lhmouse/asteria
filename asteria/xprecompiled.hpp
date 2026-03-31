@@ -1,14 +1,11 @@
 // This file is part of Asteria.
 // Copyright (C) 2024-2026 LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_XPRECOMPILED_
-#define ASTERIA_XPRECOMPILED_
-
-#include "version.h"
-
 #ifdef __FAST_MATH__
 #  error Please turn off `-ffast-math`.
 #endif
+
+#include "version.h"
 
 // Prevent use of standard streams.
 #define _IOS_BASE_H  1
@@ -74,6 +71,4 @@
 
 #ifdef __AVX__
 #include <immintrin.h>
-#endif
-
 #endif
