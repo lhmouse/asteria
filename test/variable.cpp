@@ -7,7 +7,7 @@ using namespace ::asteria;
 
 int main()
   {
-    auto var = ::rocket::make_refcnt<Variable>();
+    auto var = make_refcnt<Variable>();
     ASTERIA_TEST_CHECK(var->initialized() == false);
 
     var->initialize(V_real(123.456));

@@ -2,8 +2,8 @@
 // Copyright (C) 2018-2026 LH_Mouse. All wrongs reserved.
 
 #include "utils.hpp"
-#include "../rocket/xstring.hpp"
-using namespace ::rocket;
+#include "../asteria/rocket/xstring.hpp"
+using namespace ::asteria;
 
 template<typename charT>
 void

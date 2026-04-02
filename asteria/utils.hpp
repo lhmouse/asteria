@@ -5,7 +5,7 @@
 #define ASTERIA_UTILS_
 
 #include "fwd.hpp"
-#include "../rocket/tinyfmt_str.hpp"
+#include "rocket/tinyfmt_str.hpp"
 namespace asteria {
 
 // Formatting
@@ -34,8 +34,8 @@ template<size_t N, typename... xParams>
 cow_string&
 format(cow_string& str, const array<const char*, N>& templs, const xParams&... params)
   {
-    ::rocket::tinyfmt_str fmt;
-    fmt.set_string(move(str), ::rocket::tinyfmt::open_append);
+    tinyfmt_str fmt;
+    fmt.set_string(move(str), tinyfmt::open_append);
     format(fmt, templs, params...);
     str = fmt.extract_string();
     return str;
@@ -45,7 +45,7 @@ template<typename xTempls, typename... xParams>
 cow_string
 sformat(const xTempls& templs, const xParams&... params)
   {
-    ::rocket::tinyfmt_str fmt;
+    tinyfmt_str fmt;
     format(fmt, templs, params...);
     return fmt.extract_string();
   }
@@ -70,11 +70,11 @@ throw_runtime_error(const char* file, long line, const char* func, cow_string&& 
 #define ASTERIA_THROW(TEMPLATE, ...)  \
     ((void) ::asteria::throw_runtime_error(__FILE__, __LINE__, __FUNCTION__,  \
        ::asteria::sformat((::asteria::make_string_template TEMPLATE), ##__VA_ARGS__)),  \
-     ROCKET_UNREACHABLE())
+     ASTERIA_UNREACHABLE())
 
 // Raw memory management
 template<typename objectT, typename sourceT>
-ROCKET_ALWAYS_INLINE
+ASTERIA_ALWAYS_INLINE
 void
 bcopy(objectT& __restrict dst, const sourceT& __restrict src)
   noexcept
@@ -86,7 +86,7 @@ bcopy(objectT& __restrict dst, const sourceT& __restrict src)
   }
 
 template<typename objectT>
-ROCKET_ALWAYS_INLINE
+ASTERIA_ALWAYS_INLINE
 void
 bfill(objectT& dst, unsigned char value)
   noexcept
@@ -160,16 +160,16 @@ struct Wrapped_Index
         nappend(0), nprepend(0),
         rindex(0)
       {
-        ROCKET_ASSERT(ssize >= 0);
+        ASTERIA_ASSERT(ssize >= 0);
 
         if(sindex >= 0) {
           ptrdiff_t last_sindex = ssize - 1;
-          this->nappend = (uint64_t) (::rocket::max(last_sindex, sindex) - last_sindex);
+          this->nappend = (uint64_t) (max(last_sindex, sindex) - last_sindex);
           this->rindex = (size_t) sindex;
         }
         else {
           ptrdiff_t first_sindex = 0 - ssize;
-          this->nprepend = (uint64_t) (first_sindex - ::rocket::min(sindex, first_sindex));
+          this->nprepend = (uint64_t) (first_sindex - min(sindex, first_sindex));
           this->rindex = (size_t) (sindex + ssize) + (size_t) this->nprepend;
         }
       }

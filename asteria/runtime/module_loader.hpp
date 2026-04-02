@@ -5,7 +5,7 @@
 #define ASTERIA_RUNTIME_MODULE_LOADER_
 
 #include "../fwd.hpp"
-#include "../../rocket/tinyfmt_file.hpp"
+#include "../asteria/rocket/tinyfmt_file.hpp"
 namespace asteria {
 
 class Module_Loader
@@ -16,8 +16,8 @@ class Module_Loader
     class Unique_Stream;  // RAII wrapper
 
   private:
-    cow_dictionary<::rocket::tinyfmt_file> m_strms;
-    using locked_pair = pair<const phcow_string, ::rocket::tinyfmt_file>;
+    cow_dictionary<tinyfmt_file> m_strms;
+    using locked_pair = pair<const phcow_string, tinyfmt_file>;
 
   public:
     // Creates an empty module loader.
@@ -92,15 +92,15 @@ class Module_Loader::Unique_Stream
     path()
       const noexcept
       {
-        ROCKET_ASSERT_MSG(this->m_strm, "no stream");
+        ASTERIA_ASSERT_MSG(this->m_strm, "no stream");
         return this->m_strm->first.rdstr();
       }
 
-    ::rocket::tinyfmt_file&
+    tinyfmt_file&
     file()
       const noexcept
       {
-        ROCKET_ASSERT_MSG(this->m_strm, "no stream");
+        ASTERIA_ASSERT_MSG(this->m_strm, "no stream");
         return this->m_strm->second;
       }
 
@@ -111,8 +111,8 @@ class Module_Loader::Unique_Stream
         if(this->m_strm == nullptr)
           return *this;
 
-        auto old_loader = ::rocket::exchange(this->m_loader);
-        auto old_strm = ::rocket::exchange(this->m_strm);
+        auto old_loader = ::std::exchange(this->m_loader, nullptr);
+        auto old_strm = ::std::exchange(this->m_strm, nullptr);
         old_loader->do_unlock_stream(old_strm);
         return *this;
       }
@@ -131,8 +131,8 @@ class Module_Loader::Unique_Stream
           return *this;
         }
 
-        auto old_loader = ::rocket::exchange(this->m_loader, loader);
-        auto old_strm = ::rocket::exchange(this->m_strm, strm);
+        auto old_loader = ::std::exchange(this->m_loader, loader);
+        auto old_strm = ::std::exchange(this->m_strm, strm);
         old_loader->do_unlock_stream(old_strm);
         return *this;
       }

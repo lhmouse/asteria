@@ -93,7 +93,7 @@ class Binding_Generator
 
 // See 'library/string.cpp' for examples about how to use this macro.
 #define ASTERIA_BINDING(name, params, ...)  \
-    (::asteria::Binding_Generator(::rocket::sref("" name ""),  \
+    (::asteria::Binding_Generator(sref("" name ""),  \
         ("" name "(" params ")"), __FILE__, __LINE__))->**[](__VA_ARGS__)
 
 }  // namespace asteria

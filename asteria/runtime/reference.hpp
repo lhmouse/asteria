@@ -29,8 +29,8 @@ class Reference
       };
 
 #define ASTERIA_EINUD0SU_(U)  U##_bad, U##_void, U##_temp, U##_var, U##_ptc
-    using variant_type = ::rocket::variant<ASTERIA_EINUD0SU_(St)>;
-    using bytes_type = ::rocket::storage_for<variant_type>;
+    using variant_type = variant<ASTERIA_EINUD0SU_(St)>;
+    using bytes_type = storage_for<variant_type>;
 
     union {
       bytes_type m_bytes;
@@ -62,7 +62,7 @@ class Reference
     Reference(Reference&& other)
       noexcept
       :
-        m_bytes(::rocket::exchange(other.m_bytes))  // HACK
+        m_bytes(exchange(other.m_bytes))  // HACK
       { }
 
     Reference&
@@ -141,7 +141,7 @@ class Reference
       { return this->m_stor.ptr<St_temp>() != nullptr;  }
 
     template<typename xValue,
-    ROCKET_ENABLE_IF(::std::is_assignable<Value&, xValue&&>::value)>
+    ASTERIA_ENABLE_IF(::std::is_assignable<Value&, xValue&&>::value)>
     Reference&
     set_temporary(xValue&& xval)
       {
@@ -159,7 +159,7 @@ class Reference
     Reference&
     set_variable(const refcnt_ptr<Variable>& var)
       {
-        ROCKET_ASSERT(var != nullptr);
+        ASTERIA_ASSERT(var != nullptr);
         auto& st = this->m_stor.emplace<St_var>();
         st.var = var;
         return *this;
@@ -174,13 +174,13 @@ class Reference
     Reference&
     set_ptc(const refcnt_ptr<PTC_Arguments>& ptc)
       {
-        ROCKET_ASSERT(ptc != nullptr);
+        ASTERIA_ASSERT(ptc != nullptr);
         this->m_stor.emplace<St_ptc>(ptc);
         return *this;
       }
 
     template<typename xSubscript,
-    ROCKET_ENABLE_IF(::std::is_constructible<Subscript, xSubscript&&>::value)>
+    ASTERIA_ENABLE_IF(::std::is_constructible<Subscript, xSubscript&&>::value)>
     Reference&
     push_subscript(xSubscript&& xsub)
       {
@@ -278,7 +278,7 @@ class Reference
         if(this->m_stor.ptr<St_ptc>())
           this->do_use_function_result_slow(global, move(stack));
 
-        if(ROCKET_UNEXPECT(!(this->m_stor.ptr<St_void>()
+        if(ASTERIA_UNEXPECT(!(this->m_stor.ptr<St_void>()
                              || this->m_stor.ptr<St_temp>()
                              || this->m_stor.ptr<St_var>())))
           this->do_throw_not_dereferenceable();
@@ -291,6 +291,7 @@ swap(Reference& lhs, Reference& rhs)
   noexcept
   { lhs.swap(rhs);  }
 
+extern template class variant<ASTERIA_EINUD0SU_(Reference::St)>;
+
 }  // namespace asteria
-extern template class ::rocket::variant<ASTERIA_EINUD0SU_(::asteria::Reference::St)>;
 #endif

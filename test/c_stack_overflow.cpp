@@ -7,7 +7,7 @@ using namespace ::asteria;
 
 int main()
   {
-#ifdef ROCKET_DEBUG
+#ifdef ASTERIA_DEBUG
     fprintf(stderr, "This test is so slow that it is disabled.\n");
     return 77;
 #endif

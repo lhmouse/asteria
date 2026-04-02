@@ -894,7 +894,7 @@ example defines a global object `my`, which contains two member `add` and
 #include <asteria/runtime/argument_reader.hpp>
 #include <asteria/runtime/garbage_collector.hpp>
 #include <asteria/runtime/variable.hpp>
-using namespace rocket;
+using namespace asteria;
 using namespace asteria;
 
 int
@@ -1010,7 +1010,7 @@ function with these arguments.
 #include <asteria/simple_script.hpp>
 #include <asteria/runtime/binding_generator.hpp>
 #include <asteria/runtime/argument_reader.hpp>
-using namespace rocket;
+using namespace asteria;
 using namespace asteria;
 
 int

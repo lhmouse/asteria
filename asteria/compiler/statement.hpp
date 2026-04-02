@@ -209,7 +209,7 @@ class Statement
   public:
     // Constructors and assignment operators
     template<typename xStatement,
-    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xStatement&&>::value)>
+    ASTERIA_ENABLE_IF(::std::is_constructible<decltype(m_stor), xStatement&&>::value)>
     constexpr Statement(xStatement&& xstmt)
        noexcept(::std::is_nothrow_constructible<decltype(m_stor), xStatement&&>::value)
       :
@@ -217,7 +217,7 @@ class Statement
       { }
 
     template<typename xStatement,
-    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xStatement&&>::value)>
+    ASTERIA_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xStatement&&>::value)>
     Statement&
     operator=(xStatement&& xstmt)
       & noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xStatement&&>::value)
@@ -250,7 +250,7 @@ class Statement
     is_scopeless()
       const noexcept
       {
-        return ::rocket::is_none_of(this->m_stor.index(),
+        return is_none_of(this->m_stor.index(),
             { index_variables, index_references, index_function, index_defer });
       }
 

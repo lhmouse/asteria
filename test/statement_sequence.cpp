@@ -14,7 +14,7 @@ using namespace ::asteria;
 
 int main()
   {
-    ::rocket::tinyfmt_str cbuf;
+    tinyfmt_str cbuf;
     cbuf.set_string(
       &R"__(
         func third() {

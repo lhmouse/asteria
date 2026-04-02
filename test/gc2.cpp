@@ -5,7 +5,7 @@
 #include "../asteria/simple_script.hpp"
 #include "../asteria/runtime/garbage_collector.hpp"
 #include "../asteria/runtime/variable.hpp"
-#include "../rocket/xmemory.hpp"
+#include "../asteria/rocket/xmemory.hpp"
 #include <algorithm>
 using namespace ::asteria;
 
@@ -63,8 +63,8 @@ int main()
       code.execute();
     }
 
-    ::rocket::xmemclean();
-    ::rocket::xmemclean();
+    xmemclean();
+    xmemclean();
     ::std::sort(alloc_list.mut_begin(), alloc_list.mut_end());
     ::std::sort(free_list.mut_begin(), free_list.mut_end());
     ASTERIA_TEST_CHECK(::std::equal(

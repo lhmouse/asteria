@@ -1,10 +1,11 @@
 // This file is part of Asteria.
 // Copyright (C) 2018-2026 LH_Mouse. All wrongs reserved.
 
-#include "../asteria/xprecompiled.hpp"
+#include "../asteria/src/xprecompiled.hpp"
 #include "fwd.hpp"
 #include "../asteria/utils.hpp"
-#include "../rocket/tinyfmt_file.hpp"
+#include "../asteria/rocket/ascii_numget.hpp"
+#include "../asteria/rocket/tinyfmt_file.hpp"
 namespace asteria {
 namespace {
 
@@ -36,7 +37,7 @@ do_find_handler_opt(cow_string&& cmd)
   {
     char ch;
     for(size_t k = 0;  k != cmd.size();  ++k)
-      if((ch = ::rocket::ascii_to_lower(cmd[k])) != cmd[k])
+      if((ch = ascii_to_lower(cmd[k])) != cmd[k])
         cmd.mut(k) = ch;
 
     for(const auto& up : s_handlers)
@@ -84,7 +85,7 @@ struct Handler_exit : Handler
         Exit_Status stat = exit_non_integer;
         const auto& s = args.at(0);
 
-        ::rocket::ascii_numget numg;
+        ascii_numget numg;
         if(numg.parse_U(s.data(), s.size()) == s.size()) {
           // Get exit status from the argument.
           uint64_t temp;
@@ -135,7 +136,7 @@ struct Handler_help : Handler
 
         int max_len = 8;
         for(const auto& ptr : s_handlers)
-          max_len = ::rocket::max(max_len, (int)::strlen(ptr->cmd()));
+          max_len = max(max_len, (int)::strlen(ptr->cmd()));
 
         // short
         for(const auto& ptr : s_handlers)
@@ -246,8 +247,8 @@ struct Handler_source : Handler
 
         auto abs_path = get_real_path(args[0]);
         repl_printf("* loading file '%s'...", abs_path.c_str());
-        ::rocket::tinyfmt_file file;
-        file.open(abs_path.c_str(), ::rocket::tinyfmt::open_read);
+        tinyfmt_file file;
+        file.open(abs_path.c_str(), tinyfmt::open_read);
         repl_printf("  ---+");
 
         cow_string source, textln;
@@ -268,7 +269,7 @@ struct Handler_source : Handler
               break;
 
             // Accept the last line without a line feed.
-            ROCKET_ASSERT(textln.back() != '\n');
+            ASTERIA_ASSERT(textln.back() != '\n');
             noeol = true;
           }
           else if(ch != '\n') {
@@ -355,11 +356,11 @@ prepare_repl_commands()
     // Create command interfaces. Note the list of commands is printed
     // according to this vector, so please ensure elements are sorted
     // lexicographically.
-    s_handlers.emplace_back(::rocket::make_unique<Handler_again>());
-    s_handlers.emplace_back(::rocket::make_unique<Handler_exit>());
-    s_handlers.emplace_back(::rocket::make_unique<Handler_help>());
-    s_handlers.emplace_back(::rocket::make_unique<Handler_heredoc>());
-    s_handlers.emplace_back(::rocket::make_unique<Handler_source>());
+    s_handlers.emplace_back(make_unique<Handler_again>());
+    s_handlers.emplace_back(make_unique<Handler_exit>());
+    s_handlers.emplace_back(make_unique<Handler_help>());
+    s_handlers.emplace_back(make_unique<Handler_heredoc>());
+    s_handlers.emplace_back(make_unique<Handler_source>());
   }
 
 void
@@ -377,7 +378,7 @@ handle_repl_command(cow_string&& cmdline)
     for(;;) {
       if(quote != 0) {
         if(pos >= cmdline.size())
-          ::rocket::sprintf_and_throw<::std::invalid_argument>(
+          sprintf_and_throw<::std::invalid_argument>(
                 "Unmatched %c", quote);
 
         ch = cmdline[pos++];
@@ -405,7 +406,7 @@ handle_repl_command(cow_string&& cmdline)
         has_token = true;
 
         // Check for quoted arguments.
-        if(::rocket::is_any_of(ch, { '\'', '\"' })) {
+        if(is_any_of(ch, { '\'', '\"' })) {
           quote = ch;
           continue;
         }
@@ -414,7 +415,7 @@ handle_repl_command(cow_string&& cmdline)
       // Escape sequences are allowed except in single quotes.
       if((quote != '\'') && (ch == '\\')) {
         if(pos >= cmdline.size())
-          ::rocket::sprintf_and_throw<::std::invalid_argument>(
+          sprintf_and_throw<::std::invalid_argument>(
                 "Dangling \\ at end of command");
 
         ch = cmdline[pos++];
@@ -423,7 +424,7 @@ handle_repl_command(cow_string&& cmdline)
       cmd += ch;
     }
 
-    ROCKET_ASSERT(!has_token);
+    ASTERIA_ASSERT(!has_token);
 
     if(args.empty())
       return;
@@ -434,7 +435,7 @@ handle_repl_command(cow_string&& cmdline)
 
     auto qhand = do_find_handler_opt(move(cmd));
     if(!qhand)
-      ::rocket::sprintf_and_throw<::std::invalid_argument>(
+      sprintf_and_throw<::std::invalid_argument>(
           "Unknown command `%s` (type `:help` for available commands)",
           cmd.c_str());
 

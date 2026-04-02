@@ -48,7 +48,7 @@ class Variable
       { return this->m_value;  }
 
     template<typename xValue,
-    ROCKET_ENABLE_IF(::std::is_assignable<Value&, xValue&&>::value)>
+    ASTERIA_ENABLE_IF(::std::is_assignable<Value&, xValue&&>::value)>
     void
     initialize(xValue&& xval)
       {

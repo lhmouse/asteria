@@ -54,7 +54,7 @@ class Recursion_Sentry
         constexpr int nbits_limit = 20;  // 1 MiB
         constexpr int nbits_pointer = ::std::numeric_limits<ptrdiff_t>::digits;
 
-        if(ROCKET_UNEXPECT(usage >> nbits_limit != usage >> nbits_pointer))
+        if(ASTERIA_UNEXPECT(usage >> nbits_limit != usage >> nbits_pointer))
           this->do_throw_overflow(usage, (1 << nbits_limit) - 1);
       }
 

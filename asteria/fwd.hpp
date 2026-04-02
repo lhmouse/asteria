@@ -5,21 +5,21 @@
 #define ASTERIA_FWD_
 
 #include "version.h"
-#include "../rocket/cow_string.hpp"
-#include "../rocket/cow_vector.hpp"
-#include "../rocket/cow_hashmap.hpp"
-#include "../rocket/static_vector.hpp"
-#include "../rocket/prehashed_string.hpp"
-#include "../rocket/unique_handle.hpp"
-#include "../rocket/unique_ptr.hpp"
-#include "../rocket/refcnt_ptr.hpp"
-#include "../rocket/variant.hpp"
-#include "../rocket/optional.hpp"
-#include "../rocket/array.hpp"
-#include "../rocket/reference_wrapper.hpp"
-#include "../rocket/tinyfmt.hpp"
-#include "../rocket/xascii.hpp"
-#include "../rocket/atomic.hpp"
+#include "rocket/cow_string.hpp"
+#include "rocket/cow_vector.hpp"
+#include "rocket/cow_hashmap.hpp"
+#include "rocket/static_vector.hpp"
+#include "rocket/prehashed_string.hpp"
+#include "rocket/unique_handle.hpp"
+#include "rocket/unique_ptr.hpp"
+#include "rocket/refcnt_ptr.hpp"
+#include "rocket/variant.hpp"
+#include "rocket/optional.hpp"
+#include "rocket/array.hpp"
+#include "rocket/reference_wrapper.hpp"
+#include "rocket/tinyfmt.hpp"
+#include "rocket/xascii.hpp"
+#include "rocket/atomic.hpp"
 #include <utility>
 #include <stdexcept>
 #include <typeinfo>
@@ -28,85 +28,11 @@
 namespace asteria {
 namespace noadl = asteria;
 
-// Macros
 #define ASTERIA_INCOMPLET(T)  \
     template<typename T##_IKYvW2aJ = T, typename T = T##_IKYvW2aJ>
 
 #define ASTERIA_VARIANT(m, ...)  \
-    ::rocket::variant<__VA_ARGS__> m  // no semicolon
-
-// Directives
-using ::std::nullptr_t;
-using ::std::max_align_t;
-using ::std::ptrdiff_t;
-using ::std::size_t;
-using ::std::intptr_t;
-using ::std::uintptr_t;
-using ::std::intmax_t;
-using ::std::uintmax_t;
-using ::std::int8_t;
-using ::std::uint8_t;
-using ::std::int16_t;
-using ::std::uint16_t;
-using ::std::int32_t;
-using ::std::uint32_t;
-using ::std::int64_t;
-using ::std::uint64_t;
-using ::std::initializer_list;
-using ::std::numeric_limits;
-using ::std::type_info;
-using ::std::nothrow_t;
-using ::std::integer_sequence;
-using ::std::index_sequence;
-using ::std::initializer_list;
-using ::std::integer_sequence;
-using ::std::index_sequence;
-using ::std::pair;
-using ::std::exception;
-using ::std::exception_ptr;
-
-using ::rocket::nullopt_t;
-using ::rocket::cow_string;
-using ::rocket::cow_u16string;
-using ::rocket::cow_u32string;
-using ::rocket::phcow_string;
-using ::rocket::tinyfmt;
-
-using ::rocket::begin;
-using ::rocket::end;
-using ::rocket::swap;
-using ::rocket::xswap;
-using ::rocket::declval;
-using ::rocket::move;
-using ::rocket::forward;
-using ::rocket::forward_as_tuple;
-using ::rocket::exchange;
-using ::rocket::size;
-using ::rocket::ssize;
-using ::rocket::static_pointer_cast;
-using ::rocket::dynamic_pointer_cast;
-using ::rocket::const_pointer_cast;
-using ::rocket::is;
-using ::rocket::isnt;
-using ::rocket::are;
-using ::rocket::arent;
-using ::rocket::nullopt;
-
-using ::rocket::unique_ptr;
-using ::rocket::refcnt_ptr;
-using ::rocket::cow_vector;
-using ::rocket::cow_hashmap;
-using ::rocket::static_vector;
-using ::rocket::array;
-
-using ::rocket::atomic;
-using ::rocket::memory_order;
-using ::rocket::atomic_relaxed;
-using ::rocket::atomic_consume;
-using ::rocket::atomic_acquire;
-using ::rocket::atomic_release;
-using ::rocket::atomic_acq_rel;
-using ::rocket::atomic_seq_cst;
+    ::asteria::variant<__VA_ARGS__> m  // no semicolon
 
 template<typename E>
 using cow_dictionary = cow_hashmap<phcow_string, E, phcow_string::hash>;
@@ -115,7 +41,7 @@ template<typename T, typename U>
 using cow_bivector = cow_vector<pair<T, U>>;
 
 template<typename T>
-using opt = ::rocket::optional<T>;
+using opt = optional<T>;
 
 // Core
 class Value;
@@ -190,7 +116,7 @@ ASTERIA_DEFINE_TAG_(xtc_throw);
 // Type erasure
 struct Rcbase
   :
-    ::rocket::refcnt_base<Rcbase>
+    refcnt_base<Rcbase>
   {
     virtual ~Rcbase() = default;
 
@@ -232,21 +158,21 @@ unerase_cast(rcfwd<xReal>* ptr)  // like `static_cast`
   { return static_cast<xTarget>(ptr);  }
 
 template<typename xTarget, typename xReal>
-ROCKET_ALWAYS_INLINE
+ASTERIA_ALWAYS_INLINE
 refcnt_ptr<xTarget>
 unerase_pointer_cast(const refcnt_ptr<const rcfwd<xReal>>& ptr)  // like `static_pointer_cast`
   noexcept
   { return static_pointer_cast<xTarget>(ptr);  }
 
 template<typename xTarget, typename xReal>
-ROCKET_ALWAYS_INLINE
+ASTERIA_ALWAYS_INLINE
 refcnt_ptr<xTarget>
 unerase_pointer_cast(const refcnt_ptr<rcfwd<xReal>>& ptr)  // like `static_pointer_cast`
   noexcept
   { return static_pointer_cast<xTarget>(ptr);  }
 
 template<typename xReal>
-using rcfwd_ptr = refcnt_ptr<typename ::rocket::copy_cv<
+using rcfwd_ptr = refcnt_ptr<typename copy_cv<
     rcfwd<typename ::std::remove_cv<xReal>::type>, xReal>::type>;
 
 // Abstract base for opaque (user-defined) types
@@ -436,13 +362,13 @@ get()
   {
     auto tptr = this->m_sptr.get();
     if(!tptr)
-      ::rocket::sprintf_and_throw<::std::invalid_argument>(
+      sprintf_and_throw<::std::invalid_argument>(
             "cow_opaque: invalid dynamic cast to `%s` from a null pointer",
             typeid(xOpaque).name());
 
     auto toptr = dynamic_cast<const xOpaque*>(tptr);
     if(!toptr)
-      ::rocket::sprintf_and_throw<::std::invalid_argument>(
+      sprintf_and_throw<::std::invalid_argument>(
             "cow_opaque: invalid dynamic cast to `%s` from `%s`",
             typeid(xOpaque).name(), typeid(*tptr).name());
 
@@ -457,13 +383,13 @@ open()
   {
     auto tptr = this->m_sptr.get();
     if(!tptr)
-      ::rocket::sprintf_and_throw<::std::invalid_argument>(
+      sprintf_and_throw<::std::invalid_argument>(
             "cow_opaque: invalid dynamic cast to `%s` from a null pointer",
             typeid(xOpaque).name());
 
     auto toptr = dynamic_cast<xOpaque*>(tptr);
     if(!toptr)
-      ::rocket::sprintf_and_throw<::std::invalid_argument>(
+      sprintf_and_throw<::std::invalid_argument>(
             "cow_opaque: invalid dynamic cast to `%s` from `%s`",
             typeid(xOpaque).name(), typeid(*tptr).name());
 
@@ -479,7 +405,7 @@ open()
       return *toptr;
 
     // Take ownership of the clone. The return type is covariant with the base.
-    ROCKET_ASSERT(coptr == csptr.get());
+    ASTERIA_ASSERT(coptr == csptr.get());
     this->m_sptr = move(csptr);
     return *coptr;
   }
@@ -681,7 +607,7 @@ using optV_object    = opt<V_object>;
 
 enum Type : uint8_t { ASTERIA_TYPES_AIXE9XIG_(type) };
 
-ROCKET_CONST
+ASTERIA_CONST
 const char*
 describe_type(Type type)
   noexcept;
@@ -699,7 +625,7 @@ enum Frame_Type : uint8_t
     frame_type_try     = 7,  // An exception propagated across a try block.
   };
 
-ROCKET_CONST
+ASTERIA_CONST
 const char*
 describe_frame_type(Frame_Type type)
   noexcept;
@@ -782,7 +708,7 @@ enum Compiler_Status : uint32_t
     compiler_status_too_many_nested_levels                     = 3008,
   };
 
-ROCKET_CONST
+ASTERIA_CONST
 const char*
 describe_compiler_status(Compiler_Status status)
   noexcept;

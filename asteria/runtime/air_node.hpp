@@ -398,7 +398,7 @@ class AIR_Node
   public:
     // Constructors and assignment operators
     template<typename xNode,
-    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xNode&&>::value)>
+    ASTERIA_ENABLE_IF(::std::is_constructible<decltype(m_stor), xNode&&>::value)>
     constexpr AIR_Node(xNode&& xnode)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor), xNode&&>::value)
       :
@@ -406,7 +406,7 @@ class AIR_Node
       { }
 
     template<typename xNode,
-    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xNode&&>::value)>
+    ASTERIA_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xNode&&>::value)>
     AIR_Node&
     operator=(xNode&& xnode)
       & noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xNode&&>::value)

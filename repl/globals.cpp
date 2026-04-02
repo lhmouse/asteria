@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyright (C) 2018-2026 LH_Mouse. All wrongs reserved.
 
-#include "../asteria/xprecompiled.hpp"
+#include "../asteria/src/xprecompiled.hpp"
 #include "fwd.hpp"
 #include "../asteria/simple_script.hpp"
 #include "../asteria/source_location.hpp"
@@ -20,13 +20,13 @@ struct Verbose_Hooks
   :
      Abstract_Hooks
   {
-    ::rocket::tinyfmt_str m_fmt;
+    tinyfmt_str m_fmt;
 
     template<typename... xParams>
     void
     do_trace(const Source_Location& sloc, const char* templ, const xParams&... params)
       {
-        if(ROCKET_EXPECT(!repl_verbose))
+        if(ASTERIA_EXPECT(!repl_verbose))
           return;
 
         this->m_fmt.clear_string();
@@ -39,13 +39,13 @@ struct Verbose_Hooks
     on_trap(const Source_Location& sloc, Executive_Context& /*ctx*/) override
       {
         int sig = repl_signal.xchg(0);
-        if(rocket::is_any_of(sig, { 0, SIGURG, SIGCHLD, SIGWINCH, SIGCONT }))
+        if(is_any_of(sig, { 0, SIGURG, SIGCHLD, SIGWINCH, SIGCONT }))
           return;
 
         char sigdesc[128];
         ::snprintf(sigdesc, sizeof(sigdesc), "signal %d (%s)", sig, ::strsignal(sig));
         this->do_trace(sloc, "received $1", sigdesc);
-        ::rocket::sprintf_and_throw<::std::runtime_error>("Received %s", sigdesc);
+        sprintf_and_throw<::std::runtime_error>("Received %s", sigdesc);
       }
 
     void
@@ -130,7 +130,7 @@ exit_printf(Exit_Status stat, const char* fmt, ...) noexcept
 void
 install_verbose_hooks()
   {
-    repl_script.mut_global().set_hooks(::rocket::make_refcnt<Verbose_Hooks>());
+    repl_script.mut_global().set_hooks(make_refcnt<Verbose_Hooks>());
     repl_script.mut_options().verbose_single_step_traps = true;
   }
 

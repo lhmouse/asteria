@@ -310,7 +310,7 @@ struct Valuable<refcnt_ptr<xFunction>,
   };
 
 template<typename tValue>
-struct Valuable<::rocket::optional<tValue>>
+struct Valuable<optional<tValue>>
   {
     static constexpr bool is_enabled = Valuable<tValue>::is_enabled;
     static constexpr bool is_noexcept = Valuable<tValue>::is_noexcept;
@@ -318,7 +318,7 @@ struct Valuable<::rocket::optional<tValue>>
     template<typename xStorage>
     static
     void
-    assign(xStorage& stor, const ::rocket::optional<tValue>& opt)
+    assign(xStorage& stor, const optional<tValue>& opt)
       {
         if(!opt)
           stor = V_null();
@@ -329,7 +329,7 @@ struct Valuable<::rocket::optional<tValue>>
     template<typename xStorage>
     static
     void
-    assign(xStorage& stor, ::rocket::optional<tValue>&& opt)
+    assign(xStorage& stor, optional<tValue>&& opt)
       {
         if(!opt)
           stor = V_null();

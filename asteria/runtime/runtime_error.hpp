@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "../source_location.hpp"
 #include "../value.hpp"
-#include "../../rocket/tinyfmt_str.hpp"
+#include "../asteria/rocket/tinyfmt_str.hpp"
 #include <exception>
 namespace asteria {
 
@@ -27,9 +27,9 @@ class Runtime_Error
     Value m_value;
     cow_vector<Frame> m_frames;
     size_t m_frame_ins = 0;
-    ::rocket::tinyfmt_str m_tempf;
+    tinyfmt_str m_tempf;
 
-    ::rocket::tinyfmt_str m_fmt;  // human-readable message
+    tinyfmt_str m_fmt;  // human-readable message
 
   public:
     template<typename xValue>
@@ -55,7 +55,7 @@ class Runtime_Error
         m_value()
       {
         format(this->m_fmt, templ, params...);
-        ROCKET_ASSERT(this->m_value.type() == type_null);
+        ASTERIA_ASSERT(this->m_value.type() == type_null);
         this->m_value = this->m_fmt.extract_string();
 
         this->do_backtrace();

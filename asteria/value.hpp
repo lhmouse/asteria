@@ -16,10 +16,10 @@ class Value
 
     template<typename xValue>
     using my_Valuable = details_value::Valuable<
-            typename ::rocket::remove_cvref<xValue>::type>;
+            typename remove_cvref<xValue>::type>;
 
-    using variant_type = ::rocket::variant<ASTERIA_TYPES_AIXE9XIG_(V)>;
-    using bytes_type = ::rocket::storage_for<variant_type>;
+    using variant_type = variant<ASTERIA_TYPES_AIXE9XIG_(V)>;
+    using bytes_type = storage_for<variant_type>;
 
     union {
       bytes_type m_bytes;
@@ -36,18 +36,18 @@ class Value
       { }
 
     template<typename xValue,
-    ROCKET_ENABLE_IF(my_Valuable<xValue>::is_enabled)>
+    ASTERIA_ENABLE_IF(my_Valuable<xValue>::is_enabled)>
     Value(xValue&& xval)
       noexcept(my_Valuable<xValue>::is_noexcept)
       :
         m_bytes()
       {
-        ROCKET_ASSERT(this->m_stor.index() == 0);
+        ASTERIA_ASSERT(this->m_stor.index() == 0);
         my_Valuable<xValue>::assign(this->m_stor, forward<xValue>(xval));
       }
 
     template<typename xValue,
-    ROCKET_ENABLE_IF(my_Valuable<xValue>::is_enabled)>
+    ASTERIA_ENABLE_IF(my_Valuable<xValue>::is_enabled)>
     Value&
     operator=(xValue&& xval)
       & noexcept(my_Valuable<xValue>::is_noexcept)
@@ -73,7 +73,7 @@ class Value
     Value(Value&& other)
       noexcept
       :
-        m_bytes(::rocket::exchange(other.m_bytes))  // HACK
+        m_bytes(exchange(other.m_bytes))  // HACK
       { }
 
     Value&
@@ -114,7 +114,7 @@ class Value
   public:
     ~Value()
       {
-        if(ROCKET_UNEXPECT(this->m_stor.index() > type_real))
+        if(ASTERIA_UNEXPECT(this->m_stor.index() > type_real))
           this->do_destroy_variant_slow();
       }
 
@@ -143,7 +143,7 @@ class Value
     as_boolean()
       const
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_boolean))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_boolean))
           return this->m_stor.as<V_boolean>();
 
         this->do_throw_type_mismatch("`boolean`");
@@ -153,7 +153,7 @@ class Value
     open_boolean()
       noexcept
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_boolean))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_boolean))
           return this->m_stor.mut<V_boolean>();
 
         return this->m_stor.emplace<V_boolean>();
@@ -168,7 +168,7 @@ class Value
     as_integer()
       const
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_integer))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_integer))
           return this->m_stor.as<V_integer>();
 
         this->do_throw_type_mismatch("`integer`");
@@ -178,7 +178,7 @@ class Value
     open_integer()
       noexcept
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_integer))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_integer))
           return this->m_stor.mut<V_integer>();
 
         return this->m_stor.emplace<V_integer>();
@@ -193,10 +193,10 @@ class Value
     as_real()
       const
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_real))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_real))
           return this->m_stor.as<V_real>();
 
-        if(ROCKET_EXPECT(this->m_stor.index() == type_integer))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_integer))
           return static_cast<V_real>(this->m_stor.as<V_integer>());
 
         this->do_throw_type_mismatch("`integer` or `real`");
@@ -206,10 +206,10 @@ class Value
     open_real()
       noexcept
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_real))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_real))
           return this->m_stor.mut<V_real>();
 
-        if(ROCKET_EXPECT(this->m_stor.index() == type_integer))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_integer))
           return this->m_stor.emplace<V_real>(static_cast<V_real>(this->m_stor.mut<V_integer>()));
 
         return this->m_stor.emplace<V_real>();
@@ -224,7 +224,7 @@ class Value
     as_string()
       const
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_string))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_string))
           return this->m_stor.as<V_string>();
 
         this->do_throw_type_mismatch("`string`");
@@ -234,7 +234,7 @@ class Value
     open_string()
       noexcept
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_string))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_string))
           return this->m_stor.mut<V_string>();
 
         return this->m_stor.emplace<V_string>();
@@ -249,7 +249,7 @@ class Value
     as_function()
       const
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_function))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_function))
           return this->m_stor.as<V_function>();
 
         this->do_throw_type_mismatch("`function`");
@@ -259,7 +259,7 @@ class Value
     open_function()
       noexcept
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_function))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_function))
           return this->m_stor.mut<V_function>();
 
         return this->m_stor.emplace<V_function>();
@@ -274,7 +274,7 @@ class Value
     as_opaque()
       const
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_opaque))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_opaque))
           return this->m_stor.as<V_opaque>();
 
         this->do_throw_type_mismatch("`opaque`");
@@ -284,7 +284,7 @@ class Value
     open_opaque()
       noexcept
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_opaque))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_opaque))
           return this->m_stor.mut<V_opaque>();
 
         return this->m_stor.emplace<V_opaque>();
@@ -299,7 +299,7 @@ class Value
     as_array()
       const
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_array))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_array))
           return this->m_stor.as<V_array>();
 
         this->do_throw_type_mismatch("`array`");
@@ -309,7 +309,7 @@ class Value
     open_array()
       noexcept
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_array))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_array))
           return this->m_stor.mut<V_array>();
 
         return this->m_stor.emplace<V_array>();
@@ -324,7 +324,7 @@ class Value
     as_object()
       const
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_object))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_object))
           return this->m_stor.as<V_object>();
 
         this->do_throw_type_mismatch("`object`");
@@ -334,7 +334,7 @@ class Value
     open_object()
       noexcept
       {
-        if(ROCKET_EXPECT(this->m_stor.index() == type_object))
+        if(ASTERIA_EXPECT(this->m_stor.index() == type_object))
           return this->m_stor.mut<V_object>();
 
         return this->m_stor.emplace<V_object>();
@@ -451,10 +451,10 @@ tinyfmt&
 operator<<(tinyfmt& fmt, const Value& value)
   { return value.print_to(fmt);  }
 
+extern template class variant<ASTERIA_TYPES_AIXE9XIG_(V)>;
+extern template class optional<Value>;
+extern template class cow_vector<Value>;
+extern template class cow_hashmap<phcow_string, Value, phcow_string::hash>;
+
 }  // namespace asteria
-extern template class ::rocket::variant<ASTERIA_TYPES_AIXE9XIG_(::asteria::V)>;
-extern template class ::rocket::optional<::asteria::Value>;
-extern template class ::rocket::cow_vector<::asteria::Value>;
-extern template class ::rocket::cow_hashmap<::asteria::phcow_string,
-  ::asteria::Value, ::asteria::phcow_string::hash>;
 #endif

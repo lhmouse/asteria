@@ -1,0 +1,87 @@
+// This file is part of Asteria.
+// Copyright (C) 2018-2026 LH_Mouse. All wrongs reserved.
+
+#ifndef ASTERIA_ROCKET_XALLOCATOR_
+#define ASTERIA_ROCKET_XALLOCATOR_
+
+#include "fwd.hpp"
+namespace asteria {
+
+#include "details/xallocator.ipp"
+
+template<typename allocT>
+struct allocator_wrapper_base_for
+  :
+    conditional<
+      is_final<allocT>::value,
+      details_xallocator::final_wrapper<allocT>,
+      allocT>
+  {
+  };
+
+template<typename allocT>
+void
+propagate_allocator_on_copy(allocT& lhs, const allocT& rhs)
+  noexcept
+  {
+    details_xallocator::propagate<allocT>(
+        typename conditional<
+          allocator_traits<allocT>::propagate_on_container_copy_assignment::value,
+          details_xallocator::propagate_copy_tag,
+          details_xallocator::propagate_none_tag>::type(),
+        lhs, rhs);
+  }
+
+template<typename allocT>
+void
+propagate_allocator_on_move(allocT& lhs, allocT& rhs)
+  noexcept
+  {
+    details_xallocator::propagate<allocT>(
+        typename conditional<
+          allocator_traits<allocT>::propagate_on_container_move_assignment::value,
+          details_xallocator::propagate_move_tag,
+          details_xallocator::propagate_none_tag>::type(),
+        lhs, rhs);
+  }
+
+template<typename allocT>
+void
+propagate_allocator_on_swap(allocT& lhs, allocT& rhs)
+  noexcept
+  {
+    details_xallocator::propagate<allocT>(
+        typename conditional<
+          allocator_traits<allocT>::propagate_on_container_swap::value,
+          details_xallocator::propagate_swap_tag,
+          details_xallocator::propagate_none_tag>::type(),
+        lhs, rhs);
+  }
+
+template<typename allocT>
+struct is_std_allocator
+  :
+    false_type
+  {
+  };
+
+template<typename valueT>
+struct is_std_allocator<::std::allocator<valueT>>
+  :
+    true_type
+  {
+  };
+
+template<typename allocT>
+struct is_always_equal_allocator
+  :
+#ifdef __cpp_lib_allocator_traits_is_always_equal
+    allocator_traits<allocT>::is_always_equal
+#else
+    is_std_allocator<allocT>
+#endif
+  {
+  };
+
+}  // namespace asteria
+#endif

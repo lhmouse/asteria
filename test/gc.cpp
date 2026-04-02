@@ -5,7 +5,7 @@
 #include "../asteria/simple_script.hpp"
 #include "../asteria/runtime/garbage_collector.hpp"
 #include "../asteria/runtime/variable.hpp"
-#include "../rocket/xmemory.hpp"
+#include "../asteria/rocket/xmemory.hpp"
 #include <algorithm>
 using namespace ::asteria;
 
@@ -41,7 +41,7 @@ int main()
     // Ignore leaks of emutls, emergency pool, etc.
     delete new int;
 
-    auto foreign = ::rocket::make_refcnt<Variable>();
+    auto foreign = make_refcnt<Variable>();
     foreign->initialize(42);
     {
       Simple_Script code;
@@ -82,7 +82,7 @@ int main()
     ASTERIA_TEST_CHECK(foreign->value().type() == type_string);
     foreign = nullptr;
 
-    ::rocket::xmemclean();
+    xmemclean();
     ::std::sort(alloc_list.mut_begin(), alloc_list.mut_end());
     ::std::sort(free_list.mut_begin(), free_list.mut_end());
     ASTERIA_TEST_CHECK(::std::equal(

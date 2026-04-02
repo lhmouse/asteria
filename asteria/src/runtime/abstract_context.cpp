@@ -1,0 +1,18 @@
+// This file is part of Asteria.
+// Copyright (C) 2018-2026 LH_Mouse. All wrongs reserved.
+
+#include "../xprecompiled.hpp"
+#include "../../runtime/abstract_context.hpp"
+#include "../../utils.hpp"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+namespace asteria {
+
+Reference*
+Abstract_Context::
+do_create_lazy_reference_opt(Reference* hint_opt, const phcow_string& name)
+  const
+  {
+    return nullptr;
+  }
+
+}  // namespace asteria

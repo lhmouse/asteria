@@ -12,20 +12,20 @@
       try {  \
         if(static_cast<bool>(expr) == false) {  \
           /* failed */  \
-          ::rocket::cow_string msg;  \
+          cow_string msg;  \
           msg << "ASTERIA_TEST_CHECK FAIL: " #expr;  \
           ASTERIA_WRITE_STDERR(move(msg));  \
           ::abort();  \
         }  \
         \
         /* successful */  \
-        ::rocket::cow_string msg;  \
+        cow_string msg;  \
         msg << "ASTERIA_TEST_CHECK PASS: " #expr;  \
         ASTERIA_WRITE_STDERR(move(msg));  \
       }  \
       catch(::std::exception& stdex) {  \
         /* failed */  \
-        ::rocket::cow_string msg;  \
+        cow_string msg;  \
         msg << "ASTERIA_TEST_CHECK EXCEPT: " #expr;  \
         msg << "\n" << stdex.what();  \
         ASTERIA_WRITE_STDERR(move(msg));  \
@@ -39,14 +39,14 @@
         (void) (expr);  \
         \
         /* failed */  \
-        ::rocket::cow_string msg;  \
+        cow_string msg;  \
         msg << "ASTERIA_TEST_CHECK XPASS: " #expr;  \
         ASTERIA_WRITE_STDERR(move(msg));  \
         ::abort();  \
       }  \
       catch(::std::exception& stdex) {  \
         /* successful */  \
-        ::rocket::cow_string msg;  \
+        cow_string msg;  \
         msg << "ASTERIA_TEST_CHECK XFAIL: " #expr;  \
         msg << "\n" << stdex.what();  \
         ASTERIA_WRITE_STDERR(move(msg));  \

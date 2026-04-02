@@ -10,7 +10,7 @@ using namespace ::asteria;
 
 struct Test_Hooks : Abstract_Hooks
   {
-    ::rocket::tinyfmt_str fmt;
+    tinyfmt_str fmt;
 
     void
     on_call(const Source_Location& sloc, const cow_function& /*target*/) override
@@ -27,7 +27,7 @@ struct Test_Hooks : Abstract_Hooks
 
 int main()
   {
-    const auto hooks = ::rocket::make_refcnt<Test_Hooks>();
+    const auto hooks = make_refcnt<Test_Hooks>();
     Simple_Script code;
     code.mut_global().set_hooks(hooks);
 

@@ -30,7 +30,7 @@ int main()
     ASTERIA_TEST_CHECK(val.as_string() == "meow");
     ASTERIA_TEST_CHECK_CATCH(ref.dereference_mutable() = V_boolean(true));
 
-    auto var = ::rocket::make_refcnt<Variable>();
+    auto var = make_refcnt<Variable>();
     var->initialize(V_null());
     ref.set_variable(var);
     ref.push_subscript(Subscript::S_array_index{ -3 });

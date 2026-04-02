@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyright (C) 2018-2026 LH_Mouse. All wrongs reserved.
 
-#include "../asteria/xprecompiled.hpp"
+#include "../asteria/src/xprecompiled.hpp"
 #include "fwd.hpp"
 #include <editline/readline.h>
 #include <stdarg.h>

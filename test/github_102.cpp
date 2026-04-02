@@ -15,7 +15,7 @@ int main()
   {
     Compiler_Options opts = { };
     Token_Stream tstrm(opts);
-    ::rocket::tinyfmt_str cbuf(&R"__(
+    tinyfmt_str cbuf(&R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         var a = 1.5;

@@ -57,14 +57,14 @@ class Random_Engine
     bump()
       noexcept
       {
-        if(ROCKET_UNEXPECT(this->m_ctx.randcnt == 0)) {
+        if(ASTERIA_UNEXPECT(this->m_ctx.randcnt == 0)) {
           // Fill in the next round of numbers.
           this->do_isaac();
           this->m_ctx.randcnt = 256;
         }
 
         uint32_t t = -- this->m_ctx.randcnt;
-        ROCKET_ASSERT(t < 256);
+        ASTERIA_ASSERT(t < 256);
         return this->m_ctx.randrsl[t];
       }
 

@@ -1,0 +1,882 @@
+// This file is part of Asteria.
+// Copyright (C) 2018-2026 LH_Mouse. All wrongs reserved.
+
+#ifndef ASTERIA_ROCKET_TINYFMT_
+#define ASTERIA_ROCKET_TINYFMT_
+
+#include "fwd.hpp"
+#include "xassert.hpp"
+#include "xthrow.hpp"
+#include "xstring.hpp"
+#include "ascii_numput.hpp"
+#include "unique_ptr.hpp"
+#include "tinyfmt_base.hpp"
+#include <chrono>
+#include <cxxabi.h>
+namespace asteria {
+
+// Differences from `std::basic_ostream`:
+// 1. Locales are not supported.
+// 2. Formatting is not supported.
+// 3. The stream is stateless. Exceptions are preferred when reporting errors.
+template<typename charT>
+class basic_tinyfmt;
+
+template<typename charT>
+struct basic_formatter;
+
+template<typename charT, typename valueT>
+constexpr
+basic_formatter<charT>
+make_default_formatter(const basic_tinyfmt<charT>&, const valueT& value)
+  noexcept;
+
+#include "details/tinyfmt.ipp"
+
+template<typename charT>
+class basic_tinyfmt
+  :
+    public tinyfmt_base
+  {
+  public:
+    using char_type   = charT;
+    using seek_dir    = tinyfmt_base::seek_dir;
+    using open_mode   = tinyfmt_base::open_mode;
+
+  protected:
+    basic_tinyfmt()
+      noexcept = default;
+
+    virtual
+    void
+    vtable_key_function_ahpooM5i();
+
+    basic_tinyfmt(const basic_tinyfmt&) = default;
+    basic_tinyfmt& operator=(const basic_tinyfmt&) & = default;
+
+  public:
+    virtual ~basic_tinyfmt() = default;
+
+    // Flushes a stream, like `fflush()`.
+    virtual
+    basic_tinyfmt&
+    flush()
+      = 0;
+
+    // Gets the current stream pointer.
+    // If the stream is non-seekable, `-1` shall be returned.
+    virtual
+    int64_t
+    tell()
+      const = 0;
+
+    // Adjusts the current stream pointer.
+    // If an exception is thrown, the stream is left in an unspecified state.
+    virtual
+    basic_tinyfmt&
+    seek(int64_t off, seek_dir dir)
+      = 0;
+
+    // Reads some characters from the stream.
+    // Upon success, the number of characters that have been read successfully
+    // shall be returned. If the end of stream has been reached, zero shall be
+    // returned. If an exception is thrown, the stream is left in an unspecified
+    // state.
+    virtual
+    size_t
+    getn(char_type* s, size_t n)
+      = 0;
+
+    // Reads a single character from the stream.
+    // Upon success, the character that has been read shall be zero-extended to
+    // an integer and returned. If the end of stream has been reached, `-1` shall
+    // be returned. If an exception is thrown, the stream is left in an unspecified
+    // state.
+    virtual
+    int
+    getc()
+      = 0;
+
+    // Puts some characters into the stream.
+    // This function shall return only after all characters have been written
+    // successfully. If an exception is thrown, the stream is left in an
+    // unspecified state.
+    virtual
+    basic_tinyfmt&
+    putn(const char_type* s, size_t n)
+      = 0;
+
+    // Puts a single character into the stream.
+    // This function shall return only after the character has been written
+    // successfully. If an exception is thrown, the stream is left in an
+    // unspecified state.
+    virtual
+    basic_tinyfmt&
+    putc(char_type c)
+      = 0;
+
+    // Puts an ASCII string.
+    basic_tinyfmt&
+    putn_latin1(const char* s, size_t n);
+  };
+
+template<typename charT>
+void
+basic_tinyfmt<charT>::
+vtable_key_function_ahpooM5i()
+  {
+  }
+
+template<typename charT>
+basic_tinyfmt<charT>&
+basic_tinyfmt<charT>::
+putn_latin1(const char* s, size_t n)
+  {
+    constexpr size_t M = 32;
+    char_type x[M];
+    size_t ns = 0, nx = 0;
+
+    while(ns != n) {
+      // Zero-extend one character to `char_type`.
+      ASTERIA_ASSERT(nx != M);
+      x[nx++] = static_cast<char_type>(s[ns++] & 0xFF);
+
+      if(ASTERIA_EXPECT(ns != n) && ASTERIA_EXPECT(nx != M))
+        continue;
+
+      // Flush all pending characters.
+      this->putn(x, nx);
+      nx = 0;
+    }
+    return *this;
+  }
+
+template<>
+inline
+basic_tinyfmt<char>&
+basic_tinyfmt<char>::
+putn_latin1(const char* s, size_t n)
+  {
+    return this->putn(s, n);
+  }
+
+// Inserts a null-terminated multi-byte string. The string shall begin and
+// end in the initial shift state, otherwise the result is unspecified.
+basic_tinyfmt<wchar_t>&
+operator<<(basic_tinyfmt<wchar_t>& fmt, const char* s);
+
+basic_tinyfmt<char16_t>&
+operator<<(basic_tinyfmt<char16_t>& fmt, const char* s);
+
+basic_tinyfmt<char32_t>&
+operator<<(basic_tinyfmt<char32_t>& fmt, const char* s);
+
+// specialized stream inserters
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, charT c)
+  {
+    return fmt.putc(c);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const charT* s)
+  {
+    return s
+      ? fmt.putn(s, noadl::xstrlen(s))
+      : fmt.putn_latin1("(nullptr)", 9);
+  }
+
+template<typename charT, typename allocT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const ::std::basic_string<charT, allocT>& str)
+  {
+    return fmt.putn(str.data(), str.size());
+  }
+
+#ifdef __cpp_lib_string_view
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const ::std::basic_string_view<charT>& str)
+  {
+    return fmt.putn(str.data(), str.size());
+  }
+#endif  // __cpp_lib_string_view
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const ascii_numput& nump)
+  {
+    return fmt.putn_latin1(nump.data(), nump.size());
+  }
+
+template<typename charT, typename valueT>
+inline
+basic_tinyfmt<charT>&&
+operator<<(basic_tinyfmt<charT>&& fmt, const valueT& value)
+  {
+    return move(fmt << value);
+  }
+
+// delegating inserters
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, bool value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, signed char value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, unsigned char value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, short value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, unsigned short value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, int value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, unsigned int value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, long value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, unsigned long value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, long long value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, unsigned long long value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, float value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, double value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const volatile void* value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const type_info& tinfo)
+  {
+    char* s = ::abi::__cxa_demangle(tinfo.name(), nullptr, nullptr, nullptr);
+    unique_ptr<char, void (void*)> guard(s, ::free);
+    return s
+      ? fmt.putn_latin1(s, ::strlen(s))
+      : fmt.putn_latin1("(bad type)", 10);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const exception& ex)
+  {
+    return fmt << ex.what() << "\n[exception class `" << typeid(ex) << "`]";
+  }
+
+template<typename charT, typename valueT,
+ASTERIA_ENABLE_IF(is_enum<valueT>::value)>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, valueT value)
+  {
+    using int_type = typename underlying_type<valueT>::type;
+    return details_tinyfmt::do_format_number(fmt, static_cast<int_type>(value));
+  }
+
+template<typename charT, typename elementT, typename deleteT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const ::std::unique_ptr<elementT, deleteT>& ptr)
+  {
+    return fmt << ptr.get();
+  }
+
+template<typename charT, typename elementT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const ::std::shared_ptr<elementT>& ptr)
+  {
+    return fmt << ptr.get();
+  }
+
+// ... stupid English, stupid inflection.
+#define ASTERIA_TINYFMT_NOUN_IRREGULAR(num, sing, pl)   ((((num) > 0) && ((num) <= 1)) ? (" " sing) : (" " pl))
+#define ASTERIA_TINYFMT_NOUN_REGULAR(num, sing)         ((((num) > 0) && ((num) <= 1)) ? (" " sing) : (" " sing "s"))
+#define ASTERIA_TINYFMT_NOUN_SAME_PLURAL(num, sing)     (" " sing)
+
+template<typename charT, typename repT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<1, 1000000000>>& dur)
+  {
+    return fmt << dur.count() << ASTERIA_TINYFMT_NOUN_REGULAR(dur.count(), "nanosecond");
+  }
+
+template<typename charT, typename repT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<1, 1000000>>& dur)
+  {
+    return fmt << dur.count() << ASTERIA_TINYFMT_NOUN_REGULAR(dur.count(), "microsecond");
+  }
+
+template<typename charT, typename repT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<1, 1000>>& dur)
+  {
+    return fmt << dur.count() << ASTERIA_TINYFMT_NOUN_REGULAR(dur.count(), "millisecond");
+  }
+
+template<typename charT, typename repT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<1>>& dur)
+  {
+    return fmt << dur.count() << ASTERIA_TINYFMT_NOUN_REGULAR(dur.count(), "second");
+  }
+
+template<typename charT, typename repT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<60>>& dur)
+  {
+   return fmt << dur.count() << ASTERIA_TINYFMT_NOUN_REGULAR(dur.count(), "minute");
+  }
+
+template<typename charT, typename repT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<3600>>& dur)
+  {
+    return fmt << dur.count() << ASTERIA_TINYFMT_NOUN_REGULAR(dur.count(), "hour");
+  }
+
+template<typename charT, typename repT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<86400>>& dur)
+  {
+    return fmt << dur.count() << ASTERIA_TINYFMT_NOUN_REGULAR(dur.count(), "day");
+  }
+
+template<typename charT, typename repT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<604800>>& dur)
+  {
+    return fmt << dur.count() << ASTERIA_TINYFMT_NOUN_REGULAR(dur.count(), "week");
+  }
+
+template<typename charT, typename durationT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const time_point<system_clock, durationT>& tp)
+  {
+    uint64_t ns = static_cast<uint64_t>(time_point_cast<nanoseconds>(tp).time_since_epoch().count());
+    struct timespec tv;
+    tv.tv_sec = static_cast<::time_t>((ns + 9223372036000000000) / 1000000000) - 9223372036;
+    tv.tv_nsec = static_cast<long>(ns % 1000000000);
+    struct tm tm;
+    ::localtime_r(&(tv.tv_sec), &tm);
+    return details_tinyfmt::do_format_time_iso(fmt, tm, tv.tv_nsec);
+  }
+
+using tinyfmt     = basic_tinyfmt<char>;
+using wtinyfmt    = basic_tinyfmt<wchar_t>;
+using u16tinyfmt  = basic_tinyfmt<char16_t>;
+using u32tinyfmt  = basic_tinyfmt<char32_t>;
+
+extern template class basic_tinyfmt<char>;
+extern template class basic_tinyfmt<wchar_t>;
+extern template class basic_tinyfmt<char16_t>;
+extern template class basic_tinyfmt<char32_t>;
+
+extern template tinyfmt& operator<<(tinyfmt&, char);
+extern template wtinyfmt& operator<<(wtinyfmt&, wchar_t);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, char16_t);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, char32_t);
+
+extern template tinyfmt& operator<<(tinyfmt&, const char*);
+extern template wtinyfmt& operator<<(wtinyfmt&, const wchar_t*);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const char16_t*);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const char32_t*);
+
+extern template tinyfmt& operator<<(tinyfmt&, const ascii_numput&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const ascii_numput&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const ascii_numput&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const ascii_numput&);
+
+extern template tinyfmt& operator<<(tinyfmt&, signed char);
+extern template wtinyfmt& operator<<(wtinyfmt&, signed char);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, signed char);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, signed char);
+
+extern template tinyfmt& operator<<(tinyfmt&, signed short);
+extern template wtinyfmt& operator<<(wtinyfmt&, signed short);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, signed short);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, signed short);
+
+extern template tinyfmt& operator<<(tinyfmt&, signed);
+extern template wtinyfmt& operator<<(wtinyfmt&, signed);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, signed);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, signed);
+
+extern template tinyfmt& operator<<(tinyfmt&, signed long);
+extern template wtinyfmt& operator<<(wtinyfmt&, signed long);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, signed long);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, signed long);
+
+extern template tinyfmt& operator<<(tinyfmt&, signed long long);
+extern template wtinyfmt& operator<<(wtinyfmt&, signed long long);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, signed long long);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, signed long long);
+
+extern template tinyfmt& operator<<(tinyfmt&, unsigned char);
+extern template wtinyfmt& operator<<(wtinyfmt&, unsigned char);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, unsigned char);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, unsigned char);
+
+extern template tinyfmt& operator<<(tinyfmt&, unsigned short);
+extern template wtinyfmt& operator<<(wtinyfmt&, unsigned short);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, unsigned short);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, unsigned short);
+
+extern template tinyfmt& operator<<(tinyfmt&, unsigned);
+extern template wtinyfmt& operator<<(wtinyfmt&, unsigned);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, unsigned);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, unsigned);
+
+extern template tinyfmt& operator<<(tinyfmt&, unsigned long);
+extern template wtinyfmt& operator<<(wtinyfmt&, unsigned long);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, unsigned long);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, unsigned long);
+
+extern template tinyfmt& operator<<(tinyfmt&, unsigned long long);
+extern template wtinyfmt& operator<<(wtinyfmt&, unsigned long long);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, unsigned long long);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, unsigned long long);
+
+extern template tinyfmt& operator<<(tinyfmt&, float);
+extern template wtinyfmt& operator<<(wtinyfmt&, float);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, float);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, float);
+
+extern template tinyfmt& operator<<(tinyfmt&, double);
+extern template wtinyfmt& operator<<(wtinyfmt&, double);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, double);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, double);
+
+extern template tinyfmt& operator<<(tinyfmt&, const volatile void*);
+extern template wtinyfmt& operator<<(wtinyfmt&, const volatile void*);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const volatile void*);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const volatile void*);
+
+extern template tinyfmt& operator<<(tinyfmt&, const type_info&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const type_info&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const type_info&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const type_info&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const exception&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const exception&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const exception&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const exception&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000000>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000000>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000000>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000000>>&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000>>&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<1, 1000>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000>>&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<1>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<1>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<1>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<1>>&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<60>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<60>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<60>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<60>>&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<3600>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<3600>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<3600>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<3600>>&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<86400>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<86400>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<86400>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<86400>>&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<604800>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<604800>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<604800>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<604800>>&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<1, 1000000000>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<1, 1000000000>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<1, 1000000000>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<1, 1000000000>>&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<1, 1000000>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<1, 1000000>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<1, 1000000>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<1, 1000000>>&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<1, 1000>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<1, 1000>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<1, 1000>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<1, 1000>>&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<1>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<1>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<1>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<1>>&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<60>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<60>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<60>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<60>>&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<3600>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<3600>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<3600>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<3600>>&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<86400>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<86400>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<86400>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<86400>>&);
+
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<604800>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<604800>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<604800>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<604800>>&);
+
+template<typename charT>
+struct basic_formatter
+  {
+    using tinyfmt_type   = basic_tinyfmt<charT>;
+    using callback_type  = void (tinyfmt_type&, const void*);
+
+    callback_type* ifunc;
+    const void* param;
+
+    template<typename valueT>
+    static
+    void
+    default_callback(tinyfmt_type& fmt, const void* ptr)
+      { fmt << *static_cast<const valueT*>(ptr);  }
+
+    constexpr
+    basic_formatter()
+      noexcept
+      : ifunc(nullptr), param(nullptr)  { }
+
+    constexpr
+    basic_formatter(callback_type* xifunc, const void* xparam)
+      noexcept
+      : ifunc(xifunc), param(xparam)  { }
+  };
+
+template<typename charT, typename valueT>
+constexpr
+basic_formatter<charT>
+make_default_formatter(const basic_tinyfmt<charT>&, const valueT& value)
+  noexcept
+  {
+    using formatter = basic_formatter<charT>;
+    constexpr auto callback = formatter::template default_callback<valueT>;
+    return formatter(callback, ::std::addressof(value));
+  }
+
+template<typename charT>
+basic_tinyfmt<charT>&
+formatv(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<charT>* pinsts, size_t ninsts)
+  {
+    const charT* base = stempl;
+    const charT* next = stempl;
+
+    for(;;) {
+      // Look for the next placeholder.
+      // XXX: For non-Unicode multi-byte strings this is faulty, as trailing
+      //      bytes may match the dollar sign coincidentally.
+      while((*next != charT()) && (*next != charT('$')))
+        next ++;
+
+      if(base != next) {
+        fmt.putn(base, static_cast<size_t>(next - base));
+        base = next;
+      }
+
+      // If the end of the template string has been reached, stop.
+      if(*next == charT())
+        break;
+
+      // Parse this plafceholder.
+      ASTERIA_ASSERT(*next == charT('$'));
+      next ++;
+      switch(*next)
+        {
+        case charT():
+          noadl::sprintf_and_throw<invalid_argument>(
+              "formatv: dangling `$` at end of template string");
+
+        case charT('$'):
+          // literal `$`
+          fmt.putc(charT('$'));
+          break;
+
+        case charT('0'):
+        case charT('1'):
+        case charT('2'):
+        case charT('3'):
+        case charT('4'):
+        case charT('5'):
+        case charT('6'):
+        case charT('7'):
+        case charT('8'):
+        case charT('9'):
+          {
+            // simple placeholder
+            uint32_t iarg = static_cast<unsigned char>(*next - charT('0'));
+            if(iarg == 0) {
+              // `0` denotes the template string.
+              fmt.putn(stempl, noadl::xstrlen(stempl));
+            }
+            else if(iarg <= ninsts) {
+              // `1`...`ninsts` denote ordinal arguments.
+              const basic_formatter<charT>* inst = pinsts + iarg - 1;
+              inst->ifunc(fmt, inst->param);
+            }
+            else {
+              static constexpr charT no_arg[] = { '(','n','o',' ','a','r','g',')' };
+              fmt.putn(no_arg, noadl::size(no_arg));
+            }
+          }
+          break;
+
+        case charT('{'):
+          {
+            // composite placeholder
+            next ++;
+            base = next;
+
+            while((*next != charT()) && (*next != charT('}')))
+              next ++;
+
+            if(*next == charT())
+              noadl::sprintf_and_throw<invalid_argument>(
+                  "formatv: no matching `}` in template string");
+
+            // Check for built-in placeholders.
+            static constexpr charT errno_str[] = { 'e','r','r','n','o',':','s','t','r' };
+            static constexpr charT errno_full[] = { 'e','r','r','n','o',':','f','u','l','l' };
+            static constexpr charT time_utc[] = { 't','i','m','e',':','u','t','c' };
+
+            if(noadl::xmemeq(base, (size_t) (next - base), errno_str, 5)) {
+              // `errno`: value of `errno`
+              details_tinyfmt::do_format_errno(fmt);
+              break;
+            }
+
+            if(noadl::xmemeq(base, (size_t) (next - base), errno_str, 9)) {
+              // `errno:str`: description of `errno`
+              details_tinyfmt::do_format_strerror_errno(fmt);
+              break;
+            }
+
+            if(noadl::xmemeq(base, (size_t) (next - base), errno_full, 10)) {
+              // `errno:full`: value of `errno` followed by its description
+              details_tinyfmt::do_format_strerror_errno(fmt);
+              fmt.putn_latin1(" (errno ", 8);
+              details_tinyfmt::do_format_errno(fmt);
+              fmt.putn_latin1(")", 1);
+              break;
+            }
+
+            if(noadl::xmemeq(base, (size_t) (next - base), time_utc, 4)) {
+              // `time`: current date and time in local time zone
+              struct timespec tv;
+              ::clock_gettime(CLOCK_REALTIME, &tv);
+              struct tm tm;
+              ::localtime_r(&(tv.tv_sec), &tm);
+              details_tinyfmt::do_format_time_iso(fmt, tm, tv.tv_nsec);
+              break;
+            }
+
+            if(noadl::xmemeq(base, (size_t) (next - base), time_utc, 8)) {
+              // `time:utc`: current date and time in UTC
+              struct timespec tv;
+              ::clock_gettime(CLOCK_REALTIME, &tv);
+              struct tm tm;
+              ::gmtime_r(&(tv.tv_sec), &tm);
+              details_tinyfmt::do_format_time_iso(fmt, tm, tv.tv_nsec);
+              break;
+            }
+
+            if(next == base) {
+              // ``: valid but no output
+              break;
+            }
+
+            // The placeholder shall be a non-negative integer.
+            uint32_t iarg = 0;
+
+            while(base != next) {
+              if((*base < charT('0')) || (*base > charT('9'))) {
+                iarg = UINT32_MAX;
+                break;
+              }
+              else if(iarg >= 0xFFFFU) {
+                iarg = UINT32_MAX;
+                break;
+              }
+              iarg *= 10U;
+              iarg += static_cast<unsigned char>(*base - charT('0'));
+              base ++;
+            }
+
+            if(iarg == 0) {
+              // `0` denotes the template string.
+              fmt.putn(stempl, noadl::xstrlen(stempl));
+            }
+            else if(iarg <= ninsts) {
+              // `1`...`ninsts` denote ordinal arguments.
+              const basic_formatter<charT>* inst = pinsts + iarg - 1;
+              inst->ifunc(fmt, inst->param);
+            }
+            else {
+              static constexpr charT no_arg[] = { '(','n','o',' ','a','r','g',')' };
+              fmt.putn(no_arg, noadl::size(no_arg));
+            }
+          }
+          break;
+
+        default:
+          noadl::sprintf_and_throw<invalid_argument>(
+              "formatv: unknown placeholder `$%c` in template string",
+              static_cast<int>(*next));
+        }
+
+      next ++;
+      base = next;
+    }
+    return fmt;
+  }
+
+template<typename charT, typename... paramsT>
+inline
+basic_tinyfmt<charT>&
+format(basic_tinyfmt<charT>& fmt, const charT* stempl, const paramsT&... params)
+  {
+    using formatter = basic_formatter<charT>;
+    formatter insts[] = { noadl::make_default_formatter(fmt, params)..., formatter() };
+    return noadl::formatv(fmt, stempl, insts, sizeof...(params));
+  }
+
+using formatter     = basic_formatter<char>;
+using wformatter    = basic_formatter<wchar_t>;
+using u16formatter  = basic_formatter<char16_t>;
+using u32formatter  = basic_formatter<char32_t>;
+
+extern template tinyfmt& formatv(tinyfmt&, const char*, const formatter*, size_t);
+extern template wtinyfmt& formatv(wtinyfmt&, const wchar_t*, const wformatter*, size_t);
+extern template u16tinyfmt& formatv(u16tinyfmt&, const char16_t*, const u16formatter*, size_t);
+extern template u32tinyfmt& formatv(u32tinyfmt&, const char32_t*, const u32formatter*, size_t);
+
+}  // namespace asteria
+#endif

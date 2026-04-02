@@ -55,7 +55,7 @@ class Subscript
   public:
     // Constructors and assignment operators
     template<typename xSubscript,
-    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xSubscript&&>::value)>
+    ASTERIA_ENABLE_IF(::std::is_constructible<decltype(m_stor), xSubscript&&>::value)>
     constexpr Subscript(xSubscript&& xsub)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor), xSubscript&&>::value)
       :
@@ -63,7 +63,7 @@ class Subscript
       { }
 
     template<typename xSubscript,
-    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xSubscript&&>::value)>
+    ASTERIA_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xSubscript&&>::value)>
     Subscript&
     operator=(xSubscript&& xsub)
       & noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xSubscript&&>::value)

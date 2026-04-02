@@ -2,11 +2,11 @@
 // Copyright (C) 2018-2026 LH_Mouse. All wrongs reserved.
 
 #include "utils.hpp"
-#include "../rocket/ascii_numput.hpp"
-#include "../rocket/ascii_numget.hpp"
+#include "../asteria/rocket/ascii_numput.hpp"
+#include "../asteria/rocket/ascii_numget.hpp"
 #include <float.h>
 #include <math.h>
-using namespace ::rocket;
+using namespace ::asteria;
 
 int main()
   {

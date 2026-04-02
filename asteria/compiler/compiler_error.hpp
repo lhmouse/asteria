@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 #include "../source_location.hpp"
-#include "../../rocket/tinyfmt_str.hpp"
+#include "../asteria/rocket/tinyfmt_str.hpp"
 #include <exception>
 namespace asteria {
 
@@ -19,13 +19,13 @@ class Compiler_Error
     Source_Location m_sloc;
     cow_string m_desc;
 
-    ::rocket::tinyfmt_str m_fmt;  // human-readable message
+    tinyfmt_str m_fmt;  // human-readable message
 
   public:
     Compiler_Error(Uxtc_status, Compiler_Status xstat, const Source_Location& xsloc)
       :
         m_status(xstat), m_sloc(xsloc),
-        m_desc(::rocket::sref(describe_compiler_status(xstat)))
+        m_desc(sref(describe_compiler_status(xstat)))
       {
         this->do_compose_message();
       }

@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyright (C) 2018-2026 LH_Mouse. All wrongs reserved.
 
-#include "../asteria/xprecompiled.hpp"
+#include "../asteria/src/xprecompiled.hpp"
 #include "fwd.hpp"
 #include "../asteria/compiler/compiler_error.hpp"
 #include "../asteria/compiler/token_stream.hpp"
@@ -63,7 +63,7 @@ read_execute_print_single()
 
       // Auto-indent it.
       pos = linestr.find_not_of(" \t");
-      linestr.erase(::rocket::min(pos, linestr.size()));
+      linestr.erase(min(pos, linestr.size()));
       libedit_puts(linestr);
     }
 
@@ -124,13 +124,13 @@ read_execute_print_single()
 
     // Tokenize source code.
     cow_string real_name;
-    ::rocket::tinyfmt_str fmt;
+    tinyfmt_str fmt;
     Reference ref;
 
     try {
       // Try parsing the snippet as an expression.
       real_name = repl_file;
-      if(ROCKET_EXPECT(real_name.empty())) {
+      if(ASTERIA_EXPECT(real_name.empty())) {
         char strbuf[64];
         ::sprintf(strbuf, "expression #%.3lu", repl_index);
         real_name.assign(strbuf);
@@ -147,7 +147,7 @@ read_execute_print_single()
       try {
         // Try parsing it as a sequence of statements instead.
         real_name = repl_file;
-        if(ROCKET_EXPECT(real_name.empty())) {
+        if(ASTERIA_EXPECT(real_name.empty())) {
           char strbuf[64];
           ::sprintf(strbuf, "snippet #%.3lu", repl_index);
           real_name.assign(strbuf);

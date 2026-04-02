@@ -148,7 +148,7 @@ class Expression_Unit
   public:
     // Constructors and assignment operators
     template<typename xUnit,
-    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xUnit&&>::value)>
+    ASTERIA_ENABLE_IF(::std::is_constructible<decltype(m_stor), xUnit&&>::value)>
     constexpr Expression_Unit(xUnit&& xunit)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor), xUnit&&>::value)
       :
@@ -156,7 +156,7 @@ class Expression_Unit
       { }
 
     template<typename xUnit,
-    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xUnit&&>::value)>
+    ASTERIA_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xUnit&&>::value)>
     Expression_Unit&
     operator=(xUnit&& xunit)
       & noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xUnit&&>::value)

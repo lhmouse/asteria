@@ -78,14 +78,14 @@ class Reference_Stack
     top(uint32_t index = 0)
       const noexcept
       {
-        ROCKET_ASSERT(index < this->m_size);
+        ASTERIA_ASSERT(index < this->m_size);
         return *(this->m_bptr + this->m_size - 1 - index);
       }
 
     Reference&
     mut_top(uint32_t index = 0)
       {
-        ROCKET_ASSERT(index < this->m_size);
+        ASTERIA_ASSERT(index < this->m_size);
         return *(this->m_bptr + this->m_size - 1 - index);
       }
 
@@ -93,30 +93,30 @@ class Reference_Stack
     bottom(uint32_t index = 0)
       const noexcept
       {
-        ROCKET_ASSERT(index < this->m_size);
+        ASTERIA_ASSERT(index < this->m_size);
         return *(this->m_bptr + index);
       }
 
     Reference&
     mut_bottom(uint32_t index = 0)
       {
-        ROCKET_ASSERT(index < this->m_size);
+        ASTERIA_ASSERT(index < this->m_size);
         return *(this->m_bptr + index);
       }
 
     Reference&
     push()
       {
-#ifdef ROCKET_DEBUG
+#ifdef ASTERIA_DEBUG
         this->do_reallocate(this->m_size + 1);
 #else
-        if(ROCKET_UNEXPECT(this->m_size >= this->m_estor))
+        if(ASTERIA_UNEXPECT(this->m_size >= this->m_estor))
           this->do_reallocate(this->m_size * 2 | 17);
 #endif
 
         // Construct a new reference.
-        ROCKET_ASSERT(this->m_size < this->m_estor);
-        auto ptr = ::rocket::construct(this->m_bptr + this->m_size);
+        ASTERIA_ASSERT(this->m_size < this->m_estor);
+        auto ptr = construct(this->m_bptr + this->m_size);
         this->m_size ++;
         return *ptr;
       }
@@ -125,12 +125,12 @@ class Reference_Stack
     pop(uint32_t count = 1)
       noexcept
       {
-        ROCKET_ASSERT(count <= this->m_size);
+        ASTERIA_ASSERT(count <= this->m_size);
         uint32_t target_size = this->m_size - count;
         while(this->m_size != target_size) {
           // Destroy a reference.
           this->m_size --;
-          ::rocket::destroy(this->m_bptr + this->m_size);
+          destroy(this->m_bptr + this->m_size);
         }
       }
   };

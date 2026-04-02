@@ -59,7 +59,7 @@ class Global_Context
 
     // Get the maximum API version that is supported when this library is built.
     // N.B. This function must not be inlined for this reason.
-    ROCKET_CONST
+    ASTERIA_CONST
     API_Version
     max_api_version()
       const noexcept;
@@ -72,7 +72,7 @@ class Global_Context
       { return unerase_pointer_cast<Abstract_Hooks>(this->m_qhooks);  }
 
     template<typename xHooks, typename xMemfn, typename... xArgs>
-    ROCKET_FLATTEN
+    ASTERIA_FLATTEN
     void
     call_hook(xMemfn xHooks::* mfn, xArgs&&... args)
       {

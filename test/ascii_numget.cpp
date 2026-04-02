@@ -2,10 +2,10 @@
 // Copyright (C) 2018-2026 LH_Mouse. All wrongs reserved.
 
 #include "utils.hpp"
-#include "../rocket/ascii_numget.hpp"
+#include "../asteria/rocket/ascii_numget.hpp"
 #include <float.h>
 #include <math.h>
-using namespace ::rocket;
+using namespace ::asteria;
 
 // Test cases of known-bad strtod conversions that motivated the use of dmg_fp.
 // See https://bugs.chromium.org/p/chromium/issues/detail?id=593512.
