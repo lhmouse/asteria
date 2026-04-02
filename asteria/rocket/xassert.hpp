@@ -14,7 +14,7 @@ assert_fail(const char* expr, const char* file, long line, const char* msg_opt)
   noexcept;
 
 #ifdef ASTERIA_DEBUG
-#  define ASTERIA_ASSERT_FAIL(...)    assert_fail(__VA_ARGS__)
+#  define ASTERIA_ASSERT_FAIL(...)    ::asteria::assert_fail(__VA_ARGS__)
 #else
 #  define ASTERIA_ASSERT_FAIL(...)    ASTERIA_UNREACHABLE()
 #endif
