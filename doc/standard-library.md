@@ -404,7 +404,8 @@ variable. Individual components are categorized into sub-objects.
   its exit status. If `argv` is provided, it shall be an array of strings,
   which specifies additional arguments to pass to the program. If `envp` is
   given, it shall also be an array of strings, which specifies environment
-  variables to the program.
+  variables to the program. If `envp` is null, the child process inherits all
+  environment variables of the current process.
 
 * Returns the exit status of the new process as an integer. If the process
   has exited due to a signal, the exit status is `128+N` where `N` is the

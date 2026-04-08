@@ -200,9 +200,9 @@ std_system_call(V_string cmd, optV_array argv, optV_array envp)
 
     // Launch the program.
     ::pid_t pid;
-    if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr,
-                      const_cast<char**>(cstrings.data()),
-                      const_cast<char**>(cstrings.data() + env_start)) != 0)
+    char** out_argv = const_cast<char**>(cstrings.data());
+    char** out_envp = envp ? const_cast<char**>(cstrings.data() + env_start) : ::environ;
+    if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, out_argv, out_envp) != 0)
       ASTERIA_THROW((
           "Could not spawn process `$1` with $2",
           "[`posix_spawnp()` failed: ${errno:full}]"),
