@@ -1744,6 +1744,7 @@ std_string_pcre_replace(V_string text, optV_integer from, optV_integer length, V
 V_string
 std_string_iconv(V_string to_encoding, V_string text, optV_string from_encoding)
   {
+    V_string output;
     const char* to_enc = to_encoding.safe_c_str();
     const char* from_enc = "UTF-8";
     if(from_encoding)
@@ -1753,28 +1754,36 @@ std_string_iconv(V_string to_encoding, V_string text, optV_string from_encoding)
     unique_handle<::iconv_t, iconv_closer> qcd;
     if(!qcd.reset(::iconv_open(to_enc, from_enc)))
       ASTERIA_THROW((
-             "Could not create iconv context to encoding `$1` from `$2`"),
-             "[`iconv_open()` failed: ${errno:full}]",
-             to_enc, from_enc);
+          "Could not create iconv context to encoding `$1` from `$2`"),
+          "[`iconv_open()` failed: ${errno:full}]",
+          to_enc, from_enc);
+
+    // Define a helper function to convert a chunk of input text. After input
+    // has been exhausted, we also have to do a flush operation, by passing null
+    // input pointers.
+    auto do_iconv_chunk = [&](const char** pinp, size_t* pinc)
+      {
+        char temp[256];
+        char* outp = temp;
+        size_t outc = sizeof(temp);
+
+        size_t r = ::iconv(qcd, const_cast<char**>(pinp), pinc, &outp, &outc);
+        if((r == (size_t) -1) && (errno != E2BIG))
+          ASTERIA_THROW((
+              "Invalid input byte to encoding `$1` from `$2` at offset `$3`",
+              "[`iconv()` failed: ${errno:full}]"),
+              to_enc, from_enc, *pinp - text.c_str());
+
+        output.append(temp, outp);
+      };
 
     // Perform bytewise conversion.
-    V_string output;
-    char temp[64];
     const char* inp = text.c_str();
     size_t inc = text.size();
+    while(inc != 0)
+      do_iconv_chunk(&inp, &inc);
 
-    while(inc != 0) {
-      char* outp = temp;
-      size_t outc = sizeof(temp);
-
-      size_t r = ::iconv(qcd, const_cast<char**>(&inp), &inc, &outp, &outc);
-      output.append(temp, outp);
-      if((r == (size_t)-1) && (errno != E2BIG))
-        ASTERIA_THROW((
-               "Invalid input byte to encoding `$1` from `$2` at offset `$3`",
-               "[`iconv()` failed: ${errno:full}]"),
-               to_enc, from_enc, inp - text.c_str());
-    }
+    do_iconv_chunk(nullptr, nullptr);
     return output;
   }
 
