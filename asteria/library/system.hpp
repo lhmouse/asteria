@@ -25,7 +25,7 @@ std_system_get_properties();
 
 // `std.system.random_uuid`
 V_string
-std_system_random_uuid();
+std_system_random_uuid(Global_Context& global);
 
 // `std.system.get_pid()`
 V_integer

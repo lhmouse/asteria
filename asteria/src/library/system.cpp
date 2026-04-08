@@ -98,14 +98,18 @@ std_system_get_properties()
   }
 
 V_string
-std_system_random_uuid()
+std_system_random_uuid(Global_Context& global)
   {
-    uint64_t quads[2];
-    ::RAND_bytes((unsigned char*) quads, sizeof(quads));
+    // Generate bytes.
+    const auto prng = global.random_engine();
+    uint32_t w0 = prng->bump();
+    uint32_t w1 = prng->bump();
+    uint32_t w2 = prng->bump();
+    uint32_t w3 = prng->bump();
 
-    auto y = [](uint64_t quad, unsigned index)
+    auto y = [](uint32_t word, unsigned index)
       {
-        int value = (int) (quad >> index * 4) & 0x0F;
+        int value = (int) (word >> index * 4) & 0x0F;
         int shift_to_digit = 0x30 - (((9 - value) & -0x2700) >> 8);
         return (char) (value + shift_to_digit);
       };
@@ -116,42 +120,42 @@ std_system_random_uuid()
     char temp[36];
     char* wptr = temp;
 
-    *(wptr ++) = y(quads[0],  0);
-    *(wptr ++) = y(quads[0],  1);
-    *(wptr ++) = y(quads[0],  2);
-    *(wptr ++) = y(quads[0],  3);
-    *(wptr ++) = y(quads[0],  4);
-    *(wptr ++) = y(quads[0],  5);
-    *(wptr ++) = y(quads[0],  6);
-    *(wptr ++) = y(quads[0],  7);
+    *(wptr ++) = y(w0, 0);
+    *(wptr ++) = y(w0, 1);
+    *(wptr ++) = y(w0, 2);
+    *(wptr ++) = y(w0, 3);
+    *(wptr ++) = y(w0, 4);
+    *(wptr ++) = y(w0, 5);
+    *(wptr ++) = y(w0, 6);
+    *(wptr ++) = y(w0, 7);
     *(wptr ++) =   '-';
-    *(wptr ++) = y(quads[0],  8);
-    *(wptr ++) = y(quads[0],  9);
-    *(wptr ++) = y(quads[0], 10);
-    *(wptr ++) = y(quads[0], 11);
+    *(wptr ++) = y(w1, 0);
+    *(wptr ++) = y(w1, 1);
+    *(wptr ++) = y(w1, 2);
+    *(wptr ++) = y(w1, 3);
     *(wptr ++) =   '-';
     *(wptr ++) =   '4';
-    *(wptr ++) = y(quads[0], 12);
-    *(wptr ++) = y(quads[0], 13);
-    *(wptr ++) = y(quads[0], 14);
+    *(wptr ++) = y(w1, 5);
+    *(wptr ++) = y(w1, 6);
+    *(wptr ++) = y(w1, 7);
     *(wptr ++) =   '-';
-    *(wptr ++) = y(8 | (quads[1] & 3), 0);
-    *(wptr ++) = y(quads[1],  1);
-    *(wptr ++) = y(quads[1],  2);
-    *(wptr ++) = y(quads[1],  3);
+    *(wptr ++) = y(8 | (w2 & 3), 0);
+    *(wptr ++) = y(w2, 1);
+    *(wptr ++) = y(w2, 2);
+    *(wptr ++) = y(w2, 3);
     *(wptr ++) =   '-';
-    *(wptr ++) = y(quads[1],  4);
-    *(wptr ++) = y(quads[1],  5);
-    *(wptr ++) = y(quads[1],  6);
-    *(wptr ++) = y(quads[1],  7);
-    *(wptr ++) = y(quads[1],  8);
-    *(wptr ++) = y(quads[1],  9);
-    *(wptr ++) = y(quads[1], 10);
-    *(wptr ++) = y(quads[1], 11);
-    *(wptr ++) = y(quads[1], 12);
-    *(wptr ++) = y(quads[1], 13);
-    *(wptr ++) = y(quads[1], 14);
-    *(wptr ++) = y(quads[1], 15);
+    *(wptr ++) = y(w2, 4);
+    *(wptr ++) = y(w2, 5);
+    *(wptr ++) = y(w2, 6);
+    *(wptr ++) = y(w2, 7);
+    *(wptr ++) = y(w3, 0);
+    *(wptr ++) = y(w3, 1);
+    *(wptr ++) = y(w3, 2);
+    *(wptr ++) = y(w3, 3);
+    *(wptr ++) = y(w3, 4);
+    *(wptr ++) = y(w3, 5);
+    *(wptr ++) = y(w3, 6);
+    *(wptr ++) = y(w3, 7);
 
     return V_string(temp, wptr);
   }
@@ -1142,11 +1146,11 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     result.insert_or_assign(&"random_uuid",
       ASTERIA_BINDING(
         "std.system.random_uuid", "",
-        Argument_Reader&& reader)
+        Global_Context& global, Argument_Reader&& reader)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_system_random_uuid();
+          return (Value) std_system_random_uuid(global);
 
         reader.throw_no_matching_function_call();
       });
