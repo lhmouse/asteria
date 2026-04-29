@@ -13,9 +13,9 @@ Random_Engine()
   noexcept
   {
     if(::RAND_bytes(this->m_ctx_init, sizeof(this->m_ctx_init)) != 1)
-      sprintf_and_throw<::std::runtime_error>(
-            "asteria::Random_Engine: could not initialize random seed: %s",
-            ::ERR_reason_error_string(::ERR_peek_error()));
+      ASTERIA_TERMINATE((
+          "Could not generate random seed: $1"),
+          ::ERR_reason_error_string(::ERR_peek_error()));
 
     this->m_ctx.randcnt = 256;
   }
