@@ -1,6 +1,6 @@
 # The Asteria Programming Language
 
-![asteria](asteria.png)
+<img src="asteria_4000x3200.svg" height="135">
 
 **Asteria** (/asˈtɪərɪə/, _as-TEAR-ee-uh_) is a procedural, dynamically typed
 programming language that is highly inspired by JavaScript.
