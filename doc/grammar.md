@@ -85,7 +85,7 @@
   - _statement-block_
   - _expression-statement_
 
-* `if-statement` ::=
+* _if-statement_ ::=
   - `if` ( _negation_ )? `(` _expression_ `)` _nondeclarative-statement_ ( `else`
     _nondeclarative-statement_ )?
 
