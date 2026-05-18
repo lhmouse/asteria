@@ -141,10 +141,6 @@ test_src = [
 # Global configuration
 #===========================================================
 
-ver = { 'abi_major': meson.project_version().split('.')[0],
-        'abi_minor': meson.project_version().split('.')[1],
-        'abi_string': meson.project_version().join([ '"', '"' ]) }
-
 cxx = meson.get_compiler('cpp')
 cxx_is_i386 = cxx.has_define('__i386__')
 cxx_is_amd64 = cxx.has_define('__amd64__')
@@ -202,6 +198,10 @@ endif
 #===========================================================
 # Rules for headers
 #===========================================================
+
+ver = { 'abi_major': meson.project_version().split('.')[0],
+        'abi_minor': meson.project_version().split('.')[1],
+        'abi_string': meson.project_version().join([ '"', '"' ]) }
 
 install_headers(configure_file(output: 'version.h',
                                input: 'asteria/version.h.in',
