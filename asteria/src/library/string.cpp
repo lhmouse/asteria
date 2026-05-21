@@ -345,6 +345,7 @@ class PCRE2_Matcher
               "[`pcre2_compile()` failed at offset `$2`: $3]"),
               this->m_patt, off, PCRE2_Error(err));
 
+        ::pcre2_jit_compile(this->m_code, PCRE2_JIT_COMPLETE);
         this->do_initialize_match_data();
       }
 
