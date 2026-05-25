@@ -164,12 +164,11 @@ class static_vector
     do_throw_subscript_out_of_range(size_type pos, unsigned char rel)
       const
       {
-        static constexpr char opstr[6][3] = { "==", "<", "<=", ">", ">=", "!=" };
-        unsigned int inv = 5U - rel;
+        static constexpr char opstr[6][3] = { "!=", ">=", ">", "<=", "<", "==" };
 
         noadl::sprintf_and_throw<out_of_range>(
             "static_vector: subscript out of range (`%lld` %s `%lld`)",
-            static_cast<long long>(pos), opstr[inv], static_cast<long long>(this->size()));
+            static_cast<long long>(pos), opstr[rel], static_cast<long long>(this->size()));
       }
 
 #define ASTERIA_STATIC_VECTOR_VALIDATE_SUBSCRIPT_(pos, op)  \
