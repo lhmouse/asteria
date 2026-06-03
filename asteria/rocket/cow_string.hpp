@@ -1277,8 +1277,7 @@ class basic_cow_string
         return ASTERIA_EXPECT(n <= 0x100)
             ? details_cow_string::do_boyer_moore_horspool_search<uint8_t>(
                         text_begin, text_end, pattern_begin, pattern_end, npos)
-            :
-              details_cow_string::do_boyer_moore_horspool_search<size_type>(
+            : details_cow_string::do_boyer_moore_horspool_search<size_type>(
                         text_begin, text_end, pattern_begin, pattern_end, npos);
       }
 
