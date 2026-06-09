@@ -18,5 +18,5 @@ sudo checkinstall  \
   --pkglicense="BSD-3-Clause"  \
   --pkggroup="devel"  \
   --pkgarch="$(dpkg --print-architecture)"  \
-  --nodoc --backup=no --default --fstrans=yes --install=yes --deldesc  \
+  --nodoc --backup=no --default --install=yes --deldesc  \
   meson install -C build_makedeb
