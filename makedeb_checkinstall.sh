@@ -15,5 +15,6 @@ sudo checkinstall  \
   --pkglicense="BSD-3-Clause"  \
   --pkggroup="devel"  \
   --pkgarch="$(dpkg --print-architecture)"  \
+  --provides="asteria,libasteria-dev"  \
   --nodoc --backup=no --default --fstrans=no --install=yes  \
   meson install -C build_makedeb
