@@ -10,8 +10,8 @@
 #include "../runtime/variable.hpp"
 #include "../runtime/garbage_collector.hpp"
 #include "../llds/reference_stack.hpp"
-#include "../asteria/rocket/tinyfmt_str.hpp"
-#include "../asteria/rocket/tinyfmt_file.hpp"
+#include "../rocket/tinyfmt_str.hpp"
+#include "../rocket/tinyfmt_file.hpp"
 #include "../utils.hpp"
 namespace asteria {
 

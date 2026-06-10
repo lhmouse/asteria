@@ -5,7 +5,7 @@
 #define ASTERIA_RUNTIME_MODULE_LOADER_
 
 #include "../fwd.hpp"
-#include "../asteria/rocket/tinyfmt_file.hpp"
+#include "../rocket/tinyfmt_file.hpp"
 namespace asteria {
 
 class Module_Loader
