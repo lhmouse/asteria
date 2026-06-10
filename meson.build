@@ -227,8 +227,7 @@ lib_asteria = library('asteria',
 import('pkgconfig').generate(lib_asteria,
       name: 'asteria',
       url: 'https://github.com/lhmouse/asteria',
-      description: 'The Asteria Programming Language is a heavyweight, slow and '
-                   + 'incomplete replacement for Lua.')
+      description: 'A heavyweight, slow and incomplete replacement for Lua')
 
 #===========================================================
 # Rules for 'bin/asteria'
