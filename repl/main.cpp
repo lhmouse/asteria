@@ -107,7 +107,7 @@ do_parse_command_line(int argc, char** argv)
 
     // Parse command-line options.
     int ch;
-    while((ch = ::getopt(argc, argv, "+hIiO::Vv")) != -1) {
+    while((ch = ::getopt(argc, argv, "+hIiO::Vv")) != -1)
       switch(ch)
         {
         case 'h':
@@ -137,11 +137,11 @@ do_parse_command_line(int argc, char** argv)
         case 'v':
           verbose = true;
           continue;
-        }
 
-      // `getopt()` will have written an error message to standard error.
-      exit_printf(exit_invalid_argument, "Try `%s -h` for help.", argv[0]);
-    }
+        default:
+          // `getopt()` will have written an error message to standard error.
+          exit_printf(exit_invalid_argument, "Try `%s -h` for help.", argv[0]);
+        }
 
     // Check for early exit conditions.
     if(help)
