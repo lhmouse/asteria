@@ -780,7 +780,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 ctx.stack().clear();
               }
@@ -814,7 +814,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -856,7 +856,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
                 const auto& sloc = *(head->pv_meta->sloc_opt);
@@ -896,7 +896,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const bool immutable = head->uparam.b0;
 
@@ -942,7 +942,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const bool negative = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1118,7 +1118,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const bool negative = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1187,7 +1187,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const bool negative = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1259,7 +1259,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1421,7 +1421,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1640,7 +1640,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1674,7 +1674,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 ctx.status() = static_cast<AIR_Status>(head->uparam.u0);
               }
@@ -1699,7 +1699,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const bool by_ref = head->uparam.b0;
 
@@ -1736,7 +1736,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1786,7 +1786,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const uint32_t depth = head->uparam.u01;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1839,7 +1839,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1937,7 +1937,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const bool assign = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1979,7 +1979,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
                 const uint32_t nargs = head->uparam.u2345;
@@ -2103,7 +2103,7 @@ solidify(AVM_Rod& rod)
             case xop_inc:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool postfix = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2147,7 +2147,7 @@ solidify(AVM_Rod& rod)
             case xop_dec:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool postfix = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2191,7 +2191,7 @@ solidify(AVM_Rod& rod)
             case xop_unset:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     Reference& top = ctx.stack().mut_top();
 
@@ -2213,7 +2213,7 @@ solidify(AVM_Rod& rod)
             case xop_head:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     Reference& top = ctx.stack().mut_top();
 
@@ -2235,7 +2235,7 @@ solidify(AVM_Rod& rod)
             case xop_tail:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     Reference& top = ctx.stack().mut_top();
 
@@ -2257,7 +2257,7 @@ solidify(AVM_Rod& rod)
             case xop_random:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     Reference& top = ctx.stack().mut_top();
                     const auto prng = ctx.global().random_engine();
@@ -2280,7 +2280,7 @@ solidify(AVM_Rod& rod)
             case xop_isvoid:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     Reference& top = ctx.stack().mut_top();
 
@@ -2301,7 +2301,7 @@ solidify(AVM_Rod& rod)
             case xop_assign:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     Value& rhs = ctx.stack().mut_top().dereference_copy();
                     Reference& top = ctx.stack().mut_top(1);
@@ -2324,7 +2324,7 @@ solidify(AVM_Rod& rod)
             case xop_index:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     Value& rhs = ctx.stack().mut_top().dereference_copy();
                     Reference& top = ctx.stack().mut_top(1);
@@ -2357,7 +2357,7 @@ solidify(AVM_Rod& rod)
             case xop_pos:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2380,7 +2380,7 @@ solidify(AVM_Rod& rod)
             case xop_neg:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2419,7 +2419,7 @@ solidify(AVM_Rod& rod)
             case xop_notb:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2459,7 +2459,7 @@ solidify(AVM_Rod& rod)
             case xop_notl:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2482,7 +2482,7 @@ solidify(AVM_Rod& rod)
             case xop_countof:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2518,7 +2518,7 @@ solidify(AVM_Rod& rod)
             case xop_typeof:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2541,7 +2541,7 @@ solidify(AVM_Rod& rod)
             case xop_sqrt:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2569,7 +2569,7 @@ solidify(AVM_Rod& rod)
             case xop_isnan:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2601,7 +2601,7 @@ solidify(AVM_Rod& rod)
             case xop_isinf:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2633,7 +2633,7 @@ solidify(AVM_Rod& rod)
             case xop_abs:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2672,7 +2672,7 @@ solidify(AVM_Rod& rod)
             case xop_sign:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2704,7 +2704,7 @@ solidify(AVM_Rod& rod)
             case xop_round:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2736,7 +2736,7 @@ solidify(AVM_Rod& rod)
             case xop_floor:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2768,7 +2768,7 @@ solidify(AVM_Rod& rod)
             case xop_ceil:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2800,7 +2800,7 @@ solidify(AVM_Rod& rod)
             case xop_trunc:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2832,7 +2832,7 @@ solidify(AVM_Rod& rod)
             case xop_iround:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2864,7 +2864,7 @@ solidify(AVM_Rod& rod)
             case xop_ifloor:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2896,7 +2896,7 @@ solidify(AVM_Rod& rod)
             case xop_iceil:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2928,7 +2928,7 @@ solidify(AVM_Rod& rod)
             case xop_itrunc:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2960,7 +2960,7 @@ solidify(AVM_Rod& rod)
             case xop_lzcnt:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2989,7 +2989,7 @@ solidify(AVM_Rod& rod)
             case xop_tzcnt:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3018,7 +3018,7 @@ solidify(AVM_Rod& rod)
             case xop_popcnt:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3047,7 +3047,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_eq:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const auto& rhs = ctx.stack().top().dereference_readonly();
@@ -3074,7 +3074,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_ne:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3101,7 +3101,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_un:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3128,7 +3128,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_lt:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3155,7 +3155,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_gt:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3182,7 +3182,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_lte:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3209,7 +3209,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_gte:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3236,7 +3236,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_3way:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3266,7 +3266,7 @@ solidify(AVM_Rod& rod)
             case xop_add:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3318,7 +3318,7 @@ solidify(AVM_Rod& rod)
             case xop_sub:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3360,7 +3360,7 @@ solidify(AVM_Rod& rod)
             case xop_mul:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3427,7 +3427,7 @@ solidify(AVM_Rod& rod)
             case xop_div:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3476,7 +3476,7 @@ solidify(AVM_Rod& rod)
             case xop_mod:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3519,7 +3519,7 @@ solidify(AVM_Rod& rod)
             case xop_andb:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3566,7 +3566,7 @@ solidify(AVM_Rod& rod)
             case xop_orb:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3613,7 +3613,7 @@ solidify(AVM_Rod& rod)
             case xop_xorb:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3660,7 +3660,7 @@ solidify(AVM_Rod& rod)
             case xop_addm:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3693,7 +3693,7 @@ solidify(AVM_Rod& rod)
             case xop_subm:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3726,7 +3726,7 @@ solidify(AVM_Rod& rod)
             case xop_mulm:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3759,7 +3759,7 @@ solidify(AVM_Rod& rod)
             case xop_adds:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3795,7 +3795,7 @@ solidify(AVM_Rod& rod)
             case xop_subs:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3831,7 +3831,7 @@ solidify(AVM_Rod& rod)
             case xop_muls:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3867,7 +3867,7 @@ solidify(AVM_Rod& rod)
             case xop_sll:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3923,7 +3923,7 @@ solidify(AVM_Rod& rod)
             case xop_srl:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3979,7 +3979,7 @@ solidify(AVM_Rod& rod)
             case xop_sla:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4035,7 +4035,7 @@ solidify(AVM_Rod& rod)
             case xop_sra:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4089,7 +4089,7 @@ solidify(AVM_Rod& rod)
               // fused multiply-add; ternary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4252,7 +4252,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const bool immutable = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -4292,7 +4292,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 ctx.global().call_hook(&Abstract_Hooks::on_trap, *(head->pv_meta->sloc_opt), ctx);
               }
@@ -4559,7 +4559,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -4596,7 +4596,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -4688,7 +4688,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const bool by_ref = head->uparam.b0;
                 const bool is_void = head->uparam.b1;
@@ -4732,7 +4732,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -4767,7 +4767,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 ctx.swap_stacks();
                 ctx.stack().clear();
@@ -4797,7 +4797,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
                 const auto& sloc = *(head->pv_meta->sloc_opt);
@@ -4839,7 +4839,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const bool assign = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -4882,7 +4882,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -4951,7 +4951,7 @@ solidify(AVM_Rod& rod)
             case xop_assign:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
@@ -4973,7 +4973,7 @@ solidify(AVM_Rod& rod)
             case xop_index:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
@@ -4995,7 +4995,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_eq:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5020,7 +5020,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_ne:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5045,7 +5045,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_un:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5070,7 +5070,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_lt:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5095,7 +5095,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_gt:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5120,7 +5120,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_lte:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5145,7 +5145,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_gte:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5170,7 +5170,7 @@ solidify(AVM_Rod& rod)
             case xop_cmp_3way:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5198,7 +5198,7 @@ solidify(AVM_Rod& rod)
             case xop_add:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5238,7 +5238,7 @@ solidify(AVM_Rod& rod)
             case xop_sub:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5278,7 +5278,7 @@ solidify(AVM_Rod& rod)
             case xop_mul:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5328,7 +5328,7 @@ solidify(AVM_Rod& rod)
             case xop_div:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5369,7 +5369,7 @@ solidify(AVM_Rod& rod)
             case xop_mod:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5410,7 +5410,7 @@ solidify(AVM_Rod& rod)
             case xop_andb:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5440,7 +5440,7 @@ solidify(AVM_Rod& rod)
             case xop_orb:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5470,7 +5470,7 @@ solidify(AVM_Rod& rod)
             case xop_xorb:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5500,7 +5500,7 @@ solidify(AVM_Rod& rod)
             case xop_addm:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5531,7 +5531,7 @@ solidify(AVM_Rod& rod)
             case xop_subm:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5562,7 +5562,7 @@ solidify(AVM_Rod& rod)
             case xop_mulm:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5593,7 +5593,7 @@ solidify(AVM_Rod& rod)
             case xop_adds:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5627,7 +5627,7 @@ solidify(AVM_Rod& rod)
             case xop_subs:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5661,7 +5661,7 @@ solidify(AVM_Rod& rod)
             case xop_muls:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5695,7 +5695,7 @@ solidify(AVM_Rod& rod)
             case xop_sll:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5745,7 +5745,7 @@ solidify(AVM_Rod& rod)
             case xop_srl:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5795,7 +5795,7 @@ solidify(AVM_Rod& rod)
             case xop_sla:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5845,7 +5845,7 @@ solidify(AVM_Rod& rod)
             case xop_sra:
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__))
+                  __attribute__((__hot__, __flatten__, __no_stack_protector__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5904,7 +5904,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const Type type = static_cast<Type>(head->uparam.u0);
                 const V_integer irhs = head->uparam.i2345;
@@ -5942,7 +5942,7 @@ solidify(AVM_Rod& rod)
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__))
+              __attribute__((__hot__, __flatten__, __no_stack_protector__))
               {
                 const bool negative = head->uparam.b0;
                 Reference& top = ctx.stack().mut_top();

@@ -149,7 +149,7 @@ add_project_arguments(
     '-Winvalid-pch', '-D_FILE_OFFSET_BITS=64', '-D_POSIX_C_SOURCE=200809',
     '-D_XOPEN_SOURCE=700', '-D_DEFAULT_SOURCE', '-D_DARWIN_C_SOURCE',
     '-fno-elide-constructors', '-fvisibility-inlines-hidden', '-fstrict-aliasing',
-    '-fno-stack-protector', '-fstrict-overflow', '-fmerge-all-constants',
+    '-fstack-protector', '-fstrict-overflow', '-fmerge-all-constants',
     '-frounding-math', '-fno-math-errno', '-fno-trapping-math',
     '-fno-semantic-interposition', '-fno-plt',
     '-fno-omit-frame-pointer', '-momit-leaf-frame-pointer',
