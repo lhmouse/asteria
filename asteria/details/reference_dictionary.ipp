@@ -4,8 +4,7 @@
 #ifndef ASTERIA_LLDS_REFERENCE_DICTIONARY_
 #  error Please include <asteria/llds/reference_dictionary.hpp> instead.
 #endif
-namespace asteria {
-namespace details_reference_dictionary {
+namespace asteria::details_reference_dictionary {
 
 struct Bucket
   {
@@ -47,5 +46,4 @@ struct Bucket
       { return this->next != nullptr;  }
   };
 
-}  // namespace details_reference_dictionary
-}  // namespace asteria
+}  // namespace asteria::details_reference_dictionary

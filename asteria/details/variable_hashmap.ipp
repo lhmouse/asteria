@@ -4,8 +4,7 @@
 #ifndef ASTERIA_LLDS_VARIABLE_HASHMAP_
 #  error Please include <asteria/llds/variable_hashmap.hpp> instead.
 #endif
-namespace asteria {
-namespace details_variable_hashmap {
+namespace asteria::details_variable_hashmap {
 
 struct Bucket
   {
@@ -45,5 +44,4 @@ struct Bucket
       { return this->next != nullptr;  }
   };
 
-}  // namespace details_variable_hashmap
-}  // namespace asteria
+}  // namespace asteria::details_variable_hashmap

@@ -4,8 +4,7 @@
 #ifndef ASTERIA_VALUE_
 #  error Please include <asteria/value.hpp> instead.
 #endif
-namespace asteria {
-namespace details_value {
+namespace asteria::details_value {
 
 template<typename xValue, typename xEnable = void>
 struct Valuable
@@ -380,5 +379,4 @@ struct Valuable<xTuple,
       }
   };
 
-}  // namespace details_value
-}  // namespace asteria
+}  // namespace asteria::details_value
