@@ -27,7 +27,7 @@ Usage: %s [OPTIONS] [[--] FILE [ARGUMENTS]...]
   -h      show help message then exit
   -I      suppress interactive mode [default = auto]
   -i      force interactive mode [default = auto]
-  -O[n]   set optimization level to `n` [default = 1]
+  -O[n]   set optimization level to `n` [default = %d]
   -V      show version information then exit
   -v      enable verbose mode
 
@@ -56,6 +56,7 @@ Report bugs to <%s>.
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 //       1         2         3         4         5         6         7      |
       self,
+      repl_script.options().optimization_level,
       PACKAGE_URL,
       PACKAGE_BUGREPORT);
 
