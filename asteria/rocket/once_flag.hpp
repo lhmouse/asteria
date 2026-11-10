@@ -18,6 +18,7 @@ class once_flag
 #else
     using guard_type = uint64_t;
 #endif
+    using sentry_type = unique_ptr<guard_type, decltype(::abi::__cxa_guard_release)*>;
     guard_type m_guard = 0;
 
   public:
@@ -46,8 +47,7 @@ class once_flag
             || (::abi::__cxa_guard_acquire(&(this->m_guard)) == 0))
           return;
 
-        using Sentry = unique_ptr<guard_type, decltype(::abi::__cxa_guard_release)*>;
-        Sentry sentry(&(this->m_guard), ::abi::__cxa_guard_abort);
+        sentry_type sentry(&(this->m_guard), ::abi::__cxa_guard_abort);
         forward<funcT>(func) (forward<paramsT>(params)...);
         sentry.get_deleter() = ::abi::__cxa_guard_release;
       }
