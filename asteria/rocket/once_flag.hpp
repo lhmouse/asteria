@@ -13,33 +13,12 @@ namespace asteria {
 class once_flag
   {
   private:
-    union Guard
-      {
-        unsigned long long ull;
-        unsigned long ul;
-        unsigned int ui;
-        long long ll;
-        long l;
-        int i;
-        bool b;
-
-        operator unsigned long long*() noexcept { return &(this->ull);  }
-        operator unsigned long*() noexcept { return &(this->ul);  }
-        operator unsigned int*() noexcept { return &(this->ui);  }
-        operator long long*() noexcept { return &(this->ll);  }
-        operator long*() noexcept { return &(this->l);  }
-        operator int*() noexcept { return &(this->i);  }
-      };
-
-    struct Sentry
-      {
-        decltype(::abi::__cxa_guard_abort)* dtor;
-        Guard* guard;
-
-        ~Sentry() { (*(this->dtor))(*(this->guard));  }
-      };
-
-    Guard m_guard = { 0 };
+#if defined _CXXABI_TWEAKS_H
+    using guard_type = int64_t;
+#else
+    using guard_type = uint64_t;
+#endif
+    guard_type m_guard = 0;
 
   public:
     constexpr
@@ -54,7 +33,7 @@ class once_flag
     test()
       const noexcept
       {
-        return __atomic_load_n(&(this->m_guard.b), __ATOMIC_RELAXED);
+        return __atomic_load_n(&(this->m_guard), __ATOMIC_RELAXED);
       }
 
     template<typename funcT, typename... paramsT>
@@ -63,13 +42,14 @@ class once_flag
       {
         // Try acquiring the guard. If `__atomic_load_n()` returns zero,
         // another thread will have finished initialization.
-        if(__atomic_load_n(&(this->m_guard.b), __ATOMIC_ACQUIRE)
-            || (::abi::__cxa_guard_acquire(this->m_guard) == 0))
+        if(__atomic_load_n(reinterpret_cast<char*>(&(this->m_guard)), __ATOMIC_ACQUIRE)
+            || (::abi::__cxa_guard_acquire(&(this->m_guard)) == 0))
           return;
 
-        Sentry sentry = { ::abi::__cxa_guard_abort, &(this->m_guard) };
+        using Sentry = unique_ptr<guard_type, decltype(::abi::__cxa_guard_release)*>;
+        Sentry sentry(&(this->m_guard), ::abi::__cxa_guard_abort);
         forward<funcT>(func) (forward<paramsT>(params)...);
-        sentry.dtor = ::abi::__cxa_guard_release;
+        sentry.get_deleter() = ::abi::__cxa_guard_release;
       }
   };
 
