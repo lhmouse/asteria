@@ -77,7 +77,7 @@ class Global_Context
     call_hook(xMemfn xHooks::* mfn, xArgs&&... args)
       {
         if(auto hooks = unerase_pointer_cast<xHooks>(this->m_qhooks))
-          (hooks->*mfn) (forward<xArgs>(args)...);
+          (hooks->*(mfn))(forward<xArgs>(args)...);
       }
 
     ASTERIA_INCOMPLET(Abstract_Hooks)

@@ -69,7 +69,7 @@ clear()
         continue;
 
       if(head->pv_meta->dtor_opt)
-        (* head->pv_meta->dtor_opt) (head);
+        (*(head->pv_meta->dtor_opt))(head);
 
       delete head->pv_meta;
     }
@@ -122,7 +122,7 @@ push_function(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ct
     head->uparam._xb1[1] = 0;
 
     if(ctor_opt)
-      (*ctor_opt) (head, ctor_arg);  // may throw
+      (*(ctor_opt))(head, ctor_arg);  // may throw
     else if(sparam_size != 0)
       ::memset(head->sparam, 0, sparam_size);
 
@@ -154,9 +154,9 @@ execute(Executive_Context& ctx)
     for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
       try {
         if(!head->has_pv_meta)
-          (* head->pv_exec) (ctx, head);
+          (*(head->pv_exec))(ctx, head);
         else
-          (* head->pv_meta->exec) (ctx, head);
+          (*(head->pv_meta->exec))(ctx, head);
       }
       catch(Runtime_Error& except) {
         // Modify and rethrow the exception in place without copying it.
@@ -188,7 +188,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp)
         continue;
 
       if(head->pv_meta->coll_opt)
-        (* head->pv_meta->coll_opt) (staged, temp, head);
+        (*(head->pv_meta->coll_opt))(staged, temp, head);
     }
   }
 

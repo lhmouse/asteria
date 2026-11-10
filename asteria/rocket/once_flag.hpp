@@ -6,6 +6,7 @@
 
 #include "fwd.hpp"
 #include "xassert.hpp"
+#include "unique_ptr.hpp"
 #include <cxxabi.h>
 namespace asteria {
 
@@ -35,7 +36,7 @@ class once_flag
         decltype(::abi::__cxa_guard_abort)* dtor;
         Guard* guard;
 
-        ~Sentry() { (* this->dtor) (* this->guard);  }
+        ~Sentry() { (*(this->dtor))(*(this->guard));  }
       };
 
     Guard m_guard = { 0 };

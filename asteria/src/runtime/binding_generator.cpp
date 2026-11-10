@@ -46,7 +46,7 @@ operator->*(target_R_gsa& target)
           const override
           {
             Argument_Reader reader(this->m_name, move(stack));
-            self = (* this->m_target) (global, move(self), move(reader));
+            self = (*(this->m_target))(global, move(self), move(reader));
           }
       };
 
@@ -91,7 +91,7 @@ operator->*(target_R_ga& target)
           const override
           {
             Argument_Reader reader(this->m_name, move(stack));
-            self = (* this->m_target) (global, move(reader));
+            self = (*(this->m_target))(global, move(reader));
           }
       };
 
@@ -136,7 +136,7 @@ operator->*(target_R_sa& target)
           const override
           {
             Argument_Reader reader(this->m_name, move(stack));
-            self = (* this->m_target) (move(self), move(reader));
+            self = (*(this->m_target))(move(self), move(reader));
           }
       };
 
@@ -181,7 +181,7 @@ operator->*(target_R_a& target)
           const override
           {
             Argument_Reader reader(this->m_name, move(stack));
-            self = (* this->m_target) (move(reader));
+            self = (*(this->m_target))(move(reader));
           }
       };
 
@@ -226,7 +226,7 @@ operator->*(target_V_gsa& target)
           const override
           {
             Argument_Reader reader(this->m_name, move(stack));
-            auto val = (* this->m_target) (global, move(self), move(reader));
+            auto val = (*(this->m_target))(global, move(self), move(reader));
             self.set_temporary(move(val));
           }
       };
@@ -272,7 +272,7 @@ operator->*(target_V_ga& target)
           const override
           {
             Argument_Reader reader(this->m_name, move(stack));
-            auto val = (* this->m_target) (global, move(reader));
+            auto val = (*(this->m_target))(global, move(reader));
             self.set_temporary(move(val));
           }
       };
@@ -318,7 +318,7 @@ operator->*(target_V_sa& target)
           const override
           {
             Argument_Reader reader(this->m_name, move(stack));
-            auto val = (* this->m_target) (move(self), move(reader));
+            auto val = (*(this->m_target))(move(self), move(reader));
             self.set_temporary(move(val));
           }
       };
@@ -364,7 +364,7 @@ operator->*(target_V_a& target)
           const override
           {
             Argument_Reader reader(this->m_name, move(stack));
-            auto val = (* this->m_target) (move(reader));
+            auto val = (*(this->m_target))(move(reader));
             self.set_temporary(move(val));
           }
       };
@@ -410,7 +410,7 @@ operator->*(target_Z_gsa& target)
           const override
           {
             Argument_Reader reader(this->m_name, move(stack));
-            (* this->m_target) (global, move(self), move(reader));
+            (*(this->m_target))(global, move(self), move(reader));
             self.set_void();
           }
       };
@@ -456,7 +456,7 @@ operator->*(target_Z_ga& target)
           const override
           {
             Argument_Reader reader(this->m_name, move(stack));
-            (* this->m_target) (global, move(reader));
+            (*(this->m_target))(global, move(reader));
             self.set_void();
           }
       };
@@ -502,7 +502,7 @@ operator->*(target_Z_sa& target)
           const override
           {
             Argument_Reader reader(this->m_name, move(stack));
-            (* this->m_target) (move(self), move(reader));
+            (*(this->m_target))(move(self), move(reader));
             self.set_void();
           }
       };
@@ -548,7 +548,7 @@ operator->*(target_Z_a& target)
           const override
           {
             Argument_Reader reader(this->m_name, move(stack));
-            (* this->m_target) (move(reader));
+            (*(this->m_target))(move(reader));
             self.set_void();
           }
       };

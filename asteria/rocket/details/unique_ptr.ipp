@@ -110,7 +110,7 @@ class stored_pointer_impl<pointerT, deleterT, true, true, false>
 
         auto ptr_old = noadl::exchange(this->m_ptr, ptr_new);
         if(ptr_old != nullptr)
-          this->as_deleter() (ptr_old);
+          (*(this->as_deleter()))(ptr_old);
       }
 
     void
