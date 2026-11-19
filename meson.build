@@ -203,28 +203,27 @@ ver = { 'abi_major': meson.project_version().split('.')[0],
         'abi_minor': meson.project_version().split('.')[1],
         'abi_string': meson.project_version() }
 
-install_headers(configure_file(output: 'version.h',
-                               input: 'asteria/version.h.in',
-                               configuration: ver,
-                               install: false),
-                subdir: 'asteria')
+version_h = configure_file(output: 'version.h',
+                           input: 'asteria/version.h.in',
+                           configuration: ver,
+                           install: false)
 
-install_headers(asteria_include,
-                preserve_path: true)
+install_headers(version_h, subdir: 'asteria')
+install_headers(asteria_include, preserve_path: true)
 
 #===========================================================
 # Rules for 'lib/libasteria.so'
 #===========================================================
 
-lib_asteria = library('asteria',
+libasteria = library('asteria',
       cpp_pch: 'asteria/src/xprecompiled.hpp',
-      sources: [ asteria_src ],
+      sources: [ version_h, asteria_src ],
       dependencies: [ dep_zlib, dep_pcre2, dep_openssl, dep_iconv ],
       soversion: ver['abi_major'],
       version: '.'.join([ ver['abi_major'], ver['abi_minor'], '0' ]),
       install: true)
 
-import('pkgconfig').generate(lib_asteria,
+import('pkgconfig').generate(libasteria,
       name: 'asteria',
       url: 'https://github.com/lhmouse/asteria',
       description: 'A heavyweight, slow and incomplete replacement for Lua')
@@ -234,11 +233,11 @@ import('pkgconfig').generate(lib_asteria,
 #===========================================================
 
 executable('asteria',
-      cpp_pch: 'asteria/src/xprecompiled.hpp',
-      sources: [ repl_src ],
-      dependencies: [ dep_libedit ],
-      link_with: lib_asteria,
-      install: true)
+           cpp_pch: 'asteria/src/xprecompiled.hpp',
+           sources: [ repl_src ],
+           dependencies: [ dep_libedit ],
+           link_with: libasteria,
+           install: true)
 
 #===========================================================
 # Rules for tests
@@ -246,9 +245,9 @@ executable('asteria',
 
 foreach src : test_src
   test_exe = executable(src.underscorify(), src,
-      link_with: lib_asteria,
-      build_by_default: false,
-      install: false)
+                        link_with: libasteria,
+                        build_by_default: false,
+                        install: false)
 
   test('..' / src, test_exe)
 endforeach
